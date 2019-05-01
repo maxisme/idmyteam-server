@@ -4,17 +4,16 @@ import os
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 conf = configparser.ConfigParser()
-if os.path.isfile(ROOT+'conf/secret.conf'):
-    conf.read(ROOT+'conf/secret.conf')
+if os.path.isfile(ROOT+'/conf/secret.conf'):
+    conf.read(ROOT + '/conf/secret.conf')
 else:
-    conf.read(ROOT+'conf/test.conf')
-foo = conf.sections()
+    conf.read(ROOT + '/conf/tests.conf')
 EMAIL_CONFIG = dict(conf.items('emails'))
 DB = dict(conf.items('database'))
 RECAPTCHA_KEY = conf['secrets']['recaptcha']
 CRYPTO_KEY = conf['secrets']['crypto']
 COOKIE_SECRET = conf['secrets']['cookie']
-SENTRY_URL = conf['sentrys']['url']
+SENTRY_URL = conf['sentry']['url']
 
 
 IMAGE_UPLOAD_DIR = '/var/www/idmy.team/images/'
