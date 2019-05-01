@@ -4,7 +4,7 @@ python:
   - "3.6"
 
 install:
-  - pip install --progress-bar off -r requirements.txt
+  - pip install -r requirements.txt --progress-bar off
 
 cache: pip
 
