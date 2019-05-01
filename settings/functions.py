@@ -150,7 +150,7 @@ def add_coord_padding(img, padding, x, y, w, h):
         h = int(h + padding)
         if y + h > max_y:
             h = max_y - y
-    return int(x), int(y), int(w), int(h)  # TODO REDUCES ACCURACY
+    return int(x), int(y), int(w), int(h)  # TODO this REDUCES ACCURACY
 
 
 def crop_img(img, x, y, w, h):

@@ -1,7 +1,21 @@
 import configparser
+import os
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 conf = configparser.ConfigParser()
-conf.read('../conf/secrets.conf')
+if os.path.isfile(ROOT+'conf/secret.conf'):
+    conf.read(ROOT+'conf/secret.conf')
+else:
+    conf.read(ROOT+'conf/test.conf')
+foo = conf.sections()
+EMAIL_CONFIG = dict(conf.items('emails'))
+DB = dict(conf.items('database'))
+RECAPTCHA_KEY = conf['secrets']['recaptcha']
+CRYPTO_KEY = conf['secrets']['crypto']
+COOKIE_SECRET = conf['secrets']['cookie']
+SENTRY_URL = conf['sentrys']['url']
+
 
 IMAGE_UPLOAD_DIR = '/var/www/idmy.team/images/'
 
@@ -23,18 +37,6 @@ MAX_TRAIN_UPLOAD_SIZE_KB = 100 * 1024  # 100MB - approx 200 images
 LOCALISATION_MODEL = '/var/www/idmy.team/python/models/face_localisation.model'
 FEATURE_MODEL_DIR = '/var/www/idmy.team/python/models/feature_extractor.model'
 CLIENT_MODEL_DIR = '/var/www/idmy.team/python/models/'  # user_hash .model
-
-RECAPTCHA_KEY = conf['secret']['recaptcha']
-CRYPTO_KEY = conf['secret']['crypto']
-EMAIL_CONFIG = dict(conf.items('email'))
-
-DB = dict(conf.items('database'))
-
-SENTRY_URL = conf['sentry']['url']
-
-###
-# web
-COOKIE_SECRET = conf['secret']['cookie']
 
 ###
 # socket

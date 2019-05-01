@@ -1,3 +1,5 @@
+import time
+
 import tornado
 from tornado.testing import AsyncHTTPTestCase
 

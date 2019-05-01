@@ -246,6 +246,7 @@ class ImageUploadHandler(BaseHandler):
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     hashed_username = None
+    local_ip = None
 
     def check_origin(self, origin):
         if origin == 'wss://idmy.team':
@@ -364,3 +365,5 @@ def send_local_message(message):
         # client connected
         ws = clients[hashed_username]  # type: WebSocketHandler
         ws.write_message(pending_messages[hashed_username][-1])
+    return True
+

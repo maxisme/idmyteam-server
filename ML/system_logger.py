@@ -1,10 +1,9 @@
 # logs cpu and gpu stats - started in CRON
 # results can be seen in idmy.team/stats
 
-import time, subprocess, string
+import subprocess, string
 import psutil
 from settings import functions, config
-import re
 
 conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
 
