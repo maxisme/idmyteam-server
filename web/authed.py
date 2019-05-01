@@ -7,7 +7,6 @@ from collections import defaultdict
 from rq import Queue
 
 import tornado.websocket
-from tornado.httpclient import AsyncHTTPClient
 
 import logging
 import zipfile
@@ -144,7 +143,9 @@ class ImageUploadHandler(BaseHandler):
             if hashed_username in clients:
                 if functions.Team.allowed_to_upload(conn, hashed_username):
                     if 'img_file' in self.request.files:
-                        # predicting upload
+                        #####################
+                        # PREDICTING upload #
+                        #####################
                         if content_len <= config.MAX_IMG_UPLOAD_SIZE_KB:
                             if Classifier.get_model_path(hashed_username):
                                 # There is a classifier for username
@@ -172,7 +173,9 @@ class ImageUploadHandler(BaseHandler):
                                             (content_len, self.request.headers['X-Real-Ip']))
                             return self.return_error("Image upload size too large.")
                     elif 'ZIP' in self.request.files:
-                        # training upload
+                        ###################
+                        # TRAINING upload #
+                        ###################
                         num_trained = functions.Team.get_num_trained_last_hr(conn, hashed_username)
 
                         user = functions.Team.get(conn, hashed_username)
