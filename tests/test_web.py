@@ -1,5 +1,3 @@
-import os
-print(" os.getcwd() " + os.getcwd())
 import tornado
 from tornado.testing import AsyncHTTPTestCase
 
@@ -11,6 +9,7 @@ class TestWebApp(AsyncHTTPTestCase):
         '/local',
         '/upload'
     ]
+
     def get_app(self):
         self.app = tornado.web.Application(server.web_urls.www_urls, **server.server_settings)
         return self.app
