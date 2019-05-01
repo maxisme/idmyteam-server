@@ -18,3 +18,4 @@ pytest
 sqlalchemy
 mysqlclient
 itsdangerous
+oyaml
