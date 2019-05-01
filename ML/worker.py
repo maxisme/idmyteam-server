@@ -25,7 +25,6 @@ detecter = None
 # db pool
 def get_conn():
     return functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-
 mypool = pool.QueuePool(get_conn, max_overflow=10, pool_size=5)
 
 def main():
@@ -46,7 +45,7 @@ def main():
 class MainWorker(Worker):
     def execute_job(self, job, queue):
         if 'hashed_username' in job.kwargs:
-            type = job.kwargs.pop('type') # Don't care about the type anymore
+            type = job.kwargs.pop('type')
             hashed_username = job.kwargs['hashed_username']
             if type == 'detect':
                 if hashed_username in classifiers:
@@ -82,10 +81,10 @@ class MainWorker(Worker):
                 logging.info('Added classifier for %s', hashed_username)
 
                 # enque 'detect' jobs that have been pending the addition of this classifier
-                # if hashed_username in no_classifier_jobs:
-                #     for arr in no_classifier_jobs[hashed_username]:
-                #         job, queue = arr
-                #         queue.enqueue_job(job)
+                if hashed_username in no_classifier_jobs:
+                    for arr in no_classifier_jobs[hashed_username]:
+                        job, queue = arr
+                        queue.enqueue_job(job)
             elif type == 'remove':
                 # remove classifier
                 classifiers.pop(hashed_username, None)

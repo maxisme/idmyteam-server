@@ -1,3 +1,5 @@
+import os
+print(" os.getcwd() " + os.getcwd())
 import tornado
 from tornado.testing import AsyncHTTPTestCase
 
