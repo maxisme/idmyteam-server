@@ -1,0 +1,16 @@
+tornado
+sklearn
+raven
+rq
+mysqlclient
+bcrypt
+websocket-client
+image
+wtforms
+opencv-python
+requests
+matplotlib
+pytest
+sqlalchemy
+mysqlclient
+itsdangerous
