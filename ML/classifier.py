@@ -18,7 +18,7 @@ from settings import functions, config
 class Classifier(object):
     def __init__(self, hashed_team_username):
         """
-        :type socket: web.authed.WebSocketHandler
+        :type socket: server.authed.WebSocketHandler
         """
         self.hashed_username = hashed_team_username
         self.clf = self._load_model()
