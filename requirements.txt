@@ -1,0 +1,20 @@
+tornado
+sklearn
+raven
+rq
+mysqlclient
+bcrypt
+websocket-client
+chainer
+cupy-cuda100
+image
+chainercv
+wtforms
+opencv-python
+requests
+matplotlib
+# tf via https://www.pytorials.com/how-to-install-tensorflow-gpu-with-cuda-10-0-for-python-on-ubuntu/
+pytest
+sqlalchemy
+mysqlclient
+itsdangerous

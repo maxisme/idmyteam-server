@@ -1,0 +1,30 @@
+{% extends '../helpers/base.html' %}
+{% block content %}
+    <div class="chat-text row">
+        <div class="col s12">
+            To add a team member, visit the Web Panel's <strong>Members</strong> page and click on the <span
+                class="material-icons">person_add</span> button.
+        </div>
+
+        <div class="col s12">
+            Fill out the members details:
+        </div>
+        <div align="center" class="col s12 m6">
+            <img src="{{ static_url('images/tutorials/member_form.gif') }}"/>
+        </div>
+
+        <div class="col s12">
+            And train your team member:
+        </div>
+        <div align="center" class="col s12 m6">
+            <img src="{{ static_url('images/tutorials/member_form.gif') }}"/>
+        </div>
+        <div class="col s12">
+            First of all you should set your camera to training mode if it is not already.
+        </div>
+        <div class="col s12">
+            It is important that you add at least 10 images of your team member. These should be from 'real world',
+            different positions when entering the team space.
+        </div>
+    </div>
+{% end %}

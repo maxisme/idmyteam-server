@@ -1,0 +1,30 @@
+@-webkit-keyframes fadeOut
+  from
+    opacity: 1
+  to
+    opacity: 0
+    margin: 0
+    padding: 0
+    max-height: 0
+
+@keyframes fadeOut
+  from
+    opacity: 1
+  to
+    opacity: 0
+    margin: 0
+    padding: 0
+    max-height: 0
+
+.flash-bar
+  padding: 10px
+  border: $BORDER
+  font-weight: 600
+  text-align: center
+  -webkit-animation: fadeOut 0.5s forwards
+  animation: fadeOut 0.5s forwards
+  -webkit-animation-delay: 4s
+  animation-delay: 4s
+  .disable-animate
+    -webkit-animation-delay: unset
+    animation-delay: unset

@@ -1,0 +1,42 @@
+.tutorial-list
+  p
+    font-size: 0.6em
+    position: relative
+    top: -1em
+  li a
+    font-size: 1em
+    margin-bottom: 0.5em
+    font-weight: 600
+    display: table !important
+    color: $grey
+    text-decoration: none
+    border-bottom: none !important
+
+  li a::after
+    content: ''
+    display: table
+    width: 0
+    height: 3px
+    background: $red
+    transition: width 0.6s
+
+  li a:hover::after
+    width: 100%
+
+
+.chat-text
+  font-size: 1.1em
+  text-align: justify
+
+  h3
+    &:not(:first-child)
+      padding-top: 24px
+    font-size: 1.2em
+    border-bottom: $BORDER
+    display: table
+
+  .col
+    padding-bottom: 2em
+
+  img
+    width: 95%

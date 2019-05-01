@@ -1,0 +1,84 @@
+@import "../modules/all"
+
+*
+  color: $black
+  font-family: 'Montserrat', Georgia, sans-serif
+
+body
+  border: $BORDER
+  background: $white
+
+a
+  font-size: inherit
+  color: $black
+  &:not(.button, .btn)
+    border-bottom: 1px dashed $light-grey
+
+strong
+  font-weight: 600
+  font-size: inherit
+
+h1
+  display: table
+  border: $black 5px solidx
+  padding: 0.5em
+  font-weight: 900
+  text-transform: uppercase
+  font-style: italic
+  color: $red
+
+h2
+  display: table
+  font-size: 20px
+  text-transform: uppercase
+  padding: 15px
+  margin-bottom: 20px
+  border: $BORDER
+  font-weight: 700
+
+h3
+  &:not(:first-of-type)
+    padding-top: 50px
+  text-align: center
+  font-size: 2em
+  font-weight: 900
+
+h4
+  border-bottom: $BORDER
+
+ol
+  margin-left: 50px
+
+hr
+  border: 0
+  height: 0
+  border-top: 1px solid rgba(0, 0, 0, 0.1)
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3)
+
+canvas
+  border: $BORDER
+
+pre
+  text-align: left
+
+textarea
+  font-family: 'Cutive Mono', monospace
+  height: 50%
+  border: $BORDER
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0)
+
+thead
+  border-bottom: $BORDER
+
+table
+  border: $BORDER !important
+
+.content
+  text-align: left
+  padding-left: 5%
+  padding-right: 5%
+
+.info
+  font-size: 25px
+
+@import "helpers"

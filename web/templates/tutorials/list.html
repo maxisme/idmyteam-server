@@ -1,0 +1,46 @@
+{% extends '../helpers/base.html' %}
+{% block content %}
+    <h3>Setup</h3>
+    <ul class="tutorial-list chat-text">
+        <li>
+            <a href="tutorials/install-raspberry-pi">The Raspberry Pi</a>
+            <p>How to install the raspberry pi in your space.</p>
+        </li>
+        <li>
+            <a href="tutorials/setup-credentials">Account credentials</a>
+            <p>How to setup the credentials needed to authorise your account.</p>
+        </li>
+        <li>
+            <a href="tutorials/background-extractor">Background extractor</a>
+            <p>How to make your system more efficient by optimising the background extractor.</p>
+        </li>
+    </ul>
+    <h3>Help</h3>
+    <ul class="tutorial-list chat-text">
+        <li>
+            <a href="tutorials/slow-reaction">Slow reaction speeds</a>
+            <p>There are many reasons as to why the reaction speed of a recognition could be slower than the
+                average 0.5 second response time. In this tutorial we will cover some debugging methods.
+            </p>
+        </li>
+        <li>
+            <a href="tutorials/unknown-members">What to do with UNKNOWN members on the classify page</a>
+            <p>When ever a person that is not a member of your team enters in front of the camera they will
+                be sent for further classification by your team on the classify page of your web panel.
+            </p>
+        </li>
+    </ul>
+    <h3>Integrations</h3>
+    <ul class="tutorial-list">
+        <li>
+            <a href="tutorials/amazon-text-to-speach">Amazon Text-To-Speach</a>
+            <p>Integrate Text-To-Speach to share a friendly welcoming message, alert a member of their
+                schedule and so much more.
+            </p>
+        </li>
+        <li>
+            <a href="tutorials/amazon-text-to-speach">notifi - Desktop Notifications</a>
+            <p>Send push notifications to your Mac when a team member enters.</p>
+        </li>
+    </ul>
+{% end %}
