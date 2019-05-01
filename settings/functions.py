@@ -37,13 +37,11 @@ def connect(u, p, db):
 
 
 # marks a team as training in the database
-def set_team_training(conn, hashed_username, training=True):
+def toggle_team_training(conn, hashed_username, training=True):
     training = training * 1  # convert to int
     x = conn.cursor()
     try:
-        x.execute("UPDATE `Accounts` "
-                  "SET `is_training` = %s "
-                  "WHERE `username` = %s", (training, hashed_username))
+        x.execute("UPDATE `Accounts` SET `is_training` = %s WHERE `username` = %s", (training, hashed_username))
         conn.commit()
     except Exception as e:
         print("error - didn't mark as finished training %s" % e)
@@ -62,8 +60,8 @@ def store_feature(conn, hashed_team_username, member_id, features, manual=True, 
     # store feature in db
     x = conn.cursor()
     try:
-        x.execute("INSERT INTO `Features` (username, `class`, `type`, `features`, `score`) "
-                  "VALUES (%s, %s, %s, %s, %s);", (hashed_team_username, member_id, type, features, score))
+        x.execute("""INSERT INTO `Features` (username, `class`, `type`, `features`, `score`)
+                  VALUES (%s, %s, %s, %s, %s)""", (hashed_team_username, member_id, type, features, score))
         conn.commit()
     except MySQLdb.Error as e:
         print(("Couldn't write feature: " + str(e)))
@@ -99,7 +97,7 @@ def log_data(conn, name, type, method, val, user="system", yaxis="Seconds"):
                   "VALUES (%s, %s, %s, %s, %s, %s)", (type, name, method, str(val), user, yaxis))
         conn.commit()
     except MySQLdb.Error as e:
-        print(("didnt write feature: " + str(e)))
+        logging.error("didnt write feature: %s", e)
         conn.rollback()
     finally:
         x.close()

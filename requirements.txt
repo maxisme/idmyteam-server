@@ -20,3 +20,4 @@ mysqlclient
 itsdangerous
 oyaml
 pycrypto
+numpy

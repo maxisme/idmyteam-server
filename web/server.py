@@ -13,7 +13,7 @@ from settings import config
 server_settings = {
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
     "static_path": os.path.join(os.path.dirname(__file__), 'static'),
-    "cookie_secret": config.cookie_secret,
+    "cookie_secret": config.COOKIE_SECRET,
     "xsrf_cookies": True,
     "debug": True,
     "default_handler_class": view.Error404,

@@ -1,7 +1,7 @@
 import configparser
 
-config = configparser.ConfigParser()
-config.read('../conf/secrets.conf')
+conf = configparser.ConfigParser()
+conf.read('../conf/secrets.conf')
 
 IMAGE_UPLOAD_DIR = '/var/www/idmy.team/images/'
 
@@ -24,17 +24,17 @@ LOCALISATION_MODEL = '/var/www/idmy.team/python/models/face_localisation.model'
 FEATURE_MODEL_DIR = '/var/www/idmy.team/python/models/feature_extractor.model'
 CLIENT_MODEL_DIR = '/var/www/idmy.team/python/models/'  # user_hash .model
 
-RECAPTCHA_KEY = config['secret']['recaptcha']
-CRYPTO_KEY = config['secret']['crypto']
-EMAIL_CONFIG = dict(config.items('email'))
+RECAPTCHA_KEY = conf['secret']['recaptcha']
+CRYPTO_KEY = conf['secret']['crypto']
+EMAIL_CONFIG = dict(conf.items('email'))
 
-DB = dict(config.items('database'))
+DB = dict(conf.items('database'))
 
-SENTRY_URL = config['sentry']['url']
+SENTRY_URL = conf['sentry']['url']
 
 ###
 # web
-cookie_secret = config['secret']['cookie']
+COOKIE_SECRET = conf['secret']['cookie']
 
 ###
 # socket
