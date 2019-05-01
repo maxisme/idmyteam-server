@@ -67,7 +67,7 @@ class ConfirmEmail(view.BaseHandler):
             return self.redirect('/')
 
         conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-        if functions.Team.confirm_email_token(conn, email, token, config.EMAIL_CONFIG['key']):
+        if functions.Team.confirm_email_token(conn, email, token, config.EMAIL['key']):
             pass
         self.redirect('/')
 
@@ -82,6 +82,6 @@ class ResendConfirmationEmail(view.BaseHandler):
         # check if there is an email and also that it hasn't already been confirmed
         conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
         if functions.Team.allowed_confirmation_resend(conn, email):
-            functions.Team.send_confirmation_email(conn, email, config.EMAIL_CONFIG)
+            functions.Team.send_confirmation_email(conn, email, config.EMAIL)
 
         self.redirect('/')

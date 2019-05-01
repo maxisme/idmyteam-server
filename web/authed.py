@@ -110,7 +110,7 @@ class SignUpHandler(LoginHandler):
                 conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
                 if functions.Team.sign_up(conn, form.username.data, form.password.data,
                                           form.email.data, form.store.data, config.CRYPTO_KEY):
-                    functions.Team.send_confirmation_email(conn, form.email.data, config.EMAIL_CONFIG)
+                    functions.Team.send_confirmation_email(conn, form.email.data, config.EMAIL)
                 else:
                     self.tmpl['error_message'] = 'Error with user information! ' \
                                                  'Please try a different username and/or email.'
