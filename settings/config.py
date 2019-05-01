@@ -1,4 +1,7 @@
-# settings for the whole remote server system.
+import configparser
+
+config = configparser.ConfigParser()
+config.read('../conf/secrets.conf')
 
 IMAGE_UPLOAD_DIR = '/var/www/idmy.team/images/'
 
@@ -21,23 +24,17 @@ LOCALISATION_MODEL = '/var/www/idmy.team/python/models/face_localisation.model'
 FEATURE_MODEL_DIR = '/var/www/idmy.team/python/models/feature_extractor.model'
 CLIENT_MODEL_DIR = '/var/www/idmy.team/python/models/'  # user_hash .model
 
-RECAPTCHA_KEY = '6LfthEQUAAAAAHP1_WPyWQ_R7A4Wa0Jy_zEROHP6'
-CRYPTO_KEY = 'BAdZFm0/1Wa2ynQn+F+1NSXL6yJhC42VP1SQ0lvxulI='
-EMAIL_CONFIG = {
-    'key': 'q8s5KzAxabtXBhEZp9DS5lgP3WvvOLNBnHBPipct'
-}
+RECAPTCHA_KEY = config['secret']['recaptcha']
+CRYPTO_KEY = config['secret']['crypto']
+EMAIL_CONFIG = dict(config.items('email'))
 
-DB = {
-    'username': 'idmyteam_user',
-    'password': 'pPArS16chi9zMBGEqPNVcaY4NodtSu5pSK5rWFFq!',
-    'db': 'idmyteam'
-}
+DB = dict(config.items('database'))
 
-SENTRY_URL = 'https://41ff4de927694cb7bf28dd4ce3e083d0:b1f0d66b3fe447c48fa08f2ef70f2a14@sentry.io/1335020'
+SENTRY_URL = config['sentry']['url']
 
 ###
 # web
-cookie_secret='FeDFFg49mtvSXPBAHBqknUwGn0e14K'
+cookie_secret = config['secret']['cookie']
 
 ###
 # socket
