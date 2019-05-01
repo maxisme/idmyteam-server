@@ -1,7 +1,7 @@
 import tornado
 from tornado.testing import AsyncHTTPTestCase
 
-import server
+from web import server
 
 class TestWebApp(AsyncHTTPTestCase):
     url_blacklist = [
