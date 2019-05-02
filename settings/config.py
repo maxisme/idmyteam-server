@@ -15,13 +15,12 @@ CRYPTO_KEY = conf['secrets']['crypto']
 COOKIE_SECRET = conf['secrets']['cookie']
 SENTRY_URL = conf['sentry']['url']
 
-
-IMAGE_UPLOAD_DIR = '/var/www/idmy.team/images/'
-
-STORE_IMAGES_DIR = '/var/www/idmy.team/faces/'
-
-MODEL_DIR = '/var/www/idmy.team/python/models/'
-
+IMAGE_UPLOAD_DIR = ROOT+'/images/'
+STORE_IMAGES_DIR = ROOT+'/faces/'
+MODEL_DIR = ROOT+'/python/models/'
+LOCALISATION_MODEL = ROOT+'/python/models/face_localisation.model'
+FEATURE_MODEL_DIR = ROOT+'/python/models/feature_extractor.model'
+CLIENT_MODEL_DIR = ROOT+'/python/models/'  # user_hash .model
 FEATURE_EXTRACTOR_IMG_SIZE = 256
 MIN_FACE_SIZE = 60
 NUM_SHUFFLES = 2
@@ -32,10 +31,6 @@ MIN_CLASSIFIER_TRAINING_IMAGES = 10
 MIN_PROB = 0
 MAX_IMG_UPLOAD_SIZE_KB = 1000
 MAX_TRAIN_UPLOAD_SIZE_KB = 100 * 1024  # 100MB - approx 200 images
-
-LOCALISATION_MODEL = '/var/www/idmy.team/python/models/face_localisation.model'
-FEATURE_MODEL_DIR = '/var/www/idmy.team/python/models/feature_extractor.model'
-CLIENT_MODEL_DIR = '/var/www/idmy.team/python/models/'  # user_hash .model
 
 ###
 # socket
