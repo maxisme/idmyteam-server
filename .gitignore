@@ -1,3 +1,5 @@
 conf/secret.conf
 ML/helpers
 web/templates/emails/inline
+*.css
+!animate.css
