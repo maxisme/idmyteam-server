@@ -1,2 +1,3 @@
 conf/secret.conf
 ML/helpers
+web/templates/emails/inline

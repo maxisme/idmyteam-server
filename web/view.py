@@ -19,12 +19,27 @@ class BaseHandler(SentryMixin, tornado.web.RequestHandler):
                 'description': 'A recognition system for your team.',
                 'keywords': 'detect, recognise, facial, detection, team, id, recogniser, id my team, idmy.team'
             },
-            'error_message': False,
-            'username': self.get_secure_cookie('username')
+            'username': self.get_secure_cookie('username'),
+            'error_message': self.get_secure_cookie('error_message'),
+            'success_message': self.get_secure_cookie('success_message'),
         }
 
         if self.tmpl['username']:
             self.tmpl['username'] = self.tmpl['username'].decode('utf-8')
+
+        # remove flash messages
+        self.set_secure_cookie('error_message', '')
+        self.set_secure_cookie('success_message', '')
+
+    def flash_error(self, message, redirect_url=''):
+        self.set_secure_cookie('error_message', message)
+        if redirect_url:
+            return self.redirect(redirect_url)
+
+    def flash_success(self, message, redirect_url=''):
+        self.set_secure_cookie('success_message', message)
+        if redirect_url:
+            return self.redirect(redirect_url)
 
 
 class Error404(BaseHandler):

@@ -60,28 +60,33 @@ def send_delete_model(hashed_username):
 
 class ConfirmEmail(view.BaseHandler):
     def get(self):
-        try:
-            email = self.request.arguments['email'][0].decode()
-            token = self.request.arguments['token'][0].decode()
-        except:
-            return self.redirect('/')
+        email = self.get_argument('email', None)
+        token = self.get_argument('token', None)
+        username = self.get_argument('username', None)
 
         conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-        if functions.Team.confirm_email_token(conn, email, token, config.EMAIL['key']):
-            pass
-        self.redirect('/')
+        email_to_username = functions.Team.email_to_username(conn, email)
+        hashed_username = functions.hash(username)
+        if email_to_username == hashed_username:
+            if not functions.Team.ConfirmEmail.has_confirmed(conn, email):
+                if functions.Team.ConfirmEmail.validate_token(conn, email, token, config.EMAIL_CONFIG['key']):
+                    self.set_secure_cookie('username', username)
+                    self.flash_success('Congratulations! Your email has been confirmed.', '/profile')
+        return self.flash_error('Invalid token', '/')
+
 
 
 class ResendConfirmationEmail(view.BaseHandler):
     def get(self):
         try:
             email = self.request.arguments['email'][0].decode()
-        except:
+        except Exception as e:
+            logging.error(e)
             return self.redirect('/')
 
         # check if there is an email and also that it hasn't already been confirmed
         conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-        if functions.Team.allowed_confirmation_resend(conn, email):
-            functions.Team.send_confirmation_email(conn, email, config.EMAIL)
+        if not functions.Team.ConfirmEmail.send_confirmation(conn, email, config.EMAIL_CONFIG):
+            return self.flash_error('Problem sending confirmation email.', '/')
 
         self.redirect('/')

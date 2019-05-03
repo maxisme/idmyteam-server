@@ -1,5 +1,4 @@
 @charset "UTF-8";
-@import "vendors/animate.css";
 .materialize-red {
   background-color: #e51c23 !important;
 }
@@ -8520,14 +8519,36 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
   box-shadow: none;
 }
 .card .card-title {
-  font-size: 1em;
+  font-size: 25px;
   font-weight: 600;
 }
 .card .card-content {
   font-weight: 300;
-  font-size: 0.6em;
+  font-size: 22px;
 }
 
+@-webkit-keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    max-height: 0;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    max-height: 0;
+  }
+}
 .flash-bar {
   padding: 10px;
   border: #1c1c1c 3px solid;
@@ -8554,6 +8575,43 @@ label {
   font-size: 0.8em !important;
   color: #1c1c1c;
   cursor: default !important;
+}
+
+.btn, .btn-large {
+  text-transform: none !important;
+  position: relative;
+  transition: all 0.3s ease 0s;
+  top: 0;
+  text-shadow: 0 0 20 #1c1c1c;
+}
+.btn:hover, .btn-large:hover {
+  top: -2px;
+  box-shadow: none;
+}
+
+.btn-small {
+  height: 24px;
+  line-height: 24px;
+  padding: 0 0.7rem;
+  font-size: 10px;
+  background-color: #b3b3b3;
+}
+.btn-small:hover {
+  background-color: #474747;
+}
+
+.toast a {
+  color: #67A062;
+}
+.toast span {
+  color: #f6f6f6 !important;
+}
+
+.input-field label {
+  width: 100%;
+  left: 0.5rem !important;
+  font-size: 20px !important;
+  top: -0.5em;
 }
 
 .nav-wrapper {
@@ -8587,7 +8645,6 @@ label {
 * {
   color: #1c1c1c;
   font-family: "Montserrat", Georgia, sans-serif;
-  font-size: 1.2em;
 }
 
 body {
@@ -8598,8 +8655,9 @@ body {
 a {
   font-size: inherit;
   color: #1c1c1c;
+}
+a:not(.button, .btn, .btn-large) {
   border-bottom: 1px dashed #b3b3b3;
-  display: inline;
 }
 
 strong {
@@ -8609,7 +8667,7 @@ strong {
 
 h1 {
   display: table;
-  border: #1c1c1c 5px solid ;
+  border: #1c1c1c 5px solid;
   padding: 0.5em;
   font-weight: 900;
   text-transform: uppercase;
@@ -8651,10 +8709,37 @@ hr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+canvas {
+  border: #1c1c1c 3px solid;
+}
+
+pre {
+  text-align: left;
+}
+
+textarea {
+  font-family: "Cutive Mono", monospace;
+  height: 50%;
+  border: #1c1c1c 3px solid;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+
+thead {
+  border-bottom: #1c1c1c 3px solid;
+}
+
+table {
+  border: #1c1c1c 3px solid !important;
+}
+
 .content {
   text-align: left;
   padding-left: 5%;
   padding-right: 5%;
+}
+
+.info {
+  font-size: 25px;
 }
 
 .break-all {
@@ -8680,8 +8765,69 @@ hr {
   color: #bc2122 !important;
 }
 
+.success, .success * {
+  color: #67A062 !important;
+}
+
 img.svg {
   visibility: hidden;
 }
 
-/*# sourceMappingURL=main.css.map */
+.tutorial-list p {
+  font-size: 0.6em;
+  position: relative;
+  top: -1em;
+}
+.tutorial-list li a {
+  font-size: 1em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  display: table !important;
+  color: #474747;
+  text-decoration: none;
+  border-bottom: none !important;
+}
+.tutorial-list li a::after {
+  content: "";
+  display: table;
+  width: 0;
+  height: 3px;
+  background: #bc2122;
+  transition: width 0.6s;
+}
+.tutorial-list li a:hover::after {
+  width: 100%;
+}
+
+.chat-text {
+  font-size: 1.1em;
+  text-align: justify;
+}
+.chat-text h3 {
+  font-size: 1.2em;
+  border-bottom: #1c1c1c 3px solid;
+  display: table;
+}
+.chat-text h3:not(:first-child) {
+  padding-top: 24px;
+}
+.chat-text .col {
+  padding-bottom: 2em;
+}
+.chat-text img {
+  width: 95%;
+}
+
+* {
+  font-size: 1.2em;
+}
+
+h1 {
+  width: 80%;
+}
+
+.email-btn {
+  background-color: #474747;
+}
+
+/*# sourceMappingURL=email.css.map */

@@ -10,6 +10,7 @@
     <link rel="shortcut icon" href="{{ static_url('images/icon.ico')}}">
 
     {% block scripts %}{% end %}
+
     <!-- mobile meta -->
     <meta name="viewport" content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
     <!-- jQuery -->
@@ -58,7 +59,9 @@
     <div class="content" align="center">
         {% if title %} <h2><strong>{{ title }}</strong></h2> {% end %}
         {% if error_message %}
-            <p class='flash-bar error'>{{ error_message }}</p>
+            <div class='flash-bar error'>{% raw error_message %}</div>
+        {% elif success_message %}
+            <div class='flash-bar success'>{% raw success_message %}</div>
         {% end %}
 
         {% block content %}{% end %}

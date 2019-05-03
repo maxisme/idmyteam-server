@@ -6,6 +6,8 @@ import random
 import smtplib
 import string
 import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import MySQLdb
 import cv2
@@ -19,7 +21,7 @@ from Crypto.Cipher import AES
 import bcrypt
 import hashlib
 from itsdangerous import URLSafeTimedSerializer
-from email.message import EmailMessage
+from premailer import transform
 
 from tornado import template
 from websocket import create_connection
@@ -242,6 +244,15 @@ class Team(object):
         return True
 
     @classmethod
+    def email_to_username(cls, conn, email):
+        x = conn.cursor()
+        try:
+            x.execute("SELECT username FROM `Accounts` WHERE email=%s", (email,))
+            return x.fetchall()[0][0]
+        except IndexError:
+            return None
+
+    @classmethod
     def valid_credentials(cls, conn, username, credentials, key):
         hashed_username = hash(username)
         x = conn.cursor()
@@ -384,72 +395,83 @@ class Team(object):
 
         return True
 
-    @classmethod
-    def send_confirmation_email(cls, conn, email, email_config):
-        secret = EmailValidation.generate_token(email, email_config['key'])
+    class ConfirmEmail:
+        @classmethod
+        def send_confirmation(cls, conn, email, username, email_config):
+            if cls.has_confirmed(conn, email):
+                token = EmailValidation.generate_token(email, email_config['key'])
 
-        if cls._store_email_confirm_token(conn, email, secret):
-            # generate message
-            msg = EmailMessage()
-            msg['From'] = 'confirm@idmy.team'
-            msg['To'] = email
-            msg['Subject'] = 'Confirm your ID My Team email'
-            loader = template.Loader("templates/")
-            email_html = loader.load("helpers/confirm-email.html").generate(email=email, secret=secret)
-            msg.set_content(email_html, subtype='html')
+                if cls._store_confirmation_token(conn, email, token):
+                    # generate email content
+                    msg = MIMEMultipart("alternative")
+                    msg['From'] = email_config['email']
+                    msg['To'] = email
+                    msg['Subject'] = 'Confirm your ID My Team email'
+                    email_html = cls._gen_template('confirm-email.html', email=email, token=token, username=username)
+                    msg.attach(email_html)
 
-            # send email
-            with smtplib.SMTP(email_config['SMTP'], port=email_config['port']) as smtp_server:
-                smtp_server.ehlo()
-                smtp_server.starttls()
-                smtp_server.login(email_config['address'], email_config['password'])
-                smtp_server.send_message(msg)
+                    # send email
+                    with smtplib.SMTP(email_config['smtp'], port=email_config['smtp_port']) as smtp_server:
+                        smtp_server.ehlo()
+                        smtp_server.starttls()
+                        smtp_server.ehlo()
+                        smtp_server.login(email_config['email'], email_config['password'])
+                        smtp_server.send_message(msg)
+                return token
+            else:
+                return False
 
-    @classmethod
-    def _store_email_confirm_token(cls, conn, email, secret):
-        x = conn.cursor()
-        try:
-            x.execute("""
-            UPDATE `Accounts`
-            SET email_confirm_token = %s
-            WHERE email = %s""", (secret, email))
-            conn.commit()
-            return True
-        except MySQLdb.Error as e:
-            logging.error("Couldn't add confirm_secret: %s", e)
-            conn.rollback()
-            return False
+        @classmethod
+        def _gen_template(cls, file, **kwargs):
+            loader = template.Loader("../web/")
+            email_html = loader.load("templates/emails/inline/"+file).generate(**kwargs).decode()
+            return MIMEText(email_html, "html")
 
-    @classmethod
-    def confirm_email_token(cls, conn, email, token, email_secret_key):
-        try:
-            valid_token = EmailValidation.confirm_token(token, email, email_secret_key)
-        except Exception as e:
-            logging.error(e)
-            return False
-
-        if valid_token:
+        @classmethod
+        def _store_confirmation_token(cls, conn, email, token):
             x = conn.cursor()
             try:
                 x.execute("""
-                    UPDATE `Accounts`
-                    SET confirmed_email = NOW()
-                    WHERE email = %s""", (email,))
+                UPDATE `Accounts`
+                SET email_confirm_token = %s
+                WHERE email = %s""", (token, email))
                 conn.commit()
                 return True
             except MySQLdb.Error as e:
-                logging.error("Couldn't confirm email: %s", e)
+                logging.error("Couldn't add confirm_secret: %s", e)
                 conn.rollback()
-        return False
+                return False
 
-    @classmethod
-    def allowed_confirmation_resend(cls, conn, email):
-        x = conn.cursor()
-        try:
-            x.execute("SELECT id FROM Accounts WHERE email = %s AND confirmed_email is NULL", (email,))
-            return x.fetchall()[0][0]
-        except IndexError:
+        @classmethod
+        def validate_token(cls, conn, email, token, email_secret_key):
+            try:
+                valid_token = EmailValidation.confirm_token(token, email, email_secret_key)
+            except Exception as e:
+                logging.error(e)
+                return False
+
+            if valid_token:
+                x = conn.cursor()
+                try:
+                    x.execute("""
+                        UPDATE `Accounts`
+                        SET confirmed_email = NOW()
+                        WHERE email = %s""", (email,))
+                    conn.commit()
+                    return True
+                except MySQLdb.Error as e:
+                    logging.error("Couldn't confirm email: %s", e)
+                    conn.rollback()
             return False
+
+        @classmethod
+        def has_confirmed(cls, conn, email):
+            x = conn.cursor()
+            try:
+                x.execute("SELECT id FROM Accounts WHERE email = %s AND confirmed_email is NULL", (email,))
+                return x.fetchall()[0][0]
+            except IndexError:
+                return False
 
 
 def create_local_socket(url):
@@ -549,8 +571,10 @@ def bytes_to_kb(bytes):
 
 
 def json_helper(o):
-    if isinstance(o, np.int64): return int(o)
-    if isinstance(o, bytes): return o.decode('utf-8')
+    if isinstance(o, np.int64):
+        return int(o)
+    if isinstance(o, bytes):
+        return o.decode('utf-8')
     raise TypeError
 
 
@@ -578,4 +602,3 @@ class EmailValidation:
     def confirm_token(cls, token, email, secret_key, expiration=3600):
         serializer = URLSafeTimedSerializer(secret_key)
         return serializer.loads(token, max_age=expiration) == email
-

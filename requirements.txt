@@ -21,3 +21,4 @@ itsdangerous
 oyaml
 pycrypto
 numpy
+premailer

@@ -1,4 +1,4 @@
-import view, authed, events
+import view, authed, events, wss, upload
 
 www_urls = [
     (r'/', view.WelcomeHandler),
@@ -18,9 +18,9 @@ www_urls = [
     (r'/delete-account', events.DeleteAccountHandler),
     (r'/toggle-storage', events.AllowUploadStorageHandler),
 
-    (r'/socket', authed.WebSocketHandler),
-    (r'/local', authed.LocalWebSocketHandler),
-    (r'/upload', authed.ImageUploadHandler),
+    (r'/socket', wss.WebSocketHandler),
+    (r'/local', wss.LocalWebSocketHandler),
+    (r'/upload', upload.ImageUploadHandler),
 
     (r'/confirm', events.ConfirmEmail),
     (r'/resend', events.ResendConfirmationEmail),
