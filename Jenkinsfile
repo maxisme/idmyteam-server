@@ -2,12 +2,7 @@
 def virtualenv = "~/.virtualenvs/idmyteam-server/"
 
 pipeline {
-  agent {
-    label {
-      label ""
-      customWorkspace workspace
-    }
-  }
+  agent none
 
   stages {
     stage('venv-setup') {
