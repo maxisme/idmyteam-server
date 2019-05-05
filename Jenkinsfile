@@ -12,15 +12,16 @@ void setBuildStatus(String message, String state) {
 
 pipeline {
   agent any
+
   environment {
     CONF='/conf/test_jenkins.conf'
     PYTHONPATH="$WORKSPACE/settings/:$WORKSPACE/web/:$PYTHONPATH"
   }
+
   stages {
     stage('venv-setup') {
       steps {
         sh """
-        pip3 install -r test_requirements.txt --cache-dir ~/.pip-cache
         virtualenv --system-site-packages ${virtualenv}
         . ${virtualenv}/bin/activate
         pip3 install -r test_requirements.txt --cache-dir ~/.pip-cache
