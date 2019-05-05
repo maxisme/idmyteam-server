@@ -12,9 +12,11 @@ class DBHelper(object):
 
     def execute_sql_in_file(self, file):
         x = self.conn.cursor()
+        print(file)
         if not os.path.isfile(file):
             raise Exception('No such file %s', file)
         sql = open(file, 'r').read()
+        print(sql)
         x.execute(sql)
         x.close()
 
