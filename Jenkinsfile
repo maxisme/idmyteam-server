@@ -1,4 +1,4 @@
-def branch = "${BRANCH_NAME}".replaceAll('-', '_').replaceAll('/', '_')
+def branch = "${NODE_NAME}".replaceAll('-', '_').replaceAll('/', '_')
 def virtualenv = "~/.virtualenvs/idmyteam-server/${branch}"
 
 pipeline {
