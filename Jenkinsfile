@@ -8,7 +8,6 @@ pipeline {
   stages {
     stage('venv-setup') {
       steps {
-        pwd
         sh """
         virtualenv ${virtualenv}
         . ${virtualenv}/bin/activate
