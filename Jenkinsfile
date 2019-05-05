@@ -28,6 +28,6 @@ pipeline {
   post {
     always {
         sh "rm -rf ${virtualenv}"
-    }
+    } 
   }
 }
