@@ -10,7 +10,7 @@ pipeline {
         echo 'hello'
         virtualenv ${virtualenv}
         . ${virtualenv}/bin/activate
-        pip3 install -r test_requirements.txt
+        pip3 install -r test_requirements.txt --cache-dir ~/.pip-cache
         """
       }
     }
