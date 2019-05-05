@@ -20,7 +20,7 @@ pipeline {
     stage('venv-setup') {
       steps {
         sh """
-        virtualenv ${virtualenv}
+        virtualenv --system-site-packages ${virtualenv}
         . ${virtualenv}/bin/activate
         pip3 install -r test_requirements.txt --cache-dir ~/.pip-cache
         """
