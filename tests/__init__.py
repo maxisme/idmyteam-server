@@ -1,3 +1,5 @@
+import os
+
 from settings import functions, config
 
 
@@ -10,6 +12,8 @@ class DBHelper(object):
 
     def execute_sql_in_file(self, file):
         x = self.conn.cursor()
+        if not os.path.isfile(file):
+            raise Exception('No such file %s', file)
         sql = open(file, 'r').read()
         x.execute(sql)
         x.close()
