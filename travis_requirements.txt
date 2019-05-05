@@ -16,6 +16,7 @@ mysqlclient
 itsdangerous
 oyaml
 pycrypto
+premailer
 pytest_mock
 faker
 parameterized
