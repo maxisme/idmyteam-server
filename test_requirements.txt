@@ -17,6 +17,6 @@ itsdangerous
 oyaml
 pycrypto
 premailer
-pytest_mock
+mock
 faker
 parameterized
