@@ -1,9 +1,16 @@
+def branch = "${BRANCH_NAME}".replaceAll('-', '_').replaceAll('/', '_')
+def virtualenv = "~/.virtualenvs/${branch}"
+
 pipeline {
-  agent { docker { image 'python:3.7.2' } }
   stages {
-    stage('build') {
+    stage('venv-setup') {
       steps {
-        sh 'pip install -r test_requirements.txt'
+        sh """
+        virtualenv ${virtualenv}
+        . ${virtualenv}/bin/activate
+        echo ${@}
+        pip3 install -r test_requirements.txt --user --cache-dir $HOME/.pip-cache
+        """
       }
     }
     stage('test') {
