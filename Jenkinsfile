@@ -29,4 +29,5 @@ pipeline {
     always {
         sh "rm -rf ${virtualenv}"
     }
+  }
 }
