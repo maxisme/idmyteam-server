@@ -1,1 +1,0 @@
-[![Build Status](https://travis-ci.com/maxisme/idmyteam-server.svg?token=zTErHcAMpnepUwtawx8t&branch=master)](https://travis-ci.com/maxisme/idmyteam-server)
