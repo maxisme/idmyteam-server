@@ -60,9 +60,9 @@ def send_delete_model(hashed_username):
 
 class ConfirmEmail(view.BaseHandler):
     def get(self):
-        email = self.get_argument('email', None)
-        token = self.get_argument('token', None)
-        username = self.get_argument('username', None)
+        email = self.get_argument('email', '')
+        token = self.get_argument('token', '')
+        username = self.get_argument('username', '')
 
         conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
         email_to_username = functions.Team.email_to_username(conn, email)
@@ -71,22 +71,18 @@ class ConfirmEmail(view.BaseHandler):
             if not functions.Team.ConfirmEmail.has_confirmed(conn, email):
                 if functions.Team.ConfirmEmail.validate_token(conn, email, token, config.EMAIL_CONFIG['key']):
                     self.set_secure_cookie('username', username)
-                    self.flash_success('Congratulations! Your email has been confirmed.', '/profile')
+                    return self.flash_success('Congratulations! Your email has been confirmed.', '/profile')
         return self.flash_error('Invalid token', '/')
 
 
 
 class ResendConfirmationEmail(view.BaseHandler):
     def get(self):
-        try:
-            email = self.request.arguments['email'][0].decode()
-        except Exception as e:
-            logging.error(e)
-            return self.redirect('/')
+        email = self.get_argument('email', '')
 
         # check if there is an email and also that it hasn't already been confirmed
         conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-        if not functions.Team.ConfirmEmail.send_confirmation(conn, email, config.EMAIL_CONFIG):
+        if not functions.Team.ConfirmEmail.send_confirmation(conn, email, config.EMAIL_CONFIG, config.ROOT):
             return self.flash_error('Problem sending confirmation email.', '/')
 
         self.redirect('/')

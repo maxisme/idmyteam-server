@@ -3,3 +3,4 @@ ML/helpers
 web/templates/emails/inline
 *.css
 !animate.css
+*remote.conf

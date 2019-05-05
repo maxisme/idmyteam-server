@@ -22,3 +22,6 @@ oyaml
 pycrypto
 numpy
 premailer
+pytest_mock
+faker
+parameterized

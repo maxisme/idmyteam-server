@@ -16,3 +16,6 @@ mysqlclient
 itsdangerous
 oyaml
 pycrypto
+pytest_mock
+faker
+parameterized

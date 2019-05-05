@@ -17,9 +17,11 @@ test_strings = [
 @pytest.mark.parametrize("input", test_strings)
 def test_encrypt(input):
     key = base64.b64encode(Random.new().read(32))
+    print(key)
 
-    encrypt = functions.encrypt(input, key)
-    assert functions.decrypt(encrypt, key) == input
+    cipher = functions.AESCipher(key)
+    encrypt = cipher.encrypt(input)
+    assert cipher.decrypt(encrypt) == input
 
 
 @pytest.mark.parametrize("input", test_strings)

@@ -2,6 +2,7 @@
 import base64
 import json
 import logging
+import os
 import random
 import smtplib
 import string
@@ -228,7 +229,7 @@ class Team(object):
     def sign_up(cls, conn, username, password, email, allow_storage, key):
         hashed_username = hash(username)
         password = hash_pw(password)
-        credentials = encrypt(random_str(50), key)
+        credentials = AESCipher(key).encrypt(random_str(50))
 
         x = conn.cursor()
         try:
@@ -397,8 +398,8 @@ class Team(object):
 
     class ConfirmEmail:
         @classmethod
-        def send_confirmation(cls, conn, email, username, email_config):
-            if cls.has_confirmed(conn, email):
+        def send_confirmation(cls, conn, email, username, email_config, root):
+            if not cls.has_confirmed(conn, email):
                 token = EmailValidation.generate_token(email, email_config['key'])
 
                 if cls._store_confirmation_token(conn, email, token):
@@ -407,7 +408,7 @@ class Team(object):
                     msg['From'] = email_config['email']
                     msg['To'] = email
                     msg['Subject'] = 'Confirm your ID My Team email'
-                    email_html = cls._gen_template('confirm-email.html', email=email, token=token, username=username)
+                    email_html = cls._gen_template(root, 'confirm.html', email=email, token=token, username=username)
                     msg.attach(email_html)
 
                     # send email
@@ -422,8 +423,8 @@ class Team(object):
                 return False
 
         @classmethod
-        def _gen_template(cls, file, **kwargs):
-            loader = template.Loader("../web/")
+        def _gen_template(cls, root, file, **kwargs):
+            loader = template.Loader(root + "/web/")
             email_html = loader.load("templates/emails/inline/"+file).generate(**kwargs).decode()
             return MIMEText(email_html, "html")
 
@@ -468,8 +469,10 @@ class Team(object):
         def has_confirmed(cls, conn, email):
             x = conn.cursor()
             try:
-                x.execute("SELECT id FROM Accounts WHERE email = %s AND confirmed_email is NULL", (email,))
-                return x.fetchall()[0][0]
+                x.execute("SELECT confirmed_email FROM Accounts WHERE email = %s", (email,))
+                if x.fetchall()[0][0]:
+                    return True
+                return False
             except IndexError:
                 return False
 
@@ -493,39 +496,30 @@ def random_str(length):
     return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
 
 
-def encrypt(s, key):
-    """
-    :param s: string to be encrypted
-    :param key: base64 encoded Random.new().read(32)
-    :return: encrypted string
-    """
-    s = pad(s)
-    iv = Random.new().read(16)
-    cipher = AES.new(base64.b64decode(key), AES.MODE_CBC, iv)
-    return base64.b64encode(iv + b'|-|' + cipher.encrypt(s))
 
 
-def decrypt(s, key):
-    """
-    :param s: string to be decrypted
-    :param key: base64 encoded Random.new().read(32)
-    :return: decrypted string
-    """
-    s = base64.b64decode(s)
-    arr = s.split(b"|-|")
-    iv = arr[0]
-    encr = arr[1]
-    cipher = AES.new(base64.b64decode(key), AES.MODE_CBC, iv)
-    return unpad(cipher.decrypt(encr)).decode('utf-8')
+class AESCipher:
+    def __init__(self, key, byte_size=32):
+        self.key = base64.b64decode(key)
+        self.bs = byte_size
 
+    def encrypt(self, raw):
+        raw = self._pad(raw)
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return base64.b64encode(iv + cipher.encrypt(raw))
 
-def pad(s):
-    length = 32 - (len(s) % 32)
-    return s + chr(length) * length
+    def decrypt(self, enc):
+        enc = base64.b64decode(enc)
+        iv = enc[:16]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return self._unpad(cipher.decrypt(enc[16:])).decode('utf8')
 
+    def _pad(self, s):
+        return bytes(s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs), 'utf-8')
 
-def unpad(s):
-    return s[:-s[-1]]
+    def _unpad(self, s):
+        return s[0:-ord(s[-1:])]
 
 
 def hash_pw(s):

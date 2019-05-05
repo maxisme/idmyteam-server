@@ -4,10 +4,8 @@ import os
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 conf = configparser.ConfigParser()
-if os.path.isfile(ROOT+'/conf/secret.conf'):
-    conf.read(ROOT + '/conf/secret.conf')
-else:
-    conf.read(ROOT + '/conf/tests.conf')
+conf.read(ROOT + os.environ['CONF'])
+
 EMAIL_CONFIG = dict(conf.items('emails'))
 DB = dict(conf.items('database'))
 RECAPTCHA_KEY = conf['secrets']['recaptcha']

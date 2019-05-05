@@ -24,7 +24,7 @@ class ProfileHandler(BaseHandler):
                 self.tmpl['local_ip'] = clients[hashed_username].local_ip if hashed_username in clients else False
                 self.tmpl['has_model'] = Classifier.exists(hashed_username)
                 self.tmpl['root_password'] = 'zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQ9laRHZ5b'
-                self.tmpl['credentials'] = functions.decrypt(self.tmpl['team']['credentials'], config.CRYPTO_KEY)
+                self.tmpl['credentials'] = functions.AESCipher(config.CRYPTO_KEY).decrypt(self.tmpl['team']['credentials'])
                 self.tmpl['xsrf_token'] = self.xsrf_token
                 return self.render('profile.html', **self.tmpl)
             else:
@@ -95,7 +95,7 @@ class SignUpHandler(LoginHandler):
                 conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
                 if functions.Team.sign_up(conn, form.username.data, form.password.data,
                                           form.email.data, form.store.data, config.CRYPTO_KEY):
-                    functions.Team.ConfirmEmail.send_confirmation(conn, form.email.data, form.username.data, config.EMAIL_CONFIG)
+                    functions.Team.ConfirmEmail.send_confirmation(conn, form.email.data, form.username.data, config.EMAIL_CONFIG, config.ROOT)
                 else:
                     self.tmpl['error_message'] = 'Error with user information! ' \
                                                  'Please try a different username and/or email.'
