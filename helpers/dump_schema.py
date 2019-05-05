@@ -2,11 +2,10 @@ import re
 
 from settings import functions, config
 
-TABLE = 'idmyteam'
 conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
 
 x = conn.cursor()
-x.execute("SELECT table_name FROM information_schema.tables where table_schema='{}';".format(TABLE))
+x.execute("SELECT table_name FROM information_schema.tables where table_schema='{}';".format(config.DB["db"]))
 results = x.fetchall()
 x.close()
 
