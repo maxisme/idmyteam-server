@@ -2,6 +2,13 @@ def branch = "${BRANCH_NAME}".replaceAll('-', '_').replaceAll('/', '_')
 def virtualenv = "~/.virtualenvs/idmyteam-server/${branch}"
 
 pipeline {
+  agent {
+    label {
+      label ""
+      customWorkspace workspace
+    }
+  }
+
   stages {
     stage('venv-setup') {
       steps {
