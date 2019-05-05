@@ -1,5 +1,5 @@
-def branch = "${NODE_NAME}".replaceAll('-', '_').replaceAll('/', '_')
-def virtualenv = "~/.virtualenvs/idmyteam-server/${branch}"
+
+def virtualenv = "~/.virtualenvs/idmyteam-server/"
 
 pipeline {
   agent {
