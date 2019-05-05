@@ -2,11 +2,13 @@ def virtualenv = "~/.virtualenvs/idmyteam-server/${env.BUILD_ID}"
 
 pipeline {
   agent any
-
+  environment {
+    CONF='/conf/test_travis.conf'
+  }
   stages {
     stage('venv-setup') {
       steps {
-        sh ' echo $(pwd)'
+        pwd
         sh """
         virtualenv ${virtualenv}
         . ${virtualenv}/bin/activate
@@ -16,12 +18,10 @@ pipeline {
     }
     stage('test') {
       steps {
-        sh 'pytest'
-      }
-      post {
-        always {
-          junit 'test-reports/*.xml'
-        }
+        sh """
+        . ${virtualenv}/bin/activate
+        pytest
+        """
       }
     }
   }
