@@ -13,3 +13,4 @@ script: python -m pytest
 env:
   global:
     - PYTHONPATH=${TRAVIS_BUILD_DIR}/settings/:${TRAVIS_BUILD_DIR}/web/:$PYTHONPATH
+    - CONF=/conf/test_local.conf
