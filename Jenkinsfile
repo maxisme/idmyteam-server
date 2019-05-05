@@ -20,7 +20,6 @@ pipeline {
     stage('venv-setup') {
       steps {
         sh """
-        pip3 install -r test_requirements.txt # install globally as sort of cache
         virtualenv ${virtualenv} --system-site-packages
         . ${virtualenv}/bin/activate
         pip3 install -r test_requirements.txt
