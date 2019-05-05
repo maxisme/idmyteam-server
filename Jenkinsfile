@@ -4,7 +4,7 @@ pipeline {
   agent any
   environment {
     CONF='/conf/test_travis.conf'
-    PYTHONPATH=$WORKSPACE/settings/:$WORKSPACE/web/:$PYTHONPATH
+    PYTHONPATH="$WORKSPACE/settings/:$WORKSPACE/web/:$PYTHONPATH"
   }
   stages {
     stage('venv-setup') {
