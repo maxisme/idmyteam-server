@@ -10,7 +10,13 @@ cache: pip
 
 script: python -m pytest
 
+services:
+  - mysql
+
+before_install:
+  - mysql -e 'CREATE DATABASE `idmyteam-server-test`;' # matches env
+
 env:
   global:
     - PYTHONPATH=${TRAVIS_BUILD_DIR}/settings/:${TRAVIS_BUILD_DIR}/web/:$PYTHONPATH
-    - CONF=/conf/test_local.conf
+    - CONF=/conf/test_travis.conf
