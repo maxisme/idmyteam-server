@@ -29,6 +29,7 @@ pipeline {
     stage('test') {
       steps {
         sh """
+        . ${virtualenv}/bin/activate
         pytest
         """
       }
