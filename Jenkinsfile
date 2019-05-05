@@ -2,7 +2,7 @@
 def virtualenv = "~/.virtualenvs/idmyteam-server/"
 
 pipeline {
-  agent none
+  agent any
 
   stages {
     stage('venv-setup') {
