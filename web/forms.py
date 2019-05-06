@@ -50,6 +50,7 @@ class SignUpForm(CustomForm):
     store = BooleanField("<a href='/store'>Store Images</a>", render_kw={
         'class': 'filled-in'
     })
+    TS_MESSAGE = "You must accept our Terms & Conditions!"
     ts = BooleanField("<a href='/terms'>Terms & Conditions</a>", [
-        validators.DataRequired("You must accept our Terms & Conditions!")
+        validators.DataRequired(TS_MESSAGE)
     ])

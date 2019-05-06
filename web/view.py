@@ -3,7 +3,6 @@ import tornado.websocket
 from raven.contrib.tornado import SentryMixin
 
 # from ML import Classifier
-
 socket_clients = set()
 classifiers = {}
 
@@ -28,8 +27,8 @@ class BaseHandler(SentryMixin, tornado.web.RequestHandler):
             self.tmpl['username'] = self.tmpl['username'].decode('utf-8')
 
         # remove flash messages
-        self.set_secure_cookie('error_message', '')
-        self.set_secure_cookie('success_message', '')
+        self.clear_cookie('error_message')
+        self.clear_cookie('success_message')
 
     def flash_error(self, message, redirect_url=''):
         self.set_secure_cookie('error_message', message)

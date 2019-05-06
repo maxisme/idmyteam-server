@@ -1,11 +1,15 @@
 import os
 import smtplib
 import time
+import urllib
 
 import tornado
 from tornado import escape
 from tornado.testing import AsyncHTTPTestCase
+from tornado.web import RequestHandler, decode_signed_value
 
+import authed
+import forms
 import server
 from settings import functions, config
 from tests import DBHelper
@@ -29,6 +33,8 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
         tornado.testing.AsyncHTTPTestCase.__init__(self, *rest)
 
     def get_app(self):
+        server.server_settings['debug'] = False
+        server.server_settings['xsrf_cookies'] = False
         return tornado.web.Application(server.web_urls.www_urls, **server.server_settings)
 
     def _update_cookies(self, headers):
@@ -39,17 +45,21 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
             self.cookies.update(SimpleCookie(cookie))
 
     def fetch(self, url, *r, **kw):
-        if 'follow_redirects' not in kw:
-            kw['follow_redirects'] = False
-        header = {}
-        header['Cookie'] = ''
+        header = {
+            'Cookie': ''
+        }
         for cookie in self.cookies:
             header['Cookie'] += cookie + '=' + self.cookies[cookie].value + '; '
-        # print("URL: {}, Cookie: {}".format(url, header['Cookie']))
         resp = tornado.testing.AsyncHTTPTestCase.fetch(self, url, headers=header, *r, **kw)
         self._update_cookies(resp.headers)
         return resp
 
+    def post(self, url, data, *r, **kw):
+        body = urllib.parse.urlencode(data)
+        return self.fetch(url, body=body, method='POST', *r, **kw)
+
+    def get_cookie(self, name):
+        return decode_signed_value(config.COOKIE_SECRET, name, self.cookies[name].value).decode()
 
 class TestWebApp(LoginTest):
     url_blacklist = [
@@ -66,7 +76,7 @@ class TestWebApp(LoginTest):
                 assert response.code == 200, url[0]
 
     @mock.patch('smtplib.SMTP')
-    def test_signup_flow(self, _):
+    def test_email_confirmation_flow(self, *args):
         # init db
         sql_helper = DBHelper()
         sql_helper.init_schema(config.ROOT)
@@ -96,4 +106,33 @@ class TestWebApp(LoginTest):
         assert self.fetch('/profile').code == 302, 'no email'
 
         self.fetch('/confirm?email={email}&username={username}&token={token}'.format(token=email_token, **team.__dict__))
-        assert self.fetch('/profile').code == 200, 'correct details' # succesfully logged in
+        assert self.fetch('/profile').code == 200, 'correct details'  # successfully logged in
+
+    @mock.patch('authed.LoginHandler._is_valid_captcha', return_value=True)
+    @mock.patch('smtplib.SMTP')
+    def test_signup_flow(self, smtp, _):
+        # init db
+        sql_helper = DBHelper()
+        sql_helper.init_schema(config.ROOT)
+
+        # gen signup form data
+        team = TeamGenerator()
+        data = team.__dict__
+        data['confirm'] = team.password
+        data['ts'] = True
+
+        # initiate signup
+        self.post('/signup', data, follow_redirects=False)
+        assert smtp.called, 'SMTP called in handler'
+
+        # test duplicate signup
+        self.post('/signup', data)
+        assert self.get_cookie('error_message') == authed.SignUpHandler.INVALID_SIGNUP_MESSAGE, 'Duplicate signup'
+
+        # test unchecked ts
+        data.pop('ts')
+        self.post('/signup', data, follow_redirects=False)
+        assert self.get_cookie('error_message') == forms.SignUpForm.TS_MESSAGE, 'Not checked ts'
+
+
+

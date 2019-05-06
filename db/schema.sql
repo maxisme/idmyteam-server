@@ -1,5 +1,4 @@
-SET FOREIGN_KEY_CHECKS=0;DROP view IF EXISTS `Account_Users`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `Account_Users` AS select `Features`.`username` AS `username`,count(distinct `Features`.`class`) AS `num_classes` from `Features` group by `Features`.`username`;
+SET FOREIGN_KEY_CHECKS=0;
 DROP table IF EXISTS `Accounts`;
 CREATE TABLE `Accounts` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -66,3 +65,6 @@ CREATE TABLE `Logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3863 DEFAULT CHARSET=utf8;
 SET FOREIGN_KEY_CHECKS=1;
+
+DROP view IF EXISTS `Account_Users`;
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `Account_Users` AS select `Features`.`username` AS `username`,count(distinct `Features`.`class`) AS `num_classes` from `Features` group by `Features`.`username`;

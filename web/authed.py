@@ -52,12 +52,12 @@ class LoginHandler(BaseHandler):
                         self.set_secure_cookie('username', form.username.data)
                         return self.redirect('/profile')
                     else:
-                        self.tmpl['error_message'] = """You have not confirmed your email! 
+                        self.flash_error("""You have not confirmed your email! 
                         <a href='/resend?email={}'>
                             Resend confirmation?
-                        </a>""".format(user['email'])
+                        </a>""".format(user['email']))
                 else:
-                    self.tmpl['error_message'] = "Invalid credentials! Please try again."
+                    self.flash_error("Invalid credentials! Please try again.")
         else:
             self.tmpl['failed_captcha'] = True
         return self._screen()
@@ -84,6 +84,7 @@ class LoginHandler(BaseHandler):
 
 
 class SignUpHandler(LoginHandler):
+    INVALID_SIGNUP_MESSAGE = 'Error with user information! Please try a different username or email'
     def get(self):
         self.tmpl['form'] = forms.SignUpForm()
         self._screen()
@@ -95,10 +96,14 @@ class SignUpHandler(LoginHandler):
                 conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
                 if functions.Team.sign_up(conn, form.username.data, form.password.data,
                                           form.email.data, form.store.data, config.CRYPTO_KEY):
-                    functions.Team.ConfirmEmail.send_confirmation(conn, form.email.data, form.username.data, config.EMAIL_CONFIG, config.ROOT)
+                    functions.Team.ConfirmEmail.send_confirmation(conn, form.email.data, form.username.data,
+                                                                  config.EMAIL_CONFIG, config.ROOT)
                 else:
-                    self.tmpl['error_message'] = 'Error with user information! ' \
-                                                 'Please try a different username and/or email.'
+                    self.flash_error(self.INVALID_SIGNUP_MESSAGE)
+            else:
+                for error in form.errors:
+                    self.flash_error(form.errors[error][0])
+                    break
         else:
             self.tmpl['failed_captcha'] = True
 
