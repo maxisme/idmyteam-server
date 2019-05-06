@@ -15,7 +15,7 @@ pipeline {
 
   environment {
     CONF='/conf/test_jenkins.conf'
-    PYTHONPATH="$WORKSPACE/settings/:$WORKSPACE/web/:$PYTHONPATH"
+    PYTHONPATH="$WORKSPACE:$WORKSPACE/settings/:$WORKSPACE/web/:$PYTHONPATH"
   }
 
   stages {
