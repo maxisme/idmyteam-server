@@ -32,7 +32,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         self.hashed_username = functions.hash(username)
         if self.hashed_username not in authed.clients:
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
             if functions.Team.valid_credentials(conn, username, credentials, config.CRYPTO_KEY):
                 # add classifier to worker
                 upload.high_q.enqueue_call(func='.', kwargs={

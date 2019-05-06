@@ -16,8 +16,7 @@ class AllowUploadStorageHandler(view.BaseHandler):
         username = self.tmpl['username']
         if username:
             hashed_username = functions.hash(username)
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-            if not functions.Team.toggle_storage(conn, hashed_username):
+            if not functions.Team.toggle_storage(self.conn, hashed_username):
                 logging.error("unable to toggle storage for %s", hashed_username)
                 return self.write_error(501)
 
@@ -27,10 +26,9 @@ class DeleteAccountHandler(view.BaseHandler):
         username = self.tmpl['username']
         hashed_username = functions.hash(username)
         if username:
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
             if Classifier.delete(hashed_username):
                 send_delete_model(hashed_username)
-            functions.Team.delete(conn, hashed_username)
+            functions.Team.delete(self.conn, hashed_username)
             self.clear_all_cookies()
 
 
@@ -64,25 +62,24 @@ class ConfirmEmail(view.BaseHandler):
         token = self.get_argument('token', '')
         username = self.get_argument('username', '')
 
-        conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-        email_to_username = functions.Team.email_to_username(conn, email)
+        email_to_username = functions.Team.email_to_username(self.conn, email)
         hashed_username = functions.hash(username)
         if email_to_username == hashed_username:
-            if not functions.Team.ConfirmEmail.has_confirmed(conn, email):
-                if functions.Team.ConfirmEmail.validate_token(conn, email, token, config.EMAIL_CONFIG['key']):
+            if not functions.Team.ConfirmEmail.has_confirmed(self.conn, email):
+                if functions.Team.ConfirmEmail.validate_token(self.conn, email, token, config.EMAIL_CONFIG['key']):
                     self.set_secure_cookie('username', username)
                     return self.flash_success('Congratulations! Your email has been confirmed.', '/profile')
         return self.flash_error('Invalid token', '/')
 
 
-
 class ResendConfirmationEmail(view.BaseHandler):
     def get(self):
         email = self.get_argument('email', '')
+        username = self.get_argument('username', '')
 
         # check if there is an email and also that it hasn't already been confirmed
-        conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-        if not functions.Team.ConfirmEmail.send_confirmation(conn, email, config.EMAIL_CONFIG, config.ROOT):
+        if not functions.Team.ConfirmEmail.send_confirmation(self.conn, email, username,
+                                                             config.EMAIL_CONFIG, config.ROOT):
             return self.flash_error('Problem sending confirmation email.', '/')
 
         self.redirect('/')

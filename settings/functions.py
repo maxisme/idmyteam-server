@@ -35,8 +35,23 @@ def get_YAML(file):
 
 
 # connects to db using credentials
-def connect(u, p, db):
-    return MySQLdb.connect(host="127.0.0.1", user=u, passwd=p, db=db, connect_timeout=10)
+class DB:
+    @classmethod
+    def conn(cls, u, p, db):
+        return MySQLdb.connect(host="127.0.0.1", user=u, passwd=p, db=db)
+
+    @classmethod
+    def execute_sql_in_file(cls, conn, file):
+        x = conn.cursor()
+        if not os.path.isfile(file):
+            raise Exception('No such file %s', file)
+        sql = open(file, 'r').read()
+        try:
+            x.execute(sql)
+        except Exception as e:
+            print(sql)
+        finally:
+            x.close()
 
 
 # marks a team as training in the database
@@ -252,6 +267,8 @@ class Team(object):
             return x.fetchall()[0][0]
         except IndexError:
             return None
+        finally:
+            x.close()
 
     @classmethod
     def valid_credentials(cls, conn, username, credentials, key):
@@ -463,6 +480,8 @@ class Team(object):
                 except MySQLdb.Error as e:
                     logging.error("Couldn't confirm email: %s", e)
                     conn.rollback()
+                finally:
+                    x.close()
             return False
 
         @classmethod
@@ -475,6 +494,8 @@ class Team(object):
                 return False
             except IndexError:
                 return False
+            finally:
+                x.close()
 
 
 def create_local_socket(url):

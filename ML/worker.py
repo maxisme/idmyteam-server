@@ -24,7 +24,7 @@ detecter = None
 
 # db pool
 def get_conn():
-    return functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+    return functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
 mypool = pool.QueuePool(get_conn, max_overflow=10, pool_size=5)
 
 def main():

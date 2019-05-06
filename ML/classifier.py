@@ -26,7 +26,7 @@ class Classifier(object):
     def predict(self, features, file_name, face_coords, store_features):
         if self.clf:
             t = time.time()
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
 
             # predict member id based on face_coords
             member_id = 0
@@ -120,7 +120,7 @@ class Classifier(object):
         model_path = self.get_model_path(self.hashed_username)
         if model_path:
             t = time.time()
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
             model = joblib.load(model_path)
 
             # log how long it took to load model

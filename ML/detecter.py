@@ -76,7 +76,7 @@ class Detecter(object):
             # how long it took to load model
             load_time = str(time.time() - load_model_begin)
             print("loading feature extractor took" + load_time)
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
             functions.log_data(conn, "Feature Extractor", "Model", "Load", load_time)
             functions.purge_log(conn, "Feature Extractor", "Model", "Predict", "system")  # clear all prediction scores
 
@@ -120,7 +120,7 @@ class Detecter(object):
             # log how long it took to load model
             load_time = str(time.time() - t)
             print("loading localisation took: " + load_time)
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
             functions.log_data(conn, "Face Localisation", "Model", "Load", load_time)
             functions.purge_log(conn, "Face Localisation", "Model", "Predict", "system")  # clear all predicted scores
 

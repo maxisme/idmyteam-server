@@ -17,10 +17,9 @@ class ProfileHandler(BaseHandler):
         username = self.tmpl['username']
         if username:
             hashed_username = functions.hash(username)
-            conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
-            self.tmpl['team'] = functions.Team.get(conn, hashed_username)
+            self.tmpl['team'] = functions.Team.get(self.conn, hashed_username)
             if self.tmpl['team']:
-                self.tmpl['num_members'] = functions.Team.num_users(conn, hashed_username)
+                self.tmpl['num_members'] = functions.Team.num_users(self.conn, hashed_username)
                 self.tmpl['local_ip'] = clients[hashed_username].local_ip if hashed_username in clients else False
                 self.tmpl['has_model'] = Classifier.exists(hashed_username)
                 self.tmpl['root_password'] = 'zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQ9laRHZ5b'
@@ -45,7 +44,7 @@ class LoginHandler(BaseHandler):
         self.tmpl['form'] = form = forms.LoginForm(self.request.arguments)
         if self._is_valid_captcha(self.request.arguments):
             if form.validate():
-                conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+                conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
                 user = functions.Team.get(conn, functions.hash(form.username.data))
                 if functions.check_pw_hash(form.password.data, user['password']):
                     if user['confirmed_email']:
@@ -93,7 +92,7 @@ class SignUpHandler(LoginHandler):
         self.tmpl['form'] = form = forms.SignUpForm(self.request.arguments)
         if self._is_valid_captcha(self.request.arguments):
             if form.validate():
-                conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+                conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
                 if functions.Team.sign_up(conn, form.username.data, form.password.data,
                                           form.email.data, form.store.data, config.CRYPTO_KEY):
                     functions.Team.ConfirmEmail.send_confirmation(conn, form.email.data, form.username.data,

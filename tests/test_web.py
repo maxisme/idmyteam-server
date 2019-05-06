@@ -4,6 +4,7 @@ import time
 import urllib
 
 import tornado
+from sqlalchemy import pool
 from tornado import escape
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import RequestHandler, decode_signed_value
@@ -12,7 +13,6 @@ import authed
 import forms
 import server
 from settings import functions, config
-from tests import DBHelper
 import mock
 from faker import Factory
 from http.cookies import SimpleCookie
@@ -32,10 +32,25 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
         self.cookies = SimpleCookie()
         tornado.testing.AsyncHTTPTestCase.__init__(self, *rest)
 
+    def setUp(self):
+        super(LoginTest, self).setUp()
+
+        # create database
+        conn = functions.DB.conn(config.DB["username"], config.DB["password"], '')
+        x = conn.cursor()
+        x.execute('DROP DATABASE IF EXISTS `{db}`; CREATE DATABASE `{db}`;'.format(db=config.DB["db"]))
+        x.close()
+        conn.close()
+
+        # create tables
+        conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
+        functions.DB.execute_sql_in_file(conn, config.ROOT + "/db/schema.sql")
+
+
     def get_app(self):
         server.server_settings['debug'] = False
         server.server_settings['xsrf_cookies'] = False
-        return tornado.web.Application(server.web_urls.www_urls, **server.server_settings)
+        return server.App(server.web_urls.www_urls, **server.server_settings)
 
     def _update_cookies(self, headers):
         cs = str(headers['Set-Cookie'])
@@ -65,7 +80,7 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
     def get_cookie(self, name):
         return decode_signed_value(config.COOKIE_SECRET, name, self.cookies[name].value).decode()
 
-class TestWebApp(LoginTest):
+class TestWebUrls(LoginTest):
     url_blacklist = [
         '/socket',
         '/local',
@@ -79,23 +94,17 @@ class TestWebApp(LoginTest):
                 response = self.fetch(url[0], follow_redirects=False)
                 assert response.code == 200, url[0]
 
+class TestEmailConf(LoginTest):
     @mock.patch('smtplib.SMTP')
     def test_email_confirmation_flow(self, *args):
-        # init db
-        sql_helper = DBHelper()
-        sql_helper.init_schema(config.ROOT)
-        conn = sql_helper.conn
-
         # gen fake team
         team = TeamGenerator()
 
         # signup functions from SignUpHandler
+        conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
         functions.Team.sign_up(conn=conn, key=config.CRYPTO_KEY, **team.__dict__)
-        email_token = functions.Team.ConfirmEmail.send_confirmation(conn,
-                                                                    email=team.email,
-                                                                    username=team.username,
-                                                                    email_config=config.EMAIL_CONFIG,
-                                                                    root=config.ROOT)
+        email_token = functions.Team.ConfirmEmail.send_confirmation(conn, email=team.email, username=team.username,
+                                                                    email_config=config.EMAIL_CONFIG, root=config.ROOT)
 
         # test no token
         self.fetch('/confirm?email={email}&username={username}'.format(token=email_token, **team.__dict__))
@@ -111,14 +120,12 @@ class TestWebApp(LoginTest):
 
         self.fetch('/confirm?email={email}&username={username}&token={token}'.format(token=email_token, **team.__dict__))
         assert self.fetch('/profile', follow_redirects=False).code == 200, 'correct details'  # successfully logged in
+        conn.close()
 
+class TestSignUp(LoginTest):
     @mock.patch('authed.LoginHandler._is_valid_captcha', return_value=True)
     @mock.patch('smtplib.SMTP')
     def test_signup_flow(self, smtp, _):
-        # init db
-        sql_helper = DBHelper()
-        sql_helper.init_schema(config.ROOT)
-
         # gen signup form data
         team = TeamGenerator()
         data = team.__dict__

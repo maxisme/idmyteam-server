@@ -2,7 +2,7 @@ import re
 
 from settings import functions, config
 
-conn = functions.connect(config.DB["username"], config.DB["password"], config.DB["db"])
+conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
 
 x = conn.cursor()
 x.execute("SELECT table_name FROM information_schema.tables where table_schema='{}';".format(config.DB["db"]))
@@ -22,7 +22,7 @@ for result in results:
     t = 'table'
     if 'ALGORITHM' in scheme:
         t = 'view'
-    schema += 'DROP {} IF EXISTS `{}`;\n{}; \n'.format(t, result[0], scheme)
+    schema += scheme + ';\n'
 schema += 'SET FOREIGN_KEY_CHECKS=1;'
 
 schema = schema.replace('DEFINER=`{}`@`localhost` '.format(config.DB["db"]), '')
