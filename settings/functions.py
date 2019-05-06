@@ -36,7 +36,7 @@ def get_YAML(file):
 
 # connects to db using credentials
 def connect(u, p, db):
-    return MySQLdb.connect(host="127.0.0.1", user=u, passwd=p, db=db)
+    return MySQLdb.connect(host="127.0.0.1", user=u, passwd=p, db=db, connect_timeout=10)
 
 
 # marks a team as training in the database

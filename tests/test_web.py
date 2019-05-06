@@ -45,11 +45,15 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
             self.cookies.update(SimpleCookie(cookie))
 
     def fetch(self, url, *r, **kw):
+        if 'follow_redirects' not in kw:
+            kw['follow_redirects'] = False
+
         header = {
-            'Cookie': ''
+            'Cookie': '',
         }
         for cookie in self.cookies:
             header['Cookie'] += cookie + '=' + self.cookies[cookie].value + '; '
+
         resp = tornado.testing.AsyncHTTPTestCase.fetch(self, url, headers=header, *r, **kw)
         self._update_cookies(resp.headers)
         return resp
@@ -95,18 +99,18 @@ class TestWebApp(LoginTest):
 
         # test no token
         self.fetch('/confirm?email={email}&username={username}'.format(token=email_token, **team.__dict__))
-        assert self.fetch('/profile').code == 302, 'no token'
+        assert self.fetch('/profile', follow_redirects=False).code == 302, 'no token'
 
         # test no username
         self.fetch('/confirm?email={email}&token={token}'.format(token=email_token, **team.__dict__))
-        assert self.fetch('/profile').code == 302, 'no username'
+        assert self.fetch('/profile', follow_redirects=False).code == 302, 'no username'
 
         # test no email
         self.fetch('/confirm?username={username}&token={token}'.format(token=email_token, **team.__dict__))
-        assert self.fetch('/profile').code == 302, 'no email'
+        assert self.fetch('/profile', follow_redirects=False).code == 302, 'no email'
 
         self.fetch('/confirm?email={email}&username={username}&token={token}'.format(token=email_token, **team.__dict__))
-        assert self.fetch('/profile').code == 200, 'correct details'  # successfully logged in
+        assert self.fetch('/profile', follow_redirects=False).code == 200, 'correct details'  # successfully logged in
 
     @mock.patch('authed.LoginHandler._is_valid_captcha', return_value=True)
     @mock.patch('smtplib.SMTP')
