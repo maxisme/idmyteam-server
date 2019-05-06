@@ -64,7 +64,6 @@ CREATE TABLE `Logs` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3863 DEFAULT CHARSET=utf8;
-SET FOREIGN_KEY_CHECKS=1;
-
+SET FOREIGN_KEY_CHECKS=1; 
 DROP view IF EXISTS `Account_Users`;
 CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `Account_Users` AS select `Features`.`username` AS `username`,count(distinct `Features`.`class`) AS `num_classes` from `Features` group by `Features`.`username`;
