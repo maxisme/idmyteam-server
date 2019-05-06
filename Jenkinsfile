@@ -40,6 +40,7 @@ pipeline {
   post {
     always {
         sh "rm -rf ${virtualenv}"
+        deleteDir()
     }
     success {
       setBuildStatus("Build succeeded", "SUCCESS");
