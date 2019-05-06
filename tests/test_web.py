@@ -1,13 +1,9 @@
-import os
-import smtplib
-import time
 import urllib
 
 import tornado
-from sqlalchemy import pool
 from tornado import escape
 from tornado.testing import AsyncHTTPTestCase
-from tornado.web import RequestHandler, decode_signed_value
+from tornado.web import decode_signed_value
 
 import authed
 import forms
@@ -80,6 +76,8 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
     def get_cookie(self, name):
         return decode_signed_value(config.COOKIE_SECRET, name, self.cookies[name].value).decode()
 
+@mock.patch('smtplib.SMTP')
+@mock.patch('authed.LoginHandler._is_valid_captcha', return_value=True)
 class TestWebUrls(LoginTest):
     url_blacklist = [
         '/socket',
@@ -88,23 +86,23 @@ class TestWebUrls(LoginTest):
         '/profile'
     ]
 
-    def test_urls(self):
+    def test_urls(self, *args):
         for url in server.web_urls.www_urls:
             if url[1].__module__ != 'events' and url[0] not in self.url_blacklist:
                 response = self.fetch(url[0], follow_redirects=False)
                 assert response.code == 200, url[0]
 
-class TestEmailConf(LoginTest):
-    @mock.patch('smtplib.SMTP')
-    def test_email_confirmation_flow(self, *args):
+    @mock.patch('settings.functions.Team.ConfirmEmail._gen_template')
+    def test_email_confirmation_flow(self, gen_template, *args):
         # gen fake team
         team = TeamGenerator()
+        data = team.__dict__
+        data['confirm'] = team.password
+        data['ts'] = True
 
         # signup functions from SignUpHandler
-        conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
-        functions.Team.sign_up(conn=conn, key=config.CRYPTO_KEY, **team.__dict__)
-        email_token = functions.Team.ConfirmEmail.send_confirmation(conn, email=team.email, username=team.username,
-                                                                    email_config=config.EMAIL_CONFIG, root=config.ROOT)
+        self.post('/signup', data, follow_redirects=False)
+        email_token = gen_template.call_args[1]['token']
 
         # test no token
         self.fetch('/confirm?email={email}&username={username}'.format(token=email_token, **team.__dict__))
@@ -120,11 +118,7 @@ class TestEmailConf(LoginTest):
 
         self.fetch('/confirm?email={email}&username={username}&token={token}'.format(token=email_token, **team.__dict__))
         assert self.fetch('/profile', follow_redirects=False).code == 200, 'correct details'  # successfully logged in
-        conn.close()
 
-class TestSignUp(LoginTest):
-    @mock.patch('authed.LoginHandler._is_valid_captcha', return_value=True)
-    @mock.patch('smtplib.SMTP')
     def test_signup_flow(self, smtp, _):
         # gen signup form data
         team = TeamGenerator()
@@ -134,7 +128,7 @@ class TestSignUp(LoginTest):
 
         # initiate signup
         self.post('/signup', data, follow_redirects=False)
-        assert smtp.called, 'SMTP called in handler'
+        assert smtp.called, 'SMTP call in handler'
 
         # test duplicate signup
         self.post('/signup', data)
