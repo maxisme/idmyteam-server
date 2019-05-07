@@ -3,9 +3,10 @@
 #sql=$(ssh root@idmy.team 'export SETTINGS_FILE=/var/www/conf/prod_remote.yaml && export PYTHONPATH=/var/www/settings/:$PYTHONPATH && cd /var/www/ && python helpers/dump_schema.py')
 #echo "$sql" > 'db/schema.sql'
 
-export CONF="$(pwd)/conf/test_local.conf"
-export PYTHONPATH="$(pwd)/:$(pwd)/web/:$(pwd)/settings/:$(pwd)/helpers/:$PYTHONPATH"
-echo $PYTHONPATH
-#$(which python) helpers/*.py
+export CONF="/conf/test_local.conf"
+export PYTHONPATH="$(pwd):$(pwd)/web:$(pwd)/settings:$(pwd)/helpers"
+export PATH="$PATH:/usr/local/bin/"
+
+python3 helpers/*.py
 
 exit $?
