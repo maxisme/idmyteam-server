@@ -9,7 +9,7 @@ CREATE TABLE `Logs` (
   `username` varchar(64) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB 63 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 CREATE TABLE `Login` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -37,7 +37,7 @@ CREATE TABLE `Features` (
   PRIMARY KEY (`id`),
   KEY `account_username` (`username`),
   CONSTRAINT `Features_ibfk_1` FOREIGN KEY (`username`) REFERENCES `Accounts` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB 1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 CREATE TABLE `Accounts` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(64) NOT NULL,
@@ -58,6 +58,6 @@ CREATE TABLE `Accounts` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `Account_Users` AS select `Features`.`username` AS `username`,count(distinct `Features`.`class`) AS `num_classes` from `Features` group by `Features`.`username`;
 SET FOREIGN_KEY_CHECKS=1;
