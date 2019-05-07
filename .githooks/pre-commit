@@ -1,12 +1,12 @@
 #!/bin/sh
 
-#sql=$(ssh root@idmy.team 'export SETTINGS_FILE=/var/www/conf/prod_remote.yaml && export PYTHONPATH=/var/www/settings/:$PYTHONPATH && cd /var/www/ && python helpers/dump_schema.py')
-#echo "$sql" > 'db/schema.sql'
+sql=$(ssh root@idmy.team 'export CONF=/conf/prod_remote.conf && export PYTHONPATH=/var/www/idmy.team/python/:/var/www/idmy.team/python/settings/:$PYTHONPATH && python /var/www/idmy.team/python/helpers/dump_schema.py')
+echo "$sql" > 'sql/schema.sql'
 
 export CONF="/conf/test_local.conf"
 export PYTHONPATH="$(pwd):$(pwd)/web:$(pwd)/settings:$(pwd)/helpers"
 export PATH="$PATH:/usr/local/bin/"
 
-python3 helpers/*.py
+#python3 helpers/inline-css-email-templates.py
 
 exit $?
