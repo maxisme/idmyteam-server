@@ -26,5 +26,5 @@ for result in results[::-1]:
 schema += 'SET FOREIGN_KEY_CHECKS=1;'
 
 schema = schema.replace('DEFINER=`{}`@`localhost` '.format(config.DB["db"]), '')
-schema = re.sub(r"AUTO_INCREMENT=\d.", '', schema)  # remove AUTO_INCREMENT
+schema = re.sub(r"AUTO_INCREMENT=\d+", '', schema)  # remove AUTO_INCREMENT
 print(schema)
