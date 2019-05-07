@@ -4,7 +4,7 @@
 #echo "$sql" > 'db/schema.sql'
 
 export SETTINGS_FILE="$(pwd)/conf/test_local.conf"
-export PYTHONPATH="$(pwd)/:$(pwd)/web/:$(pwd)/settings/:$(pwd)/helpers/"
+export PYTHONPATH="$(pwd)/:$(pwd)/web/:$(pwd)/settings/:$(pwd)/helpers/:$PYTHONPATH"
 echo $PYTHONPATH
 #$(which python) helpers/*.py
 
