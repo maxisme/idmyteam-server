@@ -1,8 +1,13 @@
 #!/bin/sh
-export PYTHONPATH="$(pwd):$(pwd)/web:$(pwd)/settings:$(pwd)/helpers"
 
-sql=$(ssh root@idmy.team 'export SETTINGS_FILE=/var/www/conf/prod_remote.yaml && export PYTHONPATH=/var/www/settings/:$PYTHONPATH && cd /var/www/ && python helpers/dump_schema.py')
-echo "$sql" > 'db/schema.sql'
+#sql=$(ssh root@idmy.team 'export SETTINGS_FILE=/var/www/conf/prod_remote.yaml && export PYTHONPATH=/var/www/settings/:$PYTHONPATH && cd /var/www/ && python helpers/dump_schema.py')
+#echo "$sql" > 'db/schema.sql'
 
-$(which python) helpers/*.py
-echo 1
+cd ../
+echo $(pwd)
+export SETTINGS_FILE="$(pwd)/conf/test_local.conf"
+export PYTHONPATH="$(pwd)/:$(pwd)/web/:$(pwd)/settings/:$(pwd)/helpers/"
+echo $PYTHONPATH
+#$(which python) helpers/*.py
+
+exit $?
