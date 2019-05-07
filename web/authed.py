@@ -32,6 +32,8 @@ class ProfileHandler(BaseHandler):
 
 
 class LoginHandler(BaseHandler):
+    INVALID_MESSAGE = "Invalid credentials! Please try again."
+
     def __init__(self, *args, **kwargs):
         super(LoginHandler, self).__init__(*args, **kwargs)
         self.tmpl['failed_captcha'] = False
@@ -46,7 +48,7 @@ class LoginHandler(BaseHandler):
             if form.validate():
                 conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
                 user = functions.Team.get(conn, functions.hash(form.username.data))
-                if functions.check_pw_hash(form.password.data, user['password']):
+                if user and functions.check_pw_hash(form.password.data, user['password']):
                     if user['confirmed_email']:
                         self.set_secure_cookie('username', form.username.data)
                         return self.redirect('/profile')
@@ -56,7 +58,7 @@ class LoginHandler(BaseHandler):
                             Resend confirmation?
                         </a>""".format(user['email']))
                 else:
-                    self.flash_error("Invalid credentials! Please try again.")
+                    self.flash_error(self.INVALID_MESSAGE)
         else:
             self.tmpl['failed_captcha'] = True
         return self._screen()

@@ -416,7 +416,7 @@ class Team(object):
     class ConfirmEmail:
         @classmethod
         def send_confirmation(cls, conn, email, username, email_config, root):
-            if not cls.has_confirmed(conn, email):
+            if cls.can_confirm(conn, email):
                 token = EmailValidation.generate_token(email, email_config['key'])
 
                 if cls._store_confirmation_token(conn, email, token):
@@ -485,11 +485,14 @@ class Team(object):
             return False
 
         @classmethod
-        def has_confirmed(cls, conn, email):
+        def can_confirm(cls, conn, email):
             x = conn.cursor()
             try:
-                x.execute("SELECT confirmed_email FROM Accounts WHERE email = %s", (email,))
-                if x.fetchall()[0][0]:
+                x.execute("SELECT id, confirmed_email FROM Accounts WHERE email = %s", (email,))
+                results = x.fetchall()[0]
+                id = results[0]
+                confirmed_email = results[1]
+                if id and not confirmed_email:
                     return True
                 return False
             except IndexError:

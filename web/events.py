@@ -65,7 +65,7 @@ class ConfirmEmail(view.BaseHandler):
         email_to_username = functions.Team.email_to_username(self.conn, email)
         hashed_username = functions.hash(username)
         if email_to_username == hashed_username:
-            if not functions.Team.ConfirmEmail.has_confirmed(self.conn, email):
+            if functions.Team.ConfirmEmail.can_confirm(self.conn, email):
                 if functions.Team.ConfirmEmail.validate_token(self.conn, email, token, config.EMAIL_CONFIG['key']):
                     self.set_secure_cookie('username', username)
                     return self.flash_success('Congratulations! Your email has been confirmed.', '/profile')
@@ -73,6 +73,8 @@ class ConfirmEmail(view.BaseHandler):
 
 
 class ResendConfirmationEmail(view.BaseHandler):
+    CONFIRMATION_ERROR = 'Problem sending confirmation email.'
+
     def get(self):
         email = self.get_argument('email', '')
         username = self.get_argument('username', '')
@@ -80,6 +82,6 @@ class ResendConfirmationEmail(view.BaseHandler):
         # check if there is an email and also that it hasn't already been confirmed
         if not functions.Team.ConfirmEmail.send_confirmation(self.conn, email, username,
                                                              config.EMAIL_CONFIG, config.ROOT):
-            return self.flash_error('Problem sending confirmation email.', '/')
+            return self.flash_error(self.CONFIRMATION_ERROR, '/')
 
         self.redirect('/')

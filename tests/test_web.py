@@ -6,6 +6,7 @@ from tornado.testing import AsyncHTTPTestCase
 from tornado.web import decode_signed_value
 
 import authed
+import events
 import forms
 import server
 from settings import functions, config
@@ -74,7 +75,10 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
         return self.fetch(url, body=body, method='POST', *r, **kw)
 
     def get_cookie(self, name):
-        return decode_signed_value(config.COOKIE_SECRET, name, self.cookies[name].value).decode()
+        cookie = decode_signed_value(config.COOKIE_SECRET, name, self.cookies[name].value)
+        if cookie:
+            return cookie.decode()
+        return None
 
 @mock.patch('smtplib.SMTP')
 @mock.patch('authed.LoginHandler._is_valid_captcha', return_value=True)
@@ -88,28 +92,16 @@ class TestWebUrls(LoginTest):
     ]
 
     def _signup(self, team):
-        # gen fake team
-        data = team.__dict__
-        data['confirm'] = team.password
-        data['ts'] = True
-
-        # signup functions from SignUpHandler
-        self.post('/signup', data, follow_redirects=False)
-        return data
+        form_data = team.__dict__
+        form_data['confirm'] = team.password
+        form_data['ts'] = True
+        self.post('/signup', form_data, follow_redirects=False)
+        return form_data
 
     def _is_logged_in(self):
-        return self.fetch('/profile', follow_redirects=False).code == 200  # successfully logged in
+        return self.fetch('/profile', follow_redirects=False).code == 200  # successfully logged
 
-    def test_urls(self, *args):
-        for url in server.web_urls.www_urls:
-            if url[1].__module__ != 'events' and url[0] not in self.url_blacklist:
-                response = self.fetch(url[0], follow_redirects=False)
-                assert response.code == 200, url[0]
-
-    def test_email_confirmation_flow(self, gen_template, *args):
-        team = TeamGenerator()
-        self._signup(team)
-        email_token = gen_template.call_args[1]['token']
+    def _confirm_account_tests(self, email_token, team):
 
         # test no token
         self.fetch('/confirm?email={email}&username={username}'.format(token=email_token, **team.__dict__))
@@ -126,27 +118,68 @@ class TestWebUrls(LoginTest):
         self.fetch('/confirm?email={email}&username={username}&token={token}'.format(token=email_token, **team.__dict__))
         assert self._is_logged_in(), 'correct details'
 
+
+    def test_urls(self, *args):
+        for url in server.web_urls.www_urls:
+            if url[1].__module__ != 'events' and url[0] not in self.url_blacklist:
+                response = self.fetch(url[0], follow_redirects=False)
+                assert response.code == 200, url[0]
+
+    def test_email_confirmation_flow(self, gen_template, *args):
+        team = TeamGenerator()
+        self._signup(team)
+        email_token = gen_template.call_args[1]['token']
+        self._confirm_account_tests(email_token, team)
+
     def test_signup_flow(self, smtp, *args):
-        data = self._signup(TeamGenerator())
+        form_data = self._signup(TeamGenerator())
         assert smtp.called, 'SMTP call in handler'
 
         # test duplicate signup
-        self.post('/signup', data)
+        self.post('/signup', form_data)
         assert self.get_cookie('error_message') == authed.SignUpHandler.INVALID_SIGNUP_MESSAGE, 'Duplicate signup'
 
         # test unchecked ts
-        data.pop('ts')
-        self.post('/signup', data, follow_redirects=False)
+        form_data.pop('ts')
+        self.post('/signup', form_data, follow_redirects=False)
         assert self.get_cookie('error_message') == forms.SignUpForm.TS_MESSAGE, 'Not checked ts'
 
     def test_email_retry(self, gen_template, *args):
         team = TeamGenerator()
+        self.fetch('/resend?email={email}&username={username}'.format(**team.__dict__))
+        assert self.get_cookie('error_message') == events.ResendConfirmationEmail.CONFIRMATION_ERROR, 'No such team signed up'
+
         self._signup(team)
         self.fetch('/resend?email={email}&username={username}'.format(**team.__dict__))
         email_token = gen_template.call_args[1]['token']
+        self._confirm_account_tests(email_token, team)
 
+        self.fetch('/resend?email={email}&username={username}'.format(**team.__dict__))
+        assert self.get_cookie('error_message') == events.ResendConfirmationEmail.CONFIRMATION_ERROR, 'Already confirmed'
+
+    def test_login(self, gen_template, *args):
+        team = TeamGenerator()
+        self._signup(team)
+
+        self.post('/login', team.__dict__)
+        assert 'not confirmed' in self.get_cookie('error_message'), 'Not yet confirmed'
+
+        # confirm signup
+        email_token = gen_template.call_args[1]['token']
         self.fetch('/confirm?email={email}&username={username}&token={token}'.format(token=email_token, **team.__dict__))
-        assert self._is_logged_in(), 'correct details'
+        assert self._is_logged_in(), 'logged in'
+        self.fetch('/logout')
+        assert not self._is_logged_in(), 'logged out'
+
+        # test login
+        self.post('/login', team.__dict__)
+        assert self._is_logged_in(), 'correct login details'
+        self.fetch('/logout')
+        assert not self._is_logged_in(), 'logged out'
+
+        # test invalid login details
+        self.post('/login', TeamGenerator().__dict__)
+        assert self.get_cookie('error_message') == authed.LoginHandler.INVALID_MESSAGE, 'incorrect login details'
 
 
 
