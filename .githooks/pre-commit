@@ -7,6 +7,6 @@ export CONF="/conf/test_local.conf"
 export PYTHONPATH="$(pwd):$(pwd)/web:$(pwd)/settings:$(pwd)/helpers"
 export PATH="$PATH:/usr/local/bin/"
 
-#python3 helpers/inline-css-email-templates.py
+python3 helpers/inline-css-email-templates.py
 
-exit $?
+exit 0
