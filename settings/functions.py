@@ -229,8 +229,8 @@ def img_augmentation(img):
     return img
 
 
-class Team(object):
 
+class Team:
     @classmethod
     def get(cls, conn, username):
         x = conn.cursor(MySQLdb.cursors.DictCursor)

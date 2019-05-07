@@ -1,0 +1,8 @@
+#!/bin/bash
+export SETTINGS_FILE="$(pwd)/conf/test_local.conf"
+export PYTHONPATH="$(pwd):$(pwd)/web:$(pwd)/settings:$(pwd)/helpers"
+export PATH="$PATH:/usr/local/bin/"
+
+python3 /Library/Frameworks/Python.framework/Versions/2.7/bin/pytest
+
+exit $?

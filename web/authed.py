@@ -94,10 +94,9 @@ class SignUpHandler(LoginHandler):
         self.tmpl['form'] = form = forms.SignUpForm(self.request.arguments)
         if self._is_valid_captcha(self.request.arguments):
             if form.validate():
-                conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
-                if functions.Team.sign_up(conn, form.username.data, form.password.data,
+                if functions.Team.sign_up(self.conn, form.username.data, form.password.data,
                                           form.email.data, form.store.data, config.CRYPTO_KEY):
-                    functions.Team.ConfirmEmail.send_confirmation(conn, form.email.data, form.username.data,
+                    functions.Team.ConfirmEmail.send_confirmation(self.conn, form.email.data, form.username.data,
                                                                   config.EMAIL_CONFIG, config.ROOT)
                 else:
                     self.flash_error(self.INVALID_SIGNUP_MESSAGE)

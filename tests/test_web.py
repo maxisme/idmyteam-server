@@ -41,7 +41,7 @@ class LoginTest(tornado.testing.AsyncHTTPTestCase):
 
         # create tables
         conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
-        functions.DB.execute_sql_in_file(conn, config.ROOT + "/db/schema.sql")
+        functions.DB.execute_sql_in_file(conn, config.ROOT + "/sql/schema.sql")
 
 
     def get_app(self):
@@ -102,7 +102,6 @@ class TestWebUrls(LoginTest):
         return self.fetch('/profile', follow_redirects=False).code == 200  # successfully logged
 
     def _confirm_account_tests(self, email_token, team):
-
         # test no token
         self.fetch('/confirm?email={email}&username={username}'.format(token=email_token, **team.__dict__))
         assert self.fetch('/profile', follow_redirects=False).code == 302, 'no token'
@@ -115,6 +114,7 @@ class TestWebUrls(LoginTest):
         self.fetch('/confirm?username={username}&token={token}'.format(token=email_token, **team.__dict__))
         assert self.fetch('/profile', follow_redirects=False).code == 302, 'no email'
 
+        # test correct details
         self.fetch('/confirm?email={email}&username={username}&token={token}'.format(token=email_token, **team.__dict__))
         assert self._is_logged_in(), 'correct details'
 
