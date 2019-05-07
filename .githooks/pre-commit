@@ -5,4 +5,4 @@ sql=$(ssh root@idmy.team 'export SETTINGS_FILE=/var/www/conf/prod_remote.yaml &&
 echo "$sql" > 'db/schema.sql'
 
 $(which python) helpers/*.py
-echo -1
+echo 1
