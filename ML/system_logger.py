@@ -3,9 +3,9 @@
 
 import subprocess, string
 import psutil
-from settings import functions, config
+from settings import functions, config, db
 
-conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
+conn = db.pool.connect()
 
 gpu = subprocess.check_output('nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv', shell=True).split("\n",2)[1]
 gpu_split = string.split(gpu, "%, ")

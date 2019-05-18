@@ -209,36 +209,31 @@ def img_augmentation(img):
     if np.random.randint(3) == 0:  # rotate 1/3 times
         img = scipy.misc.imrotate(img, angle, 'bicubic')
 
-    # ###################
-    # # salt and pepper #
-    # ###################
-    # # salt
-    # coords = [np.random.randint(0, i - 1, int(np.ceil(sp_amt * img.size * SVP))) for i in img.shape]
-    # img[coords[0], coords[1], :] = 1
-    # # pepper
-    # coords = [np.random.randint(0, i - 1, int(np.ceil(sp_amt * img.size * (1.0 - SVP)))) for i in img.shape]
-    # img[coords[0], coords[1], :] = 0
-
-    ########
-    # blur #
-    ########
-    # gaussian = np.random.random((img.shape[0], img.shape[1], 1)).astype(np.float32)
-    # gaussian = np.concatenate((gaussian, gaussian, gaussian), axis=2)
-    # img = cv2.addWeighted(img, 0.85, 0.25 * gaussian, 0.25, 0)
-
     return img
 
 
 
 class Team:
     @classmethod
-    def get(cls, conn, username):
+    def get(cls, conn, **search):
+        WHERE, val = cls._get_where(search)
         x = conn.cursor(MySQLdb.cursors.DictCursor)
         try:
-            x.execute("SELECT * FROM Accounts WHERE username = %s", (username,))
+            x.execute("SELECT * FROM Accounts WHERE {}".format(WHERE), (val,))
             return x.fetchall()[0]
         except IndexError:
             return None
+
+    @classmethod
+    def _get_where(cls, search):
+        """
+        :param search dict:
+        :return tuple: WHERE string, value of where
+        """
+        if len(search) > 1:
+            raise Exception('You can only have one WHERE clause')
+        column = list(search.keys())[0]
+        return '{}=%s'.format(column), search[column]
 
     @classmethod
     def sign_up(cls, conn, username, password, email, allow_storage, key):
@@ -252,7 +247,24 @@ class Team:
                       "VALUES (%s, %s, %s, %s, %s);", (email, hashed_username, password, credentials, allow_storage))
             conn.commit()
         except MySQLdb.Error as e:
-            print(("Couldn't sign up: " + str(e)))
+            logging.critical("Couldn't sign up: " + str(e))
+            conn.rollback()
+            return False
+        finally:
+            x.close()
+        return True
+
+    @classmethod
+    def reset_password(cls, conn, password, **search):
+        WHERE, val = cls._get_where(search)
+        password = hash_pw(password)
+
+        x = conn.cursor()
+        try:
+            x.execute("UPDATE `Accounts` SET password=%s WHERE {}".format(WHERE), (password, val))
+            conn.commit()
+        except MySQLdb.Error as e:
+            logging.critical("Couldn't reset password: " + str(e))
             conn.rollback()
             return False
         finally:
@@ -271,8 +283,7 @@ class Team:
             x.close()
 
     @classmethod
-    def valid_credentials(cls, conn, username, credentials, key):
-        hashed_username = hash(username)
+    def valid_credentials(cls, conn, hashed_username, credentials, key):
         x = conn.cursor()
         try:
             x.execute("""
@@ -282,7 +293,7 @@ class Team:
             """, (hashed_username,))
             encrypted_credentials = x.fetchall()[0][0]
 
-            return decrypt(encrypted_credentials, key) == credentials
+            return AESCipher(key).decrypt(encrypted_credentials) == credentials
         except Exception as e:
             logging.info("Couldn't fetch credentials %s", e)
             return False
@@ -372,7 +383,7 @@ class Team:
     def num_users(cls, conn, username):
         x = conn.cursor()
         try:
-            x.execute("SELECT num_classes FROM Account_Users WHERE username = %s", (username,))
+            x.execute("SELECT COUNT(DISTINCT class) from `Features` where username = %s;", (username,))
             return x.fetchall()[0][0]
         except IndexError:
             return None
@@ -413,92 +424,90 @@ class Team:
 
         return True
 
-    class ConfirmEmail:
+    class PasswordReset:
         @classmethod
-        def send_confirmation(cls, conn, email, username, email_config, root):
-            if cls.can_confirm(conn, email):
-                token = EmailValidation.generate_token(email, email_config['key'])
-
-                if cls._store_confirmation_token(conn, email, token):
-                    # generate email content
-                    msg = MIMEMultipart("alternative")
-                    msg['From'] = email_config['email']
-                    msg['To'] = email
-                    msg['Subject'] = 'Confirm your ID My Team email'
-                    email_html = cls._gen_template(root, 'confirm.html', email=email, token=token, username=username)
-                    msg.attach(email_html)
-
-                    # send email
-                    with smtplib.SMTP(email_config['smtp'], port=email_config['smtp_port']) as smtp_server:
-                        smtp_server.ehlo()
-                        smtp_server.starttls()
-                        smtp_server.ehlo()
-                        smtp_server.login(email_config['email'], email_config['password'])
-                        smtp_server.send_message(msg)
-                return token
-            else:
-                return False
+        def reset(cls, conn, email, email_config, token_key, root):
+            token = Token.generate(email, token_key)
+            cls._store_reset_token(conn, token, email)
+            email_html = Email.template(root, 'reset.html', email=email, token=token)
+            Email.send(email_config, email, 'Reset ID My Team password', email_html)
+            return token
 
         @classmethod
-        def _gen_template(cls, root, file, **kwargs):
-            loader = template.Loader(root + "/web/")
-            email_html = loader.load("templates/emails/inline/"+file).generate(**kwargs).decode()
-            return MIMEText(email_html, "html")
-
-        @classmethod
-        def _store_confirmation_token(cls, conn, email, token):
-            x = conn.cursor()
+        def validate(cls, conn, email, token, token_key):
             try:
-                x.execute("""
-                UPDATE `Accounts`
-                SET email_confirm_token = %s
-                WHERE email = %s""", (token, email))
-                conn.commit()
-                return True
-            except MySQLdb.Error as e:
-                logging.error("Couldn't add confirm_secret: %s", e)
-                conn.rollback()
-                return False
-
-        @classmethod
-        def validate_token(cls, conn, email, token, email_secret_key):
-            try:
-                valid_token = EmailValidation.confirm_token(token, email, email_secret_key)
+                valid_token = Token.validate(token, email, token_key)
             except Exception as e:
                 logging.error(e)
                 return False
 
             if valid_token:
                 x = conn.cursor()
-                try:
-                    x.execute("""
-                        UPDATE `Accounts`
-                        SET confirmed_email = NOW()
-                        WHERE email = %s""", (email,))
-                    conn.commit()
-                    return True
-                except MySQLdb.Error as e:
-                    logging.error("Couldn't confirm email: %s", e)
-                    conn.rollback()
-                finally:
-                    x.close()
+                x.execute("""
+                    UPDATE `Accounts`
+                    SET password_reset_token = NULL
+                    WHERE email = %s""", (email,))
+                conn.commit()
+                x.close()
+                return True
+            return False
+
+
+        @classmethod
+        def _store_reset_token(cls, conn, email, token):
+            x = conn.cursor()
+            x.execute("""
+            UPDATE `Accounts`
+            SET password_reset_token = %s
+            WHERE email = %s""", (token, email))
+            conn.commit()
+            x.close()
+
+
+
+    class ConfirmEmail:
+        @classmethod
+        def send_confirmation(cls, conn, email, username, email_config, root, token_key):
+            team = Team.get(conn, username=hash(username))
+            if team and not team['confirmed_email']:
+                token = Token.generate(email, token_key)
+                cls._store_confirmation_token(conn, email, token)
+
+                # generate email content
+                email_html = Email.template(root, 'confirm.html', email=email, token=token, username=username)
+                Email.send(email_config, email, 'Confirm your ID My Team email', email_html)
+                return token
+            else:
+                return False
+
+        @classmethod
+        def confirm(cls, conn, email, token, token_key):
+            try:
+                valid_token = Token.validate(token, email, token_key)
+            except Exception as e:
+                logging.error(e)
+                return False
+
+            if valid_token:
+                x = conn.cursor()
+                x.execute("""
+                    UPDATE `Accounts`
+                    SET confirmed_email = NOW(), email_confirm_token = NULL
+                    WHERE email = %s""", (email,))
+                conn.commit()
+                x.close()
+                return True
             return False
 
         @classmethod
-        def can_confirm(cls, conn, email):
+        def _store_confirmation_token(cls, conn, email, token):
             x = conn.cursor()
-            try:
-                x.execute("SELECT id, confirmed_email FROM Accounts WHERE email = %s", (email,))
-                results = x.fetchall()[0]
-                id = results[0]
-                confirmed_email = results[1]
-                if id and not confirmed_email:
-                    return True
-                return False
-            except IndexError:
-                return False
-            finally:
-                x.close()
+            x.execute("""
+            UPDATE `Accounts`
+            SET email_confirm_token = %s
+            WHERE email = %s""", (token, email))
+            conn.commit()
+            x.close()
 
 
 def create_local_socket(url):
@@ -518,8 +527,6 @@ def send_json_socket(socket, hashed_username, dic):
 
 def random_str(length):
     return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
-
-
 
 
 class AESCipher:
@@ -610,13 +617,40 @@ def crop_arr(arr, num):
     return new_arr
 
 
-class EmailValidation:
-    @classmethod
-    def generate_token(cls, email, secret_key):
-        serializer = URLSafeTimedSerializer(secret_key)
-        return serializer.dumps(email)
+class Token:
+    MAX_AGE = 3600
 
     @classmethod
-    def confirm_token(cls, token, email, secret_key, expiration=3600):
-        serializer = URLSafeTimedSerializer(secret_key)
-        return serializer.loads(token, max_age=expiration) == email
+    def generate(cls, obj, token_key):
+        serializer = URLSafeTimedSerializer(token_key)
+        return serializer.dumps(obj)
+
+    @classmethod
+    def validate(cls, token, obj, token_key):
+        serializer = URLSafeTimedSerializer(token_key)
+        return serializer.loads(token, max_age=cls.MAX_AGE) == obj
+
+
+class Email:
+    @classmethod
+    def send(cls, email_config, email, subject, html):
+        # generate email content
+        msg = MIMEMultipart("alternative")
+        msg['From'] = email_config['email']
+        msg['To'] = email
+        msg['Subject'] = subject
+        msg.attach(html)
+
+        # send email
+        with smtplib.SMTP(email_config['smtp'], port=email_config['smtp_port']) as smtp_server:
+            smtp_server.ehlo()
+            smtp_server.starttls()
+            smtp_server.ehlo()
+            smtp_server.login(email_config['email'], email_config['password'])
+            smtp_server.send_message(msg)
+
+    @classmethod
+    def template(cls, root, file, **kwargs):
+        loader = template.Loader(root + "/web/")
+        email_html = loader.load("templates/emails/inline/" + file).generate(**kwargs).decode()
+        return MIMEText(email_html, "html")

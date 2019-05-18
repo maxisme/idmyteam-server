@@ -8,7 +8,7 @@ from rq import Queue
 
 import logging
 import zipfile
-from settings import functions, config
+from settings import functions, config, db
 from view import BaseHandler
 from ML.classifier import Classifier
 
@@ -33,11 +33,11 @@ class ImageUploadHandler(BaseHandler):
         if content_len > config.MAX_TRAIN_UPLOAD_SIZE_KB:
             return self.write("Upload file too large")
 
-        conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
-        if functions.Team.valid_credentials(conn, username, credentials, config.CRYPTO_KEY):
-            hashed_username = functions.hash(username)
+        self.conn = db.pool.connect()
+        hashed_username = functions.hash(username)
+        if functions.Team.valid_credentials(self.conn, hashed_username, credentials, config.SECRETS['crypto']):
             if hashed_username in authed.clients:
-                if functions.Team.allowed_to_upload(conn, hashed_username):
+                if functions.Team.allowed_to_upload(self.conn, hashed_username):
                     if 'img_file' in self.request.files:
                         #####################
                         # PREDICTING upload #
@@ -72,9 +72,9 @@ class ImageUploadHandler(BaseHandler):
                         ###################
                         # TRAINING upload #
                         ###################
-                        num_trained = functions.Team.get_num_trained_last_hr(conn, hashed_username)
+                        num_trained = functions.Team.get_num_trained_last_hr(self.conn, hashed_username)
 
-                        user = functions.Team.get(conn, hashed_username)
+                        user = functions.Team.get(self.conn, username=hashed_username)
                         max_train_imgs_per_hr = user['max_train_imgs_per_hr']
 
                         z = zipfile.ZipFile(io.BytesIO(self.request.files['ZIP'][0]['body']))

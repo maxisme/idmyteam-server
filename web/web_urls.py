@@ -24,4 +24,7 @@ www_urls = [
 
     (r'/confirm', events.ConfirmEmail),
     (r'/resend', events.ResendConfirmationEmail),
+
+    (r'/forgot', authed.ForgotPassword),
+    (r'/reset', authed.ResetPassword),
 ]

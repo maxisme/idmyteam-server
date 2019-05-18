@@ -4,7 +4,7 @@ from collections import defaultdict
 import tornado.websocket
 
 import logging
-from settings import functions, config
+from settings import functions, config, db
 from ML.classifier import Classifier
 import upload, authed
 
@@ -32,8 +32,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         self.hashed_username = functions.hash(username)
         if self.hashed_username not in authed.clients:
-            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
-            if functions.Team.valid_credentials(conn, username, credentials, config.CRYPTO_KEY):
+            conn = db.pool.connect()
+            if functions.Team.valid_credentials(conn, self.hashed_username, credentials, config.SECRETS['crypto']):
                 # add classifier to worker
                 upload.high_q.enqueue_call(func='.', kwargs={
                     'type': 'add',
@@ -57,7 +57,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.write_message(json.dumps({
                     'type': 'invalid_credentials'
                 }))
+                conn.close()
+                logging.warning('Invalid credentials')
                 return self.close(1003, 'Invalid request')
+            conn.close()
         else:
             logging.warning('%s already connected wss - %s', self.hashed_username, self.request.headers['X-Real-Ip'])
             return self.close(1003, 'Invalid request')

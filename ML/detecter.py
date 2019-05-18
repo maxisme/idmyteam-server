@@ -12,7 +12,7 @@ import numpy as np
 from redis import Redis
 from rq import Queue
 
-from settings import functions, config
+from settings import functions, config, db
 from importlib import import_module
 import ast
 import chainer
@@ -65,7 +65,7 @@ class Detecter(object):
             c.gpu_options.allow_growth = True
             self.sess = tf.Session(config=c)
             # TODO convert the below path into one file at config.FEATURE_MODEL_DIR (this path looks at multiple files)
-            tf.train.Saver().restore(self.sess, '/var/www/idmy.team/python/models/checkpoint-407500')
+            tf.train.Saver().restore(self.sess, config.ROOT + '/models/checkpoint-407500')
             #########################################
 
             # run prediction with white image as the first prediction takes longer than all proceeding ones
@@ -76,7 +76,7 @@ class Detecter(object):
             # how long it took to load model
             load_time = str(time.time() - load_model_begin)
             print("loading feature extractor took" + load_time)
-            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = db.pool.connect()
             functions.log_data(conn, "Feature Extractor", "Model", "Load", load_time)
             functions.purge_log(conn, "Feature Extractor", "Model", "Predict", "system")  # clear all prediction scores
 
@@ -120,7 +120,7 @@ class Detecter(object):
             # log how long it took to load model
             load_time = str(time.time() - t)
             print("loading localisation took: " + load_time)
-            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = db.pool.connect()
             functions.log_data(conn, "Face Localisation", "Model", "Load", load_time)
             functions.purge_log(conn, "Face Localisation", "Model", "Predict", "system")  # clear all predicted scores
 

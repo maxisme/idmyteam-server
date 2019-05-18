@@ -1,6 +1,6 @@
 from classifier import Classifier
 from detecter import Detecter
-from settings import config, functions
+from settings import config, functions, db
 
 import logging
 import os
@@ -10,7 +10,6 @@ from rq import Worker, Queue, Connection
 from rq.contrib.sentry import register_sentry
 from raven import Client
 from raven.transport.http import HTTPTransport
-import sqlalchemy.pool as pool
 
 logging.basicConfig(level='CRITICAL')
 
@@ -21,11 +20,6 @@ rq_conn = redis.from_url(redis_url)
 classifiers = {}
 no_classifier_jobs = {}
 detecter = None
-
-# db pool
-def get_conn():
-    return functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
-mypool = pool.QueuePool(get_conn, max_overflow=10, pool_size=5)
 
 def main():
     global detecter
@@ -49,11 +43,11 @@ class MainWorker(Worker):
             hashed_username = job.kwargs['hashed_username']
             if type == 'detect':
                 if hashed_username in classifiers:
-                    db_conn = mypool.connect()
+                    db_conn = db.pool.connect()
                     if 'member_id' in job.kwargs:
                         # training image
                         num_trained = functions.Team.get_num_trained_last_hr(db_conn, hashed_username)
-                        num_allowed = functions.Team.get(db_conn, hashed_username)['max_train_imgs_per_hr']
+                        num_allowed = functions.Team.get(db_conn, username=hashed_username)['max_train_imgs_per_hr']
                         if num_trained >= num_allowed:
                             logging.warning("User (%s) has uploaded too many images.", hashed_username)
                             return
@@ -72,7 +66,7 @@ class MainWorker(Worker):
                         no_classifier_jobs[hashed_username] = [(job, queue)]
             elif type == 'train':
                 if hashed_username in classifiers:
-                    db_conn = mypool.connect()
+                    db_conn = db.pool.connect()
                     thread = Thread(target=classifiers[hashed_username].train, args=(db_conn,))
                     thread.daemon = True
                     thread.start()

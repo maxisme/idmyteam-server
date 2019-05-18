@@ -1,4 +1,4 @@
-from wtforms import Form, PasswordField, StringField, validators, BooleanField
+from wtforms import Form, PasswordField, StringField, validators, BooleanField, HiddenField
 from wtforms.fields.html5 import EmailField
 
 
@@ -38,19 +38,40 @@ class LoginForm(CustomForm):
 
 class SignUpForm(CustomForm):
     username = StringField("Username", [validators.Length(min=4), validators.InputRequired()])
-    password = PasswordField("Password", [
-        validators.InputRequired(),
-        validators.Length(min=8),
-        validators.EqualTo('confirm', message='Passwords must match')
-    ])
-    confirm = PasswordField('Confirm Password')
-    email = EmailField("Email", [
-        validators.InputRequired()
-    ])
+    password = PasswordField("Password", [validators.InputRequired(), validators.Length(min=8),
+                                          validators.EqualTo('confirm', message='Passwords must match')], render_kw={
+        'col': 'm6 s12'
+    })
+    confirm = PasswordField('Confirm Password', render_kw={
+        'col': 'm6 s12'
+    })
+    email = EmailField("Email", [validators.InputRequired()])
     store = BooleanField("<a href='/store'>Store Images</a>", render_kw={
-        'class': 'filled-in'
+        'col': 'm6 s12'
     })
     TS_MESSAGE = "You must accept our Terms & Conditions!"
-    ts = BooleanField("<a href='/terms'>Terms & Conditions</a>", [
-        validators.DataRequired(TS_MESSAGE)
-    ])
+    ts = BooleanField("<a href='/terms'>Terms & Conditions</a>", [validators.DataRequired(TS_MESSAGE)], render_kw={
+        'col': 'm6 s12'
+    })
+
+
+class ForgotForm(CustomForm):
+    username = StringField("Username", render_kw={
+        'col': 'm6 s12'
+    })
+    email = EmailField("Email", render_kw={
+        'col': 'm6 s12'
+    })
+
+
+class ResetPasswordForm(CustomForm):
+    password = PasswordField("Password", [validators.InputRequired(), validators.Length(min=8),
+        validators.EqualTo('confirm', message='Passwords must match!')], render_kw={
+        'col': 'm6 s12'
+    })
+    confirm = PasswordField('Confirm Password', render_kw={
+        'col': 'm6 s12'
+    })
+    token = HiddenField("Token", [validators.InputRequired()])
+    email = HiddenField()
+    username = HiddenField()

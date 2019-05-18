@@ -8,17 +8,15 @@ conf.read(ROOT + os.environ['CONF'])
 
 EMAIL_CONFIG = dict(conf.items('emails'))
 DB = dict(conf.items('database'))
-RECAPTCHA_KEY = conf['secrets']['recaptcha']
-CRYPTO_KEY = conf['secrets']['crypto']
-COOKIE_SECRET = conf['secrets']['cookie']
+SECRETS = dict(conf.items('secrets'))
 SENTRY_URL = conf['sentry']['url']
 
 IMAGE_UPLOAD_DIR = ROOT+'/images/'
 STORE_IMAGES_DIR = ROOT+'/faces/'
-MODEL_DIR = ROOT+'/python/models/'
-LOCALISATION_MODEL = ROOT+'/python/models/face_localisation.model'
-FEATURE_MODEL_DIR = ROOT+'/python/models/feature_extractor.model'
-CLIENT_MODEL_DIR = ROOT+'/python/models/'  # user_hash .model
+MODEL_DIR = ROOT+'/models/'
+LOCALISATION_MODEL = ROOT+'/models/face_localisation.model'
+FEATURE_MODEL_DIR = ROOT+'/models/feature_extractor.model'
+CLIENT_MODEL_DIR = ROOT+'/models/'  # user_hash .model
 FEATURE_EXTRACTOR_IMG_SIZE = 256
 MIN_FACE_SIZE = 60
 NUM_SHUFFLES = 2

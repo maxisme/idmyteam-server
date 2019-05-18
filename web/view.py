@@ -23,7 +23,6 @@ class BaseHandler(SentryMixin, tornado.web.RequestHandler):
             'success_message': self.get_secure_cookie('success_message'),
         }
 
-        self.conn = self.application.db.connect()
         if self.tmpl['username']:
             self.tmpl['username'] = self.tmpl['username'].decode('utf-8')
 
@@ -42,7 +41,10 @@ class BaseHandler(SentryMixin, tornado.web.RequestHandler):
             return self.redirect(redirect_url)
 
     def on_finish(self):
-        self.conn.close()
+        try:
+            self.conn.close()
+        except AttributeError:
+            pass
 
 
 class Error404(BaseHandler):
@@ -86,3 +88,6 @@ class TutorialHandler(BaseHandler):
 
         self.tmpl['title'] = title
         self.render(path, **self.tmpl)
+
+
+

@@ -10,19 +10,24 @@
 
             {% for field in form %}
                 {% set c = '' %}
-                <div class="row">
                     {% if field.type not in ('BooleanField') %}
                         {% set c = c + ' input-field' %}
                     {% end %}
+                    {% if field.render_kw %}
+                        {% set c = c + ' ' + field.render_kw.get('col', '') %}
+                    {% else %}
+                        {% set c = c + ' s12' %}
+                    {% end %}
 
-                    <div class="{{ c }} col s12">
+                    <div class="{{ c }} col">
                         {% raw field %}
-                        <label {% if field.errors %}data-error="{% raw field.errors[0] %}"{% end %}
-                               for="{{ field.name }}">{% raw field.label %}</label>
+                        {% if field.type not in ('HiddenField') %}
+                            <label {% if field.errors %}data-error="{% raw field.errors[0] %}"{% end %}
+                                   for="{{ field.name }}">{% raw field.label %}</label>
+                        {% end %}
                     </div>
-                </div>
             {% end %}
-
+            <p>&nbsp;</p>
             <div class="row">
                 <div class="col s12">
                     <div id="captcha"></div>

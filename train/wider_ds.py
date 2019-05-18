@@ -22,7 +22,7 @@ class WiderDataset(chainer.dataset.DatasetMixin):
                     # if change in current_path store all coords for last one
                     if tmp_path != current_path and os.path.isfile(tmp_path):
                         if len(file_bboxs) > 0:
-                            if current_path == '/var/www/idmy.team/python/data-sets/Faces/WIDER/WIDER_train/images/0--Parade/0_Parade_marchingband_1_849.jpg':
+                            if current_path == '/var/www/idmy.team/data-sets/Faces/WIDER/WIDER_train/images/0--Parade/0_Parade_marchingband_1_849.jpg':
                                 print(file_bboxs)
                             self.paths.append(current_path)
                             file_bboxs = np.array(file_bboxs).astype(np.float32)

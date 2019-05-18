@@ -12,7 +12,7 @@ from sklearn.model_selection import ShuffleSplit, cross_val_score
 from sklearn.externals import joblib
 from sklearn.svm import SVC
 
-from settings import functions, config
+from settings import functions, config, db
 
 
 class Classifier(object):
@@ -26,7 +26,7 @@ class Classifier(object):
     def predict(self, features, file_name, face_coords, store_features):
         if self.clf:
             t = time.time()
-            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = db.pool.connect()
 
             # predict member id based on face_coords
             member_id = 0
@@ -71,7 +71,7 @@ class Classifier(object):
         if training_input is not None:
             # make sure there are more than 1 classes to train model
             if len(np.unique(training_output)) <= 1:
-                functions.send_json_socket(socket, self.hashed_username, {
+                return functions.send_json_socket(socket, self.hashed_username, {
                     "type": "error",
                     "mess": "You must train with more than one team member!"
                 })
@@ -115,12 +115,13 @@ class Classifier(object):
 
         # mark team as finished training
         functions.toggle_team_training(conn, self.hashed_username, training=False)
+        conn.close()
 
     def _load_model(self):
         model_path = self.get_model_path(self.hashed_username)
         if model_path:
             t = time.time()
-            conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
+            conn = db.pool.connect()
             model = joblib.load(model_path)
 
             # log how long it took to load model
