@@ -13,16 +13,14 @@ class TeamParser(chainer.dataset.DatasetMixin):
         self.bboxs = {}
 
         for image in glob(image_dir + "*.jpg"):
-            img_path = image_dir+image
+            img_path = image_dir + image
             bbox = functions.read_img_comment(img_path)
             if bbox:
                 # bbox to y1, x1, y2, x2
                 bbox = bbox[:, 2:4] + bbox[:, 0:2].astype(np.float32)
 
-
                 self.paths.append(img_path)
                 self.bboxs[img_path] = bbox.astype(np.float32)
-
 
     def __len__(self):
         return len(self.paths)

@@ -9,12 +9,12 @@ from ML.classifier import Classifier
 class LogoutHandler(view.BaseHandler):
     def get(self):
         self.clear_all_cookies()
-        self.redirect('/')
+        self.redirect("/")
 
 
 class AllowUploadStorageHandler(view.BaseHandler):
     def post(self):
-        username = self.tmpl['username']
+        username = self.tmpl["username"]
         if username:
             hashed_username = functions.hash(username)
             self.conn = db.pool.connect()
@@ -25,7 +25,7 @@ class AllowUploadStorageHandler(view.BaseHandler):
 
 class DeleteAccountHandler(view.BaseHandler):
     def post(self):
-        username = self.tmpl['username']
+        username = self.tmpl["username"]
         if username:
             hashed_username = functions.hash(username)
             if Classifier.delete(hashed_username):
@@ -41,15 +41,14 @@ class DeleteAccountHandler(view.BaseHandler):
         :param hashed_username: client
         :return:
         """
-        wss.send_local_message(json.dumps({
-            'hashed_username': hashed_username,
-            'delete-model': True
-        }))
+        wss.send_local_message(
+            json.dumps({"hashed_username": hashed_username, "delete-model": True})
+        )
 
 
 class DeleteModelHandler(DeleteAccountHandler):
     def post(self):
-        username = self.tmpl['username']
+        username = self.tmpl["username"]
         if username:
             hashed_username = functions.hash(username)
             if Classifier.delete(hashed_username):
@@ -61,33 +60,41 @@ class DeleteModelHandler(DeleteAccountHandler):
 
 class ConfirmEmail(view.BaseHandler):
     def get(self):
-        email = self.get_argument('email', '')
-        token = self.get_argument('token', '')
-        username = self.get_argument('username', '')
+        email = self.get_argument("email", "")
+        token = self.get_argument("token", "")
+        username = self.get_argument("username", "")
 
         self.conn = db.pool.connect()
         email_to_username = functions.Team.email_to_username(self.conn, email)
         hashed_username = functions.hash(username)
         if email_to_username == hashed_username:
-            if functions.Team.ConfirmEmail.confirm(self.conn, email, token, config.SECRETS['token']):
-                self.set_secure_cookie('username', username)
-                return self.flash_success('Congratulations! Your email has been confirmed.', '/profile')
-        return self.flash_error('Invalid token', '/')
+            if functions.Team.ConfirmEmail.confirm(
+                self.conn, email, token, config.SECRETS["token"]
+            ):
+                self.set_secure_cookie("username", username)
+                return self.flash_success(
+                    "Congratulations! Your email has been confirmed.", "/profile"
+                )
+        return self.flash_error("Invalid token", "/")
 
 
 class ResendConfirmationEmail(view.BaseHandler):
-    CONFIRMATION_ERROR = 'Problem sending confirmation email.'
+    CONFIRMATION_ERROR = "Problem sending confirmation email."
 
     def get(self):
-        email = self.get_argument('email', '')
-        username = self.get_argument('username', '')
+        email = self.get_argument("email", "")
+        username = self.get_argument("username", "")
 
         # check if there is an email and also that it hasn't already been confirmed
         self.conn = db.pool.connect()
-        if not functions.Team.ConfirmEmail.send_confirmation(self.conn, email, username,
-                                                             config.EMAIL_CONFIG, config.ROOT, config.SECRETS['token']):
-            return self.flash_error(self.CONFIRMATION_ERROR, '/')
+        if not functions.Team.ConfirmEmail.send_confirmation(
+            self.conn,
+            email,
+            username,
+            config.EMAIL_CONFIG,
+            config.ROOT,
+            config.SECRETS["token"],
+        ):
+            return self.flash_error(self.CONFIRMATION_ERROR, "/")
 
-        self.redirect('/')
-
-
+        self.redirect("/")

@@ -4,19 +4,19 @@ import os
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 conf = configparser.ConfigParser()
-conf.read(ROOT + os.environ['CONF'])
+conf.read(ROOT + os.environ["CONF"])
 
-EMAIL_CONFIG = dict(conf.items('emails'))
-DB = dict(conf.items('database'))
-SECRETS = dict(conf.items('secrets'))
-SENTRY_URL = conf['sentry']['url']
+EMAIL_CONFIG = dict(conf.items("emails"))
+DB = dict(conf.items("database"))
+SECRETS = dict(conf.items("secrets"))
+SENTRY_URL = conf["sentry"]["url"]
 
-IMAGE_UPLOAD_DIR = ROOT+'/images/'
-STORE_IMAGES_DIR = ROOT+'/faces/'
-MODEL_DIR = ROOT+'/models/'
-LOCALISATION_MODEL = ROOT+'/models/face_localisation.model'
-FEATURE_MODEL_DIR = ROOT+'/models/feature_extractor.model'
-CLIENT_MODEL_DIR = ROOT+'/models/'  # user_hash .model
+IMAGE_UPLOAD_DIR = ROOT + "/images/"
+STORE_IMAGES_DIR = ROOT + "/faces/"
+MODEL_DIR = ROOT + "/models/"
+LOCALISATION_MODEL = ROOT + "/models/face_localisation.model"
+FEATURE_MODEL_DIR = ROOT + "/models/feature_extractor.model"
+CLIENT_MODEL_DIR = ROOT + "/models/"  # user_hash .model
 FEATURE_EXTRACTOR_IMG_SIZE = 256
 MIN_FACE_SIZE = 60
 NUM_SHUFFLES = 2
@@ -30,4 +30,4 @@ MAX_TRAIN_UPLOAD_SIZE_KB = 100 * 1024  # 100MB - approx 200 images
 
 ###
 # socket
-LOCAL_SOCKET_URL = 'ws://localhost:8888'
+LOCAL_SOCKET_URL = "ws://localhost:8888"

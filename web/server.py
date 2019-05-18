@@ -13,8 +13,8 @@ from settings import config
 
 server_settings = {
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
-    "static_path": os.path.join(os.path.dirname(__file__), 'static'),
-    "cookie_secret": config.SECRETS['cookie'],
+    "static_path": os.path.join(os.path.dirname(__file__), "static"),
+    "cookie_secret": config.SECRETS["cookie"],
     "xsrf_cookies": True,
     "debug": True,
     "default_handler_class": view.Error404,
@@ -27,12 +27,12 @@ app.sentry_client = AsyncSentryClient(config.SENTRY_URL)
 def main():
     server = tornado.httpserver.HTTPServer(app)
     server.bind(8888)
-    if not app.settings['debug']:
+    if not app.settings["debug"]:
         server.start(0)  # all cpus
     else:
         server.start(1)  # 1 cpu
     IOLoop.current().start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

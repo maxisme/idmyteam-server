@@ -29,7 +29,7 @@ from websocket import create_connection
 
 
 def get_YAML(file):
-    with open(file, 'r') as f:
+    with open(file, "r") as f:
         content = yaml.load(f)
     return content
 
@@ -44,8 +44,8 @@ class DB:
     def execute_sql_in_file(cls, conn, file):
         x = conn.cursor()
         if not os.path.isfile(file):
-            raise Exception('No such file %s', file)
-        sql = open(file, 'r').read()
+            raise Exception("No such file %s", file)
+        sql = open(file, "r").read()
         try:
             x.execute(sql)
         except Exception as e:
@@ -59,7 +59,10 @@ def toggle_team_training(conn, hashed_username, training=True):
     training = training * 1  # convert to int
     x = conn.cursor()
     try:
-        x.execute("UPDATE `Accounts` SET `is_training` = %s WHERE `username` = %s", (training, hashed_username))
+        x.execute(
+            "UPDATE `Accounts` SET `is_training` = %s WHERE `username` = %s",
+            (training, hashed_username),
+        )
         conn.commit()
     except Exception as e:
         print("error - didn't mark as finished training %s" % e)
@@ -69,17 +72,22 @@ def toggle_team_training(conn, hashed_username, training=True):
 
 
 # stores features from the feature extractor model in the database
-def store_feature(conn, hashed_team_username, member_id, features, manual=True, score=0.0):
+def store_feature(
+    conn, hashed_team_username, member_id, features, manual=True, score=0.0
+):
     # compress features for storage
     features = compress_string(str(features))
 
-    type = 'MANUAL' if manual else 'MODEL'
+    type = "MANUAL" if manual else "MODEL"
 
     # store feature in db
     x = conn.cursor()
     try:
-        x.execute("""INSERT INTO `Features` (username, `class`, `type`, `features`, `score`)
-                  VALUES (%s, %s, %s, %s, %s)""", (hashed_team_username, member_id, type, features, score))
+        x.execute(
+            """INSERT INTO `Features` (username, `class`, `type`, `features`, `score`)
+                  VALUES (%s, %s, %s, %s, %s)""",
+            (hashed_team_username, member_id, type, features, score),
+        )
         conn.commit()
     except MySQLdb.Error as e:
         print(("Couldn't write feature: " + str(e)))
@@ -89,7 +97,9 @@ def store_feature(conn, hashed_team_username, member_id, features, manual=True, 
 
 
 # formats message in mannor for client to receive a classification (recognition)
-def send_classification(coords, member_id, recognition_score, file_id, hashed_username, socket):
+def send_classification(
+    coords, member_id, recognition_score, file_id, hashed_username, socket
+):
     """
     :param coords:
     :param member_id: predicted member
@@ -98,21 +108,28 @@ def send_classification(coords, member_id, recognition_score, file_id, hashed_us
     :param hashed_username:
     :return:
     """
-    send_json_socket(socket, hashed_username, {
-        "type": "classification",
-        "coords": coords,
-        "member_id": member_id,
-        "recognition_score": recognition_score,
-        "file_id": file_id
-    })
+    send_json_socket(
+        socket,
+        hashed_username,
+        {
+            "type": "classification",
+            "coords": coords,
+            "member_id": member_id,
+            "recognition_score": recognition_score,
+            "file_id": file_id,
+        },
+    )
 
 
 # writes data log to database as can be seen in idmy.team/stats
 def log_data(conn, name, type, method, val, user="system", yaxis="Seconds"):
     x = conn.cursor()
     try:
-        x.execute("INSERT INTO `Logs` (`type`, `name`, `method`, `value`, username, `yaxis`) "
-                  "VALUES (%s, %s, %s, %s, %s, %s)", (type, name, method, str(val), user, yaxis))
+        x.execute(
+            "INSERT INTO `Logs` (`type`, `name`, `method`, `value`, username, `yaxis`) "
+            "VALUES (%s, %s, %s, %s, %s, %s)",
+            (type, name, method, str(val), user, yaxis),
+        )
         conn.commit()
     except MySQLdb.Error as e:
         logging.error("didnt write feature: %s", e)
@@ -125,8 +142,10 @@ def log_data(conn, name, type, method, val, user="system", yaxis="Seconds"):
 def purge_log(conn, name, type, method, user):
     x = conn.cursor()
     try:
-        x.execute("DELETE FROM `Logs` WHERE username = %s AND `type` = %s AND `method` = %s AND `name` = %s",
-                  (user, type, method, name))
+        x.execute(
+            "DELETE FROM `Logs` WHERE username = %s AND `type` = %s AND `method` = %s AND `name` = %s",
+            (user, type, method, name),
+        )
         conn.commit()
     except:
         conn.rollback()
@@ -136,7 +155,7 @@ def purge_log(conn, name, type, method, user):
 
 # Pre process a cropped image of the face for the feature extractor model.
 def pre_process_img(img, size):
-    img = scipy.misc.imresize(img, (size, size), interp='bilinear')
+    img = scipy.misc.imresize(img, (size, size), interp="bilinear")
     # img = np.expand_dims(img, axis=0)
     return img
 
@@ -173,7 +192,7 @@ def add_coord_padding(img, padding, x, y, w, h):
 
 def crop_img(img, x, y, w, h):
     img = np.array(img)
-    img = img[:, y:y + h, x:x + w]
+    img = img[:, y : y + h, x : x + w]
     img = np.moveaxis(img, 0, -1)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
@@ -207,10 +226,9 @@ def img_augmentation(img):
     # rotation #
     ############
     if np.random.randint(3) == 0:  # rotate 1/3 times
-        img = scipy.misc.imrotate(img, angle, 'bicubic')
+        img = scipy.misc.imrotate(img, angle, "bicubic")
 
     return img
-
 
 
 class Team:
@@ -231,9 +249,9 @@ class Team:
         :return tuple: WHERE string, value of where
         """
         if len(search) > 1:
-            raise Exception('You can only have one WHERE clause')
+            raise Exception("You can only have one WHERE clause")
         column = list(search.keys())[0]
-        return '{}=%s'.format(column), search[column]
+        return "{}=%s".format(column), search[column]
 
     @classmethod
     def sign_up(cls, conn, username, password, email, allow_storage, key):
@@ -243,8 +261,11 @@ class Team:
 
         x = conn.cursor()
         try:
-            x.execute("INSERT INTO `Accounts` (email, username, password, credentials, allow_storage) "
-                      "VALUES (%s, %s, %s, %s, %s);", (email, hashed_username, password, credentials, allow_storage))
+            x.execute(
+                "INSERT INTO `Accounts` (email, username, password, credentials, allow_storage) "
+                "VALUES (%s, %s, %s, %s, %s);",
+                (email, hashed_username, password, credentials, allow_storage),
+            )
             conn.commit()
         except MySQLdb.Error as e:
             logging.critical("Couldn't sign up: " + str(e))
@@ -261,7 +282,10 @@ class Team:
 
         x = conn.cursor()
         try:
-            x.execute("UPDATE `Accounts` SET password=%s WHERE {}".format(WHERE), (password, val))
+            x.execute(
+                "UPDATE `Accounts` SET password=%s WHERE {}".format(WHERE),
+                (password, val),
+            )
             conn.commit()
         except MySQLdb.Error as e:
             logging.critical("Couldn't reset password: " + str(e))
@@ -286,11 +310,14 @@ class Team:
     def valid_credentials(cls, conn, hashed_username, credentials, key):
         x = conn.cursor()
         try:
-            x.execute("""
+            x.execute(
+                """
             SELECT `credentials`
             FROM Accounts
             WHERE `username` = %s
-            """, (hashed_username,))
+            """,
+                (hashed_username,),
+            )
             encrypted_credentials = x.fetchall()[0][0]
 
             return AESCipher(key).decrypt(encrypted_credentials) == credentials
@@ -303,11 +330,14 @@ class Team:
         t = time.time()
         x = conn.cursor()
         try:
-            x.execute("""
+            x.execute(
+                """
             SELECT `last_upload`, `upload_retry_limit`
             FROM Accounts
             WHERE `username` = %s
-            """, (hashed_username,))
+            """,
+                (hashed_username,),
+            )
 
             result = x.fetchall()[0]
             if result[0]:
@@ -322,10 +352,13 @@ class Team:
 
         # insert new last_upload time
         try:
-            x.execute("""
+            x.execute(
+                """
             UPDATE `Accounts`
             SET last_upload = %s
-            WHERE username = %s""", (str(t), hashed_username))
+            WHERE username = %s""",
+                (str(t), hashed_username),
+            )
             conn.commit()
             return True
         except MySQLdb.Error as e:
@@ -337,12 +370,15 @@ class Team:
     def get_num_trained_last_hr(cls, conn, hashed_username):
         x = conn.cursor()
         try:
-            x.execute("""
+            x.execute(
+                """
             SELECT count(id)
             FROM Features
             WHERE username = %s
             AND type = 'MODEL'
-            AND create_dttm > DATE_SUB(NOW(), INTERVAL 1 HOUR)""", (hashed_username,))
+            AND create_dttm > DATE_SUB(NOW(), INTERVAL 1 HOUR)""",
+                (hashed_username,),
+            )
             return x.fetchall()[0][0]
         except Exception as e:
             logging.error("get_num_trained_last_hr %s", e)
@@ -352,11 +388,14 @@ class Team:
     def increase_num_classifications(cls, conn, hashed_username):
         x = conn.cursor()
         try:
-            x.execute("""
+            x.execute(
+                """
             UPDATE Accounts
             SET num_classifications = num_classifications + 1
             WHERE username = %s
-            """, (hashed_username,))
+            """,
+                (hashed_username,),
+            )
             conn.commit()
             return True
         except MySQLdb.Error as e:
@@ -368,10 +407,13 @@ class Team:
     def toggle_storage(cls, conn, hashed_username):
         x = conn.cursor()
         try:
-            x.execute("""
+            x.execute(
+                """
             UPDATE Accounts
             SET allow_storage = 1 - allow_storage
-            WHERE username = %s""", (hashed_username,))
+            WHERE username = %s""",
+                (hashed_username,),
+            )
             conn.commit()
             return True
         except MySQLdb.Error as e:
@@ -383,7 +425,10 @@ class Team:
     def num_users(cls, conn, username):
         x = conn.cursor()
         try:
-            x.execute("SELECT COUNT(DISTINCT class) from `Features` where username = %s;", (username,))
+            x.execute(
+                "SELECT COUNT(DISTINCT class) from `Features` where username = %s;",
+                (username,),
+            )
             return x.fetchall()[0][0]
         except IndexError:
             return None
@@ -394,9 +439,12 @@ class Team:
 
         # delete logs
         try:
-            x.execute("""
+            x.execute(
+                """
             DELETE from `Logs`
-            WHERE username = %s""", (hashed_username,))
+            WHERE username = %s""",
+                (hashed_username,),
+            )
             conn.commit()
         except MySQLdb.Error as e:
             print(("Couldn't delete users logs: " + str(e)))
@@ -404,9 +452,12 @@ class Team:
 
         # delete features
         try:
-            x.execute("""
+            x.execute(
+                """
             DELETE from `Features`
-            WHERE username = %s""", (hashed_username,))
+            WHERE username = %s""",
+                (hashed_username,),
+            )
             conn.commit()
         except MySQLdb.Error as e:
             print(("Couldn't delete users features: " + str(e)))
@@ -414,9 +465,12 @@ class Team:
 
         # delete account
         try:
-            x.execute("""
+            x.execute(
+                """
             DELETE from `Accounts`
-            WHERE username = %s""", (hashed_username,))
+            WHERE username = %s""",
+                (hashed_username,),
+            )
             conn.commit()
         except MySQLdb.Error as e:
             print(("Couldn't delete user account: " + str(e)))
@@ -429,8 +483,8 @@ class Team:
         def reset(cls, conn, email, email_config, token_key, root):
             token = Token.generate(email, token_key)
             cls._store_reset_token(conn, token, email)
-            email_html = Email.template(root, 'reset.html', email=email, token=token)
-            Email.send(email_config, email, 'Reset ID My Team password', email_html)
+            email_html = Email.template(root, "reset.html", email=email, token=token)
+            Email.send(email_config, email, "Reset ID My Team password", email_html)
             return token
 
         @classmethod
@@ -443,39 +497,48 @@ class Team:
 
             if valid_token:
                 x = conn.cursor()
-                x.execute("""
+                x.execute(
+                    """
                     UPDATE `Accounts`
                     SET password_reset_token = NULL
-                    WHERE email = %s""", (email,))
+                    WHERE email = %s""",
+                    (email,),
+                )
                 conn.commit()
                 x.close()
                 return True
             return False
 
-
         @classmethod
         def _store_reset_token(cls, conn, email, token):
             x = conn.cursor()
-            x.execute("""
+            x.execute(
+                """
             UPDATE `Accounts`
             SET password_reset_token = %s
-            WHERE email = %s""", (token, email))
+            WHERE email = %s""",
+                (token, email),
+            )
             conn.commit()
             x.close()
 
-
-
     class ConfirmEmail:
         @classmethod
-        def send_confirmation(cls, conn, email, username, email_config, root, token_key):
+        def send_confirmation(
+            cls, conn, email, username, email_config, root, token_key
+        ):
             team = Team.get(conn, username=hash(username))
-            if team and not team['confirmed_email']:
+            if team and not team["confirmed_email"]:
                 token = Token.generate(email, token_key)
                 cls._store_confirmation_token(conn, email, token)
 
                 # generate email content
-                email_html = Email.template(root, 'confirm.html', email=email, token=token, username=username)
-                Email.send(email_config, email, 'Confirm your ID My Team email', email_html)
+                email_html = Email.template(
+                    root, "confirm.html", email=email, token=token, username=username
+                )
+                Email.send(
+                    email_config, email, "Confirm your ID My Team email", email_html
+                )
                 return token
             else:
                 return False
@@ -490,10 +553,13 @@ class Team:
 
             if valid_token:
                 x = conn.cursor()
-                x.execute("""
+                x.execute(
+                    """
                     UPDATE `Accounts`
                     SET confirmed_email = NOW(), email_confirm_token = NULL
-                    WHERE email = %s""", (email,))
+                    WHERE email = %s""",
+                    (email,),
+                )
                 conn.commit()
                 x.close()
                 return True
@@ -502,10 +568,13 @@ class Team:
         @classmethod
         def _store_confirmation_token(cls, conn, email, token):
             x = conn.cursor()
-            x.execute("""
+            x.execute(
+                """
             UPDATE `Accounts`
             SET email_confirm_token = %s
-            WHERE email = %s""", (token, email))
+            WHERE email = %s""",
+                (token, email),
+            )
             conn.commit()
             x.close()
 
@@ -521,12 +590,14 @@ def send_json_socket(socket, hashed_username, dic):
     :param dic:
     :return:
     """
-    dic['hashed_username'] = hashed_username
+    dic["hashed_username"] = hashed_username
     socket.send(json.dumps(dic, default=json_helper))
 
 
 def random_str(length):
-    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+    return "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(length)
+    )
 
 
 class AESCipher:
@@ -544,17 +615,19 @@ class AESCipher:
         enc = base64.b64decode(enc)
         iv = enc[:16]
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        return self._unpad(cipher.decrypt(enc[16:])).decode('utf8')
+        return self._unpad(cipher.decrypt(enc[16:])).decode("utf8")
 
     def _pad(self, s):
-        return bytes(s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs), 'utf-8')
+        return bytes(
+            s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs), "utf-8"
+        )
 
     def _unpad(self, s):
-        return s[0:-ord(s[-1:])]
+        return s[0 : -ord(s[-1:])]
 
 
 def hash_pw(s):
-    return bcrypt.hashpw(str.encode(s), bcrypt.gensalt()).decode('utf-8')
+    return bcrypt.hashpw(str.encode(s), bcrypt.gensalt()).decode("utf-8")
 
 
 def check_pw_hash(s, h):
@@ -571,7 +644,7 @@ def hash(s):
 
 
 def compress_string(s):
-    string = s.replace(' ', '')
+    string = s.replace(" ", "")
     string = zlib.compress(str.encode(string))
     string = base64.encodebytes(string)
     return string
@@ -580,7 +653,7 @@ def compress_string(s):
 def decompress_string(s):
     string = base64.decodebytes(s)
     string = zlib.decompress(string)
-    return string.decode('utf-8')
+    return string.decode("utf-8")
 
 
 def is_valid_ip(ip):
@@ -599,7 +672,7 @@ def json_helper(o):
     if isinstance(o, np.int64):
         return int(o)
     if isinstance(o, bytes):
-        return o.decode('utf-8')
+        return o.decode("utf-8")
     raise TypeError
 
 
@@ -611,7 +684,7 @@ def crop_arr(arr, num):
     each, rem = divmod(num, len(arr))
     for i, key in enumerate(arr):
         if i < rem:
-            new_arr[key] = arr[key][:each + 1]
+            new_arr[key] = arr[key][: each + 1]
         else:
             new_arr[key] = arr[key][:each]
     return new_arr
@@ -636,21 +709,25 @@ class Email:
     def send(cls, email_config, email, subject, html):
         # generate email content
         msg = MIMEMultipart("alternative")
-        msg['From'] = email_config['email']
-        msg['To'] = email
-        msg['Subject'] = subject
+        msg["From"] = email_config["email"]
+        msg["To"] = email
+        msg["Subject"] = subject
         msg.attach(html)
 
         # send email
-        with smtplib.SMTP(email_config['smtp'], port=email_config['smtp_port']) as smtp_server:
+        with smtplib.SMTP(
+            email_config["smtp"], port=email_config["smtp_port"]
+        ) as smtp_server:
             smtp_server.ehlo()
             smtp_server.starttls()
             smtp_server.ehlo()
-            smtp_server.login(email_config['email'], email_config['password'])
+            smtp_server.login(email_config["email"], email_config["password"])
             smtp_server.send_message(msg)
 
     @classmethod
     def template(cls, root, file, **kwargs):
         loader = template.Loader(root + "/web/")
-        email_html = loader.load("templates/emails/inline/" + file).generate(**kwargs).decode()
+        email_html = (
+            loader.load("templates/emails/inline/" + file).generate(**kwargs).decode()
+        )
         return MIMEText(email_html, "html")

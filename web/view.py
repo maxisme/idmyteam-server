@@ -13,30 +13,30 @@ class BaseHandler(SentryMixin, tornado.web.RequestHandler):
 
         # default values
         self.tmpl = {
-            'title': '',
-            'meta': {
-                'description': 'A recognition system for your team.',
-                'keywords': 'detect, recognise, facial, detection, team, id, recogniser, id my team, idmy.team'
+            "title": "",
+            "meta": {
+                "description": "A recognition system for your team.",
+                "keywords": "detect, recognise, facial, detection, team, id, recogniser, id my team, idmy.team",
             },
-            'username': self.get_secure_cookie('username'),
-            'error_message': self.get_secure_cookie('error_message'),
-            'success_message': self.get_secure_cookie('success_message'),
+            "username": self.get_secure_cookie("username"),
+            "error_message": self.get_secure_cookie("error_message"),
+            "success_message": self.get_secure_cookie("success_message"),
         }
 
-        if self.tmpl['username']:
-            self.tmpl['username'] = self.tmpl['username'].decode('utf-8')
+        if self.tmpl["username"]:
+            self.tmpl["username"] = self.tmpl["username"].decode("utf-8")
 
         # remove flash messages
-        self.clear_cookie('error_message')
-        self.clear_cookie('success_message')
+        self.clear_cookie("error_message")
+        self.clear_cookie("success_message")
 
-    def flash_error(self, message, redirect_url=''):
-        self.set_secure_cookie('error_message', message)
+    def flash_error(self, message, redirect_url=""):
+        self.set_secure_cookie("error_message", message)
         if redirect_url:
             return self.redirect(redirect_url)
 
-    def flash_success(self, message, redirect_url=''):
-        self.set_secure_cookie('success_message', message)
+    def flash_success(self, message, redirect_url=""):
+        self.set_secure_cookie("success_message", message)
         if redirect_url:
             return self.redirect(redirect_url)
 
@@ -49,45 +49,42 @@ class BaseHandler(SentryMixin, tornado.web.RequestHandler):
 
 class Error404(BaseHandler):
     def get(self):
-        self.write('404')
+        self.write("404")
 
 
 class WelcomeHandler(BaseHandler):
     def get(self):
-        self.render('welcome.html', **self.tmpl)
+        self.render("welcome.html", **self.tmpl)
 
 
 class AboutHandler(BaseHandler):
     def get(self):
-        self.tmpl['title'] = 'About'
-        self.render('about.html', **self.tmpl)
+        self.tmpl["title"] = "About"
+        self.render("about.html", **self.tmpl)
 
 
 class ContactHandler(BaseHandler):
     def get(self):
-        self.tmpl['title'] = 'Contact'
-        self.render('contact.html', **self.tmpl)
+        self.tmpl["title"] = "Contact"
+        self.render("contact.html", **self.tmpl)
 
 
 class TermsHandler(BaseHandler):
     def get(self):
-        self.tmpl['title'] = 'Terms'
-        self.render('terms.html', **self.tmpl)
+        self.tmpl["title"] = "Terms"
+        self.render("terms.html", **self.tmpl)
 
 
 class TutorialListHandler(BaseHandler):
     def get(self):
-        self.tmpl['title'] = 'Tutorials'
-        self.render('tutorials/list.html', **self.tmpl)
+        self.tmpl["title"] = "Tutorials"
+        self.render("tutorials/list.html", **self.tmpl)
 
 
 class TutorialHandler(BaseHandler):
     def get(self, name):
         title = name.replace("-", " ").title()
-        path = 'tutorials/' + name + '.html'
+        path = "tutorials/" + name + ".html"
 
-        self.tmpl['title'] = title
+        self.tmpl["title"] = title
         self.render(path, **self.tmpl)
-
-
-

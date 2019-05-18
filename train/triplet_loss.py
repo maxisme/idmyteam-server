@@ -21,7 +21,7 @@ def all_diffs(a, b):
     return tf.expand_dims(a, axis=1) - tf.expand_dims(b, axis=0)
 
 
-def cdist(a, b, metric='euclidean'):
+def cdist(a, b, metric="euclidean"):
     """Similar to scipy.spatial's cdist, but symbolic.
 
     The currently supported metrics can be listed as `cdist.supported_metrics` and are:
@@ -45,20 +45,21 @@ def cdist(a, b, metric='euclidean'):
     """
     with tf.name_scope("cdist"):
         diffs = all_diffs(a, b)
-        if metric == 'sqeuclidean':
+        if metric == "sqeuclidean":
             return tf.reduce_sum(tf.square(diffs), axis=-1)
-        elif metric == 'euclidean':
+        elif metric == "euclidean":
             return tf.sqrt(tf.reduce_sum(tf.square(diffs), axis=-1) + 1e-12)
-        elif metric == 'cityblock':
+        elif metric == "cityblock":
             return tf.reduce_sum(tf.abs(diffs), axis=-1)
         else:
             raise NotImplementedError(
-                'The following metric is not implemented by `cdist` yet: {}'.format(metric))
-cdist.supported_metrics = [
-    'euclidean',
-    'sqeuclidean',
-    'cityblock',
-]
+                "The following metric is not implemented by `cdist` yet: {}".format(
+                    metric
+                )
+            )
+
+
+cdist.supported_metrics = ["euclidean", "sqeuclidean", "cityblock"]
 
 
 def get_at_indices(tensor, indices):
@@ -70,16 +71,17 @@ def get_at_indices(tensor, indices):
 def apply_margin(x, margin):
     if isinstance(margin, numbers.Real):
         return tf.maximum(x + margin, 0.0)
-    elif margin == 'soft':
+    elif margin == "soft":
         return tf.nn.softplus(x)
-    elif margin.lower() == 'none':
+    elif margin.lower() == "none":
         return x
     else:
         raise NotImplementedError(
-            'The margin {} is not implemented in batch_hard'.format(margin))
+            "The margin {} is not implemented in batch_hard".format(margin)
+        )
 
 
-def _generic_batchloss(dists, pids, margin, batch_precision_at_k=None, variant='hard'):
+def _generic_batchloss(dists, pids, margin, batch_precision_at_k=None, variant="hard"):
     """Computes the batch-hard loss from arxiv.org/abs/1703.07737.
 
     Args:
@@ -94,60 +96,80 @@ def _generic_batchloss(dists, pids, margin, batch_precision_at_k=None, variant='
         A 1D tensor of shape (B,) containing the loss value for each sample.
     """
     with tf.name_scope("batch_hard"):
-        same_identity_mask = tf.equal(tf.expand_dims(pids, axis=1),
-                                      tf.expand_dims(pids, axis=0))
+        same_identity_mask = tf.equal(
+            tf.expand_dims(pids, axis=1), tf.expand_dims(pids, axis=0)
+        )
         negative_mask = tf.logical_not(same_identity_mask)
-        positive_mask = tf.logical_xor(same_identity_mask,
-                                       tf.eye(tf.shape(pids)[0], dtype=tf.bool))
+        positive_mask = tf.logical_xor(
+            same_identity_mask, tf.eye(tf.shape(pids)[0], dtype=tf.bool)
+        )
 
-        if variant == 'sample':
+        if variant == "sample":
             # -inf gives that index a probability of zero.
-            neg_infs = -tf.constant(float('inf'))*tf.ones_like(dists)
+            neg_infs = -tf.constant(float("inf")) * tf.ones_like(dists)
             # higher logits are more likely to be sampled.
             pos_logits = tf.where(positive_mask, dists, neg_infs)
-            pos_indices = tf.multinomial(pos_logits, num_samples=1)[:,0]
+            pos_indices = tf.multinomial(pos_logits, num_samples=1)[:, 0]
             positive = get_at_indices(dists, pos_indices)
 
             # Same for the negatives, but we need to turn the logits around,
             # since we want to sample the smaller distances more likely.
             neg_logits = tf.where(negative_mask, -dists, neg_infs)
-            neg_indices = tf.multinomial(neg_logits, num_samples=1)[:,0]
+            neg_indices = tf.multinomial(neg_logits, num_samples=1)[:, 0]
             negative = get_at_indices(dists, neg_indices)
-        elif variant == 'hard':
+        elif variant == "hard":
             # Furthest one is worst positive.
-            positive = tf.reduce_max(dists*tf.cast(positive_mask, tf.float32), axis=1)
+            positive = tf.reduce_max(dists * tf.cast(positive_mask, tf.float32), axis=1)
             # Closest one is worst negative.
-            negative = tf.map_fn(lambda x: tf.reduce_min(tf.boolean_mask(x[0], x[1])),
-                                 (dists, negative_mask), tf.float32)
+            negative = tf.map_fn(
+                lambda x: tf.reduce_min(tf.boolean_mask(x[0], x[1])),
+                (dists, negative_mask),
+                tf.float32,
+            )
             # negative = tf.reduce_min(dists + 1e5*tf.cast(same_identity_mask, tf.float32), axis=1)
 
         losses = apply_margin(positive - negative, margin)
 
-    return return_with_extra_stats(losses, dists, batch_precision_at_k,
-                                   same_identity_mask,
-                                   positive_mask, negative_mask)
+    return return_with_extra_stats(
+        losses,
+        dists,
+        batch_precision_at_k,
+        same_identity_mask,
+        positive_mask,
+        negative_mask,
+    )
+
 
 def batch_hard(dists, pids, margin, batch_precision_at_k=None):
-    return _generic_batchloss(dists, pids, margin, batch_precision_at_k, variant='hard')
+    return _generic_batchloss(dists, pids, margin, batch_precision_at_k, variant="hard")
 
 
 def batch_sample(dists, pids, margin, batch_precision_at_k=None):
-    return _generic_batchloss(dists, pids, margin, batch_precision_at_k, variant='sample')
+    return _generic_batchloss(
+        dists, pids, margin, batch_precision_at_k, variant="sample"
+    )
 
 
 def batch_all(dists, pids, margin, batch_precision_at_k=None):
     with tf.name_scope("batch_hard"):
-        same_identity_mask = tf.equal(tf.expand_dims(pids, axis=1),
-                                      tf.expand_dims(pids, axis=0))
+        same_identity_mask = tf.equal(
+            tf.expand_dims(pids, axis=1), tf.expand_dims(pids, axis=0)
+        )
         negative_mask = tf.logical_not(same_identity_mask)
-        positive_mask = tf.logical_xor(same_identity_mask,
-                                       tf.eye(tf.shape(pids)[0], dtype=tf.bool))
+        positive_mask = tf.logical_xor(
+            same_identity_mask, tf.eye(tf.shape(pids)[0], dtype=tf.bool)
+        )
 
         # Unfortunately, foldl can only go over one tensor, unlike map_fn,
         # so we need to convert and stack around.
-        packed = tf.stack([dists,
-                           tf.cast(positive_mask, tf.float32),
-                           tf.cast(negative_mask, tf.float32)], axis=1)
+        packed = tf.stack(
+            [
+                dists,
+                tf.cast(positive_mask, tf.float32),
+                tf.cast(negative_mask, tf.float32),
+            ],
+            axis=1,
+        )
 
         def per_anchor(accum, row):
             # `dists_` is a 1D array of distance (row of `dists`)
@@ -156,8 +178,10 @@ def batch_all(dists, pids, margin, batch_precision_at_k=None):
             dists_, poss_, negs_ = row[0], row[1], row[2]
 
             # Now construct a (P,N)-matrix of all-to-all (anchor-pos - anchor-neg).
-            diff = all_diffs(tf.boolean_mask(dists_, tf.cast(poss_, tf.bool)),
-                             tf.boolean_mask(dists_, tf.cast(negs_, tf.bool)))
+            diff = all_diffs(
+                tf.boolean_mask(dists_, tf.cast(poss_, tf.bool)),
+                tf.boolean_mask(dists_, tf.cast(negs_, tf.bool)),
+            )
 
             losses = tf.reshape(apply_margin(diff, margin), [-1])
             return tf.concat([accum, losses], axis=0)
@@ -168,13 +192,24 @@ def batch_all(dists, pids, margin, batch_precision_at_k=None):
         init = tf.placeholder_with_default([], shape=[None])
         losses = tf.foldl(per_anchor, packed, init)
 
-    return return_with_extra_stats(losses, dists, batch_precision_at_k,
-                                   same_identity_mask,
-                                   positive_mask, negative_mask)
+    return return_with_extra_stats(
+        losses,
+        dists,
+        batch_precision_at_k,
+        same_identity_mask,
+        positive_mask,
+        negative_mask,
+    )
 
 
-def return_with_extra_stats(to_return, dists, batch_precision_at_k,
-                            same_identity_mask, positive_mask, negative_mask):
+def return_with_extra_stats(
+    to_return,
+    dists,
+    batch_precision_at_k,
+    same_identity_mask,
+    positive_mask,
+    negative_mask,
+):
     if batch_precision_at_k is None:
         return to_return
 
@@ -183,16 +218,16 @@ def return_with_extra_stats(to_return, dists, batch_precision_at_k,
     with tf.name_scope("monitoring"):
         # This is like argsort along the last axis. Add one to K as we'll
         # drop the diagonal.
-        _, indices = tf.nn.top_k(-dists, k=batch_precision_at_k+1)
+        _, indices = tf.nn.top_k(-dists, k=batch_precision_at_k + 1)
 
         # Drop the diagonal (distance to self is always least).
-        indices = indices[:,1:]
+        indices = indices[:, 1:]
 
         # Generate the index indexing into the batch dimension.
         # This is simething like [[0,0,0],[1,1,1],...,[B,B,B]]
         batch_index = tf.tile(
-            tf.expand_dims(tf.range(tf.shape(indices)[0]), 1),
-            (1, tf.shape(indices)[1]))
+            tf.expand_dims(tf.range(tf.shape(indices)[0]), 1), (1, tf.shape(indices)[1])
+        )
 
         # Stitch the above together with the argsort indices to get the
         # indices of the top-k of each row.
@@ -202,10 +237,10 @@ def return_with_extra_stats(to_return, dists, batch_precision_at_k,
         topk_is_same = tf.gather_nd(same_identity_mask, topk_indices)
 
         # All of the above could be reduced to the simpler following if k==1
-        #top1_is_same = get_at_indices(same_identity_mask, top_idxs[:,1])
+        # top1_is_same = get_at_indices(same_identity_mask, top_idxs[:,1])
 
         topk_is_same_f32 = tf.cast(topk_is_same, tf.float32)
-        top1 = tf.reduce_mean(topk_is_same_f32[:,0])
+        top1 = tf.reduce_mean(topk_is_same_f32[:, 0])
         prec_at_k = tf.reduce_mean(topk_is_same_f32)
 
         # Finally, let's get some more info that can help in debugging while
@@ -219,11 +254,11 @@ def return_with_extra_stats(to_return, dists, batch_precision_at_k,
 # Adaptive weights
 def softmax_weights(dist, mask):
     max = tf.reduce_max(dist * mask, axis=1)
-    max_v = tf.expand_dims(max,1)
-    max_r = tf.tile(max_v,[1, tf.shape(mask)[1] ])
+    max_v = tf.expand_dims(max, 1)
+    max_r = tf.tile(max_v, [1, tf.shape(mask)[1]])
     diff = dist - max_r
-    Z = tf.reduce_sum(tf.exp(diff) * mask,axis=1) + 1e-6 # avoid division by zero
-    W = tf.exp(diff) * mask / tf.expand_dims(Z,1)
+    Z = tf.reduce_sum(tf.exp(diff) * mask, axis=1) + 1e-6  # avoid division by zero
+    W = tf.exp(diff) * mask / tf.expand_dims(Z, 1)
 
     return W
 
@@ -241,31 +276,34 @@ def weighted_triplet(dists, pids, margin, batch_precision_at_k=None):
         A 1D tensor of shape (B,) containing the loss value for each sample.
     """
     with tf.name_scope("batch_hard"):
-        same_identity_mask = tf.equal(tf.expand_dims(pids, axis=1),
-                                      tf.expand_dims(pids, axis=0))
+        same_identity_mask = tf.equal(
+            tf.expand_dims(pids, axis=1), tf.expand_dims(pids, axis=0)
+        )
         negative_mask = tf.logical_not(same_identity_mask)
-        positive_mask = tf.logical_xor(same_identity_mask,
-                                       tf.eye(tf.shape(pids)[0], dtype=tf.bool))
+        positive_mask = tf.logical_xor(
+            same_identity_mask, tf.eye(tf.shape(pids)[0], dtype=tf.bool)
+        )
 
-        pos_dist = dists*tf.cast(positive_mask, tf.float32)
-        neg_dist = dists*tf.cast(negative_mask, tf.float32)
+        pos_dist = dists * tf.cast(positive_mask, tf.float32)
+        neg_dist = dists * tf.cast(negative_mask, tf.float32)
 
         pos_weights = softmax_weights(pos_dist, tf.cast(positive_mask, tf.float32))
         neg_weights = softmax_weights(-neg_dist, tf.cast(negative_mask, tf.float32))
 
-        furthest_positive = tf.reduce_sum(pos_dist * pos_weights , axis=1)
+        furthest_positive = tf.reduce_sum(pos_dist * pos_weights, axis=1)
         closest_negative = tf.reduce_sum(neg_dist * neg_weights, axis=1)
 
         diff = furthest_positive - closest_negative
         if isinstance(margin, numbers.Real):
             diff = tf.maximum(diff + margin, 0.0)
-        elif margin == 'soft':
+        elif margin == "soft":
             diff = tf.nn.softplus(diff)
-        elif margin.lower() == 'none':
+        elif margin.lower() == "none":
             pass
         else:
             raise NotImplementedError(
-                'The margin {} is not implemented in batch_hard'.format(margin))
+                "The margin {} is not implemented in batch_hard".format(margin)
+            )
 
     if batch_precision_at_k is None:
         return diff
@@ -275,16 +313,16 @@ def weighted_triplet(dists, pids, margin, batch_precision_at_k=None):
     with tf.name_scope("monitoring"):
         # This is like argsort along the last axis. Add one to K as we'll
         # drop the diagonal.
-        _, indices = tf.nn.top_k(-dists, k=batch_precision_at_k+1)
+        _, indices = tf.nn.top_k(-dists, k=batch_precision_at_k + 1)
 
         # Drop the diagonal (distance to self is always least).
-        indices = indices[:,1:]
+        indices = indices[:, 1:]
 
         # Generate the index indexing into the batch dimension.
         # This is simething like [[0,0,0],[1,1,1],...,[B,B,B]]
         batch_index = tf.tile(
-            tf.expand_dims(tf.range(tf.shape(indices)[0]), 1),
-            (1, tf.shape(indices)[1]))
+            tf.expand_dims(tf.range(tf.shape(indices)[0]), 1), (1, tf.shape(indices)[1])
+        )
 
         # Stitch the above together with the argsort indices to get the
         # indices of the top-k of each row.
@@ -294,10 +332,10 @@ def weighted_triplet(dists, pids, margin, batch_precision_at_k=None):
         topk_is_same = tf.gather_nd(same_identity_mask, topk_indices)
 
         # All of the above could be reduced to the simpler following if k==1
-        #top1_is_same = get_at_indices(same_identity_mask, top_idxs[:,1])
+        # top1_is_same = get_at_indices(same_identity_mask, top_idxs[:,1])
 
         topk_is_same_f32 = tf.cast(topk_is_same, tf.float32)
-        top1 = tf.reduce_mean(topk_is_same_f32[:,0])
+        top1 = tf.reduce_mean(topk_is_same_f32[:, 0])
         prec_at_k = tf.reduce_mean(topk_is_same_f32)
 
         # Finally, let's get some more info that can help in debugging while
@@ -307,9 +345,10 @@ def weighted_triplet(dists, pids, margin, batch_precision_at_k=None):
 
         return diff, top1, prec_at_k, topk_is_same, negative_dists, positive_dists
 
+
 LOSS_CHOICES = {
-    'batch_hard': batch_hard,
-    'batch_sample': batch_sample,
-    'batch_all': batch_all,
-    'weighted_triplet': weighted_triplet,
+    "batch_hard": batch_hard,
+    "batch_sample": batch_sample,
+    "batch_all": batch_all,
+    "weighted_triplet": weighted_triplet,
 }

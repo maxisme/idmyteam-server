@@ -5,12 +5,12 @@ from settings import functions
 from Crypto import Random
 
 test_strings = [
-    ("A"*1000),
+    ("A" * 1000),
     ("."),
-    ("abcdefg"*1000),
+    ("abcdefg" * 1000),
     ("d"),
     ("6**))%@19hhjh_-{}[]'gg66g"),
-    ("test")
+    ("test"),
 ]
 
 
@@ -42,45 +42,38 @@ def test_hash(input):
 
 
 test_crop_array_dict = {
-    "foo": ['1.jpg', '2.jpg', '3.jpg'],
-    "bar":  ['1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg'],
-    "baz":  ['1.jpg', '2.jpg', '3.jpg', '4.jpg']
+    "foo": ["1.jpg", "2.jpg", "3.jpg"],
+    "bar": ["1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg"],
+    "baz": ["1.jpg", "2.jpg", "3.jpg", "4.jpg"],
 }
-@pytest.mark.parametrize("dict,num,expected", [
-    (  # test 1
-        test_crop_array_dict, 4,
-        {
-            "foo": ['1.jpg', '2.jpg'],
-            "bar": ['1.jpg'],
-            "baz": ['1.jpg']
-        }
-    ),
-    (  # test 2
-        test_crop_array_dict, 0, {}
-    ),
-    (  # test 3
-        {}, 0, {}
-    ),
-    (  # test 4
-        test_crop_array_dict, 5,
-        {
-            "foo": ['1.jpg', '2.jpg'],
-            "bar": ['1.jpg', '2.jpg'],
-            "baz": ['1.jpg']
-        }
-    ),
-    (  # test 5
-        test_crop_array_dict, 8,
-        {
-            "foo": ['1.jpg', '2.jpg', '3.jpg'],
-            "bar":  ['1.jpg', '2.jpg', '3.jpg'],
-            "baz":  ['1.jpg', '2.jpg']
-        }
-    ),
-    (  # test 6
-        test_crop_array_dict, 100000, test_crop_array_dict
-    ),
-])
+
+
+@pytest.mark.parametrize(
+    "dict,num,expected",
+    [
+        (  # test 1
+            test_crop_array_dict,
+            4,
+            {"foo": ["1.jpg", "2.jpg"], "bar": ["1.jpg"], "baz": ["1.jpg"]},
+        ),
+        (test_crop_array_dict, 0, {}),  # test 2
+        ({}, 0, {}),  # test 3
+        (  # test 4
+            test_crop_array_dict,
+            5,
+            {"foo": ["1.jpg", "2.jpg"], "bar": ["1.jpg", "2.jpg"], "baz": ["1.jpg"]},
+        ),
+        (  # test 5
+            test_crop_array_dict,
+            8,
+            {
+                "foo": ["1.jpg", "2.jpg", "3.jpg"],
+                "bar": ["1.jpg", "2.jpg", "3.jpg"],
+                "baz": ["1.jpg", "2.jpg"],
+            },
+        ),
+        (test_crop_array_dict, 100000, test_crop_array_dict),  # test 6
+    ],
+)
 def test_crop_array(dict, num, expected):
     assert functions.crop_arr(dict, num) == expected
-

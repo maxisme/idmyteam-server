@@ -34,25 +34,49 @@ class Classifier(object):
             classes = self.clf.classes_
             probabilities = self.clf.predict_proba(np.array(features))
             for i, prob in enumerate(probabilities[0]):
-                logging.info('User: %s\nClass: %s\nProb: %s', self.hashed_username, str(classes[i]), str(prob))
+                logging.info(
+                    "User: %s\nClass: %s\nProb: %s",
+                    self.hashed_username,
+                    str(classes[i]),
+                    str(prob),
+                )
                 if prob >= max_prob:
                     member_id = classes[i]
                     max_prob = prob
 
             # send member classification back to user
             socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
-            functions.send_classification(json.dumps(face_coords), member_id, max_prob, file_name, self.hashed_username,
-                                          socket)
+            functions.send_classification(
+                json.dumps(face_coords),
+                member_id,
+                max_prob,
+                file_name,
+                self.hashed_username,
+                socket,
+            )
 
             # log how long it took to predict class
-            functions.log_data(conn, "Classifier", "Model", "Predict", str(time.time() - t), self.hashed_username)
+            functions.log_data(
+                conn,
+                "Classifier",
+                "Model",
+                "Predict",
+                str(time.time() - t),
+                self.hashed_username,
+            )
 
             if member_id > 0:
                 functions.Team.increase_num_classifications(conn, self.hashed_username)
                 if store_features:
                     # store features in db for further training of model
-                    functions.store_feature(conn, self.hashed_username, member_id, features, manual=False,
-                                            score=max_prob)
+                    functions.store_feature(
+                        conn,
+                        self.hashed_username,
+                        member_id,
+                        features,
+                        manual=False,
+                        score=max_prob,
+                    )
         else:
             logging.error("Missing model for: %s", self.hashed_username)
 
@@ -66,41 +90,68 @@ class Classifier(object):
         logging.info("Creating new model for %s", self.hashed_username)
 
         # create a new model using ALL the team training data
-        training_input, training_output, sample_weight, results = self._get_training_data(conn)
+        training_input, training_output, sample_weight, results = self._get_training_data(
+            conn
+        )
 
         if training_input is not None:
             # make sure there are more than 1 classes to train model
             if len(np.unique(training_output)) <= 1:
-                return functions.send_json_socket(socket, self.hashed_username, {
-                    "type": "error",
-                    "mess": "You must train with more than one team member!"
-                })
+                return functions.send_json_socket(
+                    socket,
+                    self.hashed_username,
+                    {
+                        "type": "error",
+                        "mess": "You must train with more than one team member!",
+                    },
+                )
             else:
                 clf = SVC(probability=True)
         else:
-            return functions.send_json_socket(socket, self.hashed_username, {
-                "type": "error",
-                "mess": "You must train with at least %d members!" % (config.MIN_CLASSIFIER_TRAINING_IMAGES,)
-            })
+            return functions.send_json_socket(
+                socket,
+                self.hashed_username,
+                {
+                    "type": "error",
+                    "mess": "You must train with at least %d members!"
+                    % (config.MIN_CLASSIFIER_TRAINING_IMAGES,),
+                },
+            )
 
         clf.fit(training_input, training_output, sample_weight=sample_weight)
 
-        functions.log_data(conn, "Classifier", "Model", "Train", str(time.time() - t), self.hashed_username)
+        functions.log_data(
+            conn,
+            "Classifier",
+            "Model",
+            "Train",
+            str(time.time() - t),
+            self.hashed_username,
+        )
 
         new_output = [o for o in training_output if o > 0]
         unique_outputs = np.bincount(new_output)
         num_outputs = np.nonzero(unique_outputs)[0]
         cnt_uni = list(zip(num_outputs, unique_outputs[num_outputs]))
 
-        print("fitted %d features from %d classes" % (len(training_input), len(set(training_output))))
+        print(
+            "fitted %d features from %d classes"
+            % (len(training_input), len(set(training_output)))
+        )
 
         # send message to client with who has been trained
-        functions.send_json_socket(socket, self.hashed_username, {
-            "type": "trained",
-            "trained_members": json.dumps(cnt_uni, default=functions.json_helper)
-        })
+        functions.send_json_socket(
+            socket,
+            self.hashed_username,
+            {
+                "type": "trained",
+                "trained_members": json.dumps(cnt_uni, default=functions.json_helper),
+            },
+        )
 
-        if not self.exists(self.hashed_username) or self._should_update_model(clf, training_input, training_output, conn):
+        if not self.exists(self.hashed_username) or self._should_update_model(
+            clf, training_input, training_output, conn
+        ):
             model_path = self.get_model_path(self.hashed_username, True)
             joblib.dump(clf, model_path)  # save model
             self.clf = clf  # reload the new model
@@ -109,7 +160,10 @@ class Classifier(object):
 
         # mark all features as not new
         cur = conn.cursor()
-        cur.execute("UPDATE `Features` SET `new` = '0' WHERE username = %s", (self.hashed_username,))
+        cur.execute(
+            "UPDATE `Features` SET `new` = '0' WHERE username = %s",
+            (self.hashed_username,),
+        )
         conn.commit()
         cur.close()
 
@@ -125,8 +179,17 @@ class Classifier(object):
             model = joblib.load(model_path)
 
             # log how long it took to load model
-            functions.log_data(conn, "Classifier", "Model", "Load", str(time.time() - t), self.hashed_username)
-            functions.purge_log(conn, "Classifier", "Model", "Predict", self.hashed_username)
+            functions.log_data(
+                conn,
+                "Classifier",
+                "Model",
+                "Load",
+                str(time.time() - t),
+                self.hashed_username,
+            )
+            functions.purge_log(
+                conn, "Classifier", "Model", "Predict", self.hashed_username
+            )
             return model
         return None
 
@@ -141,21 +204,38 @@ class Classifier(object):
         if mb_size < config.MAX_CLASSIFIER_SIZE_MB:
             # check if this mean score is better than the last within margin
             cur = conn.cursor(MySQLdb.cursors.DictCursor)
-            cur.execute("""SELECT `value` 
+            cur.execute(
+                """SELECT `value` 
                         FROM `Logs` 
                         WHERE `method` = 'Mean Accuracy' 
                         AND username= %s 
                         ORDER BY `id` 
                         DESC LIMIT 1
-                        """, (self.hashed_username,))
+                        """,
+                (self.hashed_username,),
+            )
 
             last_mean = 0
             for row in cur.fetchall():
-                last_mean = row['value']
+                last_mean = row["value"]
 
             # log scores
-            functions.log_data(conn, "Classifier", "Model", "Mean Accuracy", str(scores.mean()), self.hashed_username)
-            functions.log_data(conn, "Classifier", "Model", "Std Accuracy", str(scores.std()), self.hashed_username)
+            functions.log_data(
+                conn,
+                "Classifier",
+                "Model",
+                "Mean Accuracy",
+                str(scores.mean()),
+                self.hashed_username,
+            )
+            functions.log_data(
+                conn,
+                "Classifier",
+                "Model",
+                "Std Accuracy",
+                str(scores.std()),
+                self.hashed_username,
+            )
             cur.close()
 
             if last_mean == 0 or float(last_mean - 0.1) < float(scores.mean()):
@@ -168,32 +248,39 @@ class Classifier(object):
         :return: the training input, output and sample weights for a team.
         """
         cur = conn.cursor(MySQLdb.cursors.DictCursor)
-        cur.execute("""SELECT `features`, `class`, `type`, `new` 
+        cur.execute(
+            """SELECT `features`, `class`, `type`, `new` 
                     FROM `Features`
                     WHERE username = %s
-                    OR username = 'init'""", (self.hashed_username,))
+                    OR username = 'init'""",
+            (self.hashed_username,),
+        )
 
         training_input, training_output, weight = [], [], []
         results = cur.fetchall()
 
         num_new = 0
         for row in results:
-            features = functions.decompress_string(str.encode(row['features']))
+            features = functions.decompress_string(str.encode(row["features"]))
             training_input.append(ast.literal_eval(features))
-            training_output.append(int(row['class']))
+            training_output.append(int(row["class"]))
 
-            if row['type'] == "MANUAL":
+            if row["type"] == "MANUAL":
                 weight.append(1)
             else:
                 weight.append(0.1)  # 1/10th as reliable if data acquired from model
 
-            if row['new'] == 1:
+            if row["new"] == 1:
                 num_new = num_new + 1
         cur.close()
 
         if training_input == [] or num_new < config.MIN_CLASSIFIER_TRAINING_IMAGES:
             return None, None, None
-        return np.array(training_input)[:, 0], np.array(training_output), np.array(weight)
+        return (
+            np.array(training_input)[:, 0],
+            np.array(training_output),
+            np.array(weight),
+        )
 
     @classmethod
     def get_model_path(cls, hashed_username, expected_path=False):
