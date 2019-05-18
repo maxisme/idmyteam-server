@@ -23,14 +23,15 @@ class TestWeb(WebTest):
         '/socket',
         '/local',
         '/upload',
-        '/profile'
+        '/profile',
+        '/reset'
     ]
 
 
     def test_urls(self, *args):
         for url in server.web_urls.www_urls:
             if url[1].__module__ != 'events' and url[0] not in self.url_blacklist:
-                response = self.fetch(url[0], follow_redirects=False)
+                response = self.fetch(url[0])
                 assert response.code == 200, url[0]
 
     def test_email_confirmation_flow(self, template, *args):
