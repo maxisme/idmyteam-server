@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sql=$(ssh root@idmy.team 'export CONF=/conf/prod_remote.conf && export PYTHONPATH=/var/www/idmy.team/python/:/var/www/idmy.team/python/settings/:$PYTHONPATH && python /var/www/idmy.team/helpers/dump_schema.py')
+sql=$(ssh root@idmy.team 'export CONF=/conf/prod_remote.conf && export PYTHONPATH=/var/www/idmy.team/:/var/www/idmy.team/settings/:$PYTHONPATH && python /var/www/idmy.team/helpers/dump_schema.py')
 echo "$sql" > 'sql/schema.sql'
 
 export CONF="/conf/test_local.conf"
