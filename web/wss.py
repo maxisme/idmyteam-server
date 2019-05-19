@@ -97,7 +97,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.hashed_username,
             self.request.headers.get("X-Real-Ip"),
         )
-        self.write_message('Invalid request')
+        self.write_message("Invalid request")
         super(WebSocketHandler, self).close(code)
 
 

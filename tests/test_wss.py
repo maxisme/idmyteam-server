@@ -41,7 +41,7 @@ class TestSocketClient(object):
             self.failure = False
 
     def _asserts(self, msg):
-        raise Exception('Not customised asserts!')
+        raise Exception("Not customised asserts!")
 
 
 @mock.patch("smtplib.SMTP")
@@ -49,7 +49,6 @@ class TestSocketClient(object):
 @mock.patch("settings.functions.Email.template")
 @mock.patch("settings.functions.AESCipher._mock_me")
 class WSSTest(WebTest):
-
     def test_initial_team_connection(self, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):
@@ -62,12 +61,15 @@ class WSSTest(WebTest):
         credentials = self.get_credentials(team, _mock_me)
 
         # connect to socket
-        url = self.get_url('/socket').replace('http', 'ws')
-        request = HTTPRequest(url, headers={
-            "username": team.username,
-            "credentials": credentials,
-            "local-ip": team.ip,
-        })
+        url = self.get_url("/socket").replace("http", "ws")
+        request = HTTPRequest(
+            url,
+            headers={
+                "username": team.username,
+                "credentials": credentials,
+                "local-ip": team.ip,
+            },
+        )
         ws = TestWSS(request)
         ws.connect()
 
@@ -76,7 +78,7 @@ class WSSTest(WebTest):
         except:
             assert not ws.failure
 
-    @mock.patch('ML.classifier.Classifier.get_model_path', return_value=True)
+    @mock.patch("ML.classifier.Classifier.get_model_path", return_value=True)
     def test_team_with_model_connection(self, _, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):
@@ -89,12 +91,15 @@ class WSSTest(WebTest):
         credentials = self.get_credentials(team, _mock_me)
 
         # connect to socket
-        url = self.get_url('/socket').replace('http', 'ws')
-        request = HTTPRequest(url, headers={
-            "username": team.username,
-            "credentials": credentials,
-            "local-ip": team.ip,
-        })
+        url = self.get_url("/socket").replace("http", "ws")
+        request = HTTPRequest(
+            url,
+            headers={
+                "username": team.username,
+                "credentials": credentials,
+                "local-ip": team.ip,
+            },
+        )
         ws = TestWSS(request)
         ws.connect()
 
@@ -112,12 +117,15 @@ class WSSTest(WebTest):
         team = TeamGenerator()
 
         # connect to socket
-        url = self.get_url('/socket').replace('http', 'ws')
-        request = HTTPRequest(url, headers={
-            "username": team.username,
-            "credentials": 'foo',
-            "local-ip": team.ip,
-        })
+        url = self.get_url("/socket").replace("http", "ws")
+        request = HTTPRequest(
+            url,
+            headers={
+                "username": team.username,
+                "credentials": "foo",
+                "local-ip": team.ip,
+            },
+        )
         ws = TestWSS(request)
         ws.connect()
 
@@ -126,12 +134,12 @@ class WSSTest(WebTest):
         except:
             assert not ws.failure
 
-    @mock.patch('ML.classifier.Classifier.get_model_path', return_value=True)
+    @mock.patch("ML.classifier.Classifier.get_model_path", return_value=True)
     def test_team_with_invalid_ip(self, _, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):
                 # IMPORTANT
-                assert msg == 'Invalid request'
+                assert msg == "Invalid request"
 
         # create user
         team = TeamGenerator()
@@ -139,12 +147,15 @@ class WSSTest(WebTest):
         credentials = self.get_credentials(team, _mock_me)
 
         # connect to socket
-        url = self.get_url('/socket').replace('http', 'ws')
-        request = HTTPRequest(url, headers={
-            "username": team.username,
-            "credentials": credentials,
-            "local-ip": 'foo',
-        })
+        url = self.get_url("/socket").replace("http", "ws")
+        request = HTTPRequest(
+            url,
+            headers={
+                "username": team.username,
+                "credentials": credentials,
+                "local-ip": "foo",
+            },
+        )
         ws = TestWSS(request)
         ws.connect()
 
@@ -157,10 +168,10 @@ class WSSTest(WebTest):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):
                 # IMPORTANT
-                assert msg == 'Invalid request'
+                assert msg == "Invalid request"
 
         # connect to socket
-        url = self.get_url('/socket').replace('http', 'ws')
+        url = self.get_url("/socket").replace("http", "ws")
         request = HTTPRequest(url)
         ws = TestWSS(request)
         ws.connect()
