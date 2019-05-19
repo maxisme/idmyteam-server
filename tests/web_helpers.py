@@ -74,3 +74,27 @@ class WebTest(tornado.testing.AsyncHTTPTestCase):
         if cookie:
             return cookie.decode()
         return None
+
+    def _signup(self, team):
+        form_data = team.__dict__
+        form_data["confirm"] = team.password
+        form_data["ts"] = True
+        self.post("/signup", form_data, follow_redirects=False)
+        return form_data
+
+    def new_team(self, team, template):
+        self._signup(team)
+        email_token = template.call_args[1]["token"]
+        self.fetch(
+            "/confirm?email={email}&username={username}&token={token}".format(token=email_token, **team.__dict__))
+        assert self._is_logged_in(), "correct details"
+
+    def get_credentials(self, team, decrypt):
+        self.post("/login", team.__dict__)
+        self.fetch('/profile')
+        return decrypt.call_args[0][0]
+
+    def _is_logged_in(self):
+        return (
+            self.fetch("/profile", follow_redirects=False).code == 200
+        )  # successfully logged

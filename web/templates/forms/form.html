@@ -1,0 +1,11 @@
+{% extends '../helpers/base.html' %}
+
+{% block content %}
+    {% include '../helpers/form.html' %}
+{% end %}
+
+{% block scripts %}
+    <script src="{{ static_url('js/captcha-handler.js') }}"></script>
+    <!-- recaptcha import -->
+    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+{% end %}

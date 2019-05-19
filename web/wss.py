@@ -23,12 +23,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             credentials = headers["credentials"]
             local_ip = headers["local-ip"]
             username = headers["username"]
-        except Exception as e:
-            logging.warning("Invalid request %s", e)
-            return self.close(1003, "Invalid request")
+        except KeyError as e:
+            return self.close(1003, "Invalid headers: {}".format(e))
 
         if not functions.is_valid_ip(local_ip):
-            return self.close(1003, "Invalid local IP")
+            return self.close(1003, "Invalid IP")
 
         self.hashed_username = functions.hash(username)
         if self.hashed_username not in authed.clients:
@@ -42,7 +41,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     kwargs={"type": "add", "hashed_username": self.hashed_username},
                 )
 
-                if not Classifier.exists(self.hashed_username):
+                if Classifier.exists(self.hashed_username):
+                    self.write_message(json.dumps({"type": "connected"}))
+                else:
                     self.write_message(json.dumps({"type": "no_model"}))
 
                 self.local_ip = local_ip
@@ -56,16 +57,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             else:
                 self.write_message(json.dumps({"type": "invalid_credentials"}))
                 conn.close()
-                logging.warning("Invalid credentials")
-                return self.close(1003, "Invalid request")
+                return self.close(1003, "Invalid credentials")
             conn.close()
         else:
-            logging.warning(
-                "%s already connected wss - %s",
-                self.hashed_username,
-                self.request.headers["X-Real-Ip"],
-            )
-            return self.close(1003, "Invalid request")
+            return self.close(1003, "Already connected")
 
     def on_close(self):
         if self.hashed_username and self.hashed_username in authed.clients:
@@ -96,9 +91,14 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.close(1004, "Invalid Message")
 
     def close(self, code=None, reason=None):
-        logging.warning("Close socket reason: %s", reason)
-        self.write_message(reason)
-        super(WebSocketHandler, self).close(code, reason)
+        logging.error(
+            "Close socket reason:%s - %s : %s",
+            reason,
+            self.hashed_username,
+            self.request.headers.get("X-Real-Ip"),
+        )
+        self.write_message('Invalid request')
+        super(WebSocketHandler, self).close(code)
 
 
 class LocalWebSocketHandler(tornado.websocket.WebSocketHandler):

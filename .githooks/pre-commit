@@ -9,4 +9,6 @@ export PATH="$PATH:/usr/local/bin/"
 
 python3 helpers/inline-css-email-templates.py > /dev/null 2>&1
 
+black .
+
 exit 0

@@ -15,10 +15,12 @@ class TeamGenerator(object):
         self.email = fake.email()
         self.password = fake.password()
         self.allow_storage = fake.boolean()
+        self.ip = fake.ipv4_private()
 
 
 @mock.patch("smtplib.SMTP")
 @mock.patch("authed.LoginHandler._is_valid_captcha", return_value=True)
+@mock.patch("settings.functions.AESCipher._mock_me")
 @mock.patch("settings.functions.Email.template")
 class TestWeb(WebTest):
     url_blacklist = ["/socket", "/local", "/upload", "/profile", "/reset"]
@@ -101,18 +103,6 @@ class TestWeb(WebTest):
         assert (
             self.get_cookie("error_message") == authed.LoginHandler.INVALID_MESSAGE
         ), "incorrect login details"
-
-    def _signup(self, team):
-        form_data = team.__dict__
-        form_data["confirm"] = team.password
-        form_data["ts"] = True
-        self.post("/signup", form_data, follow_redirects=False)
-        return form_data
-
-    def _is_logged_in(self):
-        return (
-            self.fetch("/profile", follow_redirects=False).code == 200
-        )  # successfully logged
 
     def _confirm_account_tests(self, email_token, team):
         # test no token
@@ -216,3 +206,8 @@ class TestWeb(WebTest):
             },
         )
         assert self.get_cookie("success_message") == authed.ResetPassword.SUCCESS
+
+    def test_credentials(self, template, _mock_me, *args):
+        team = TeamGenerator()
+        self.new_team(team, template)
+        assert self.get_credentials(team, _mock_me)

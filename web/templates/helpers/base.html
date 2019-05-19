@@ -31,7 +31,7 @@
 </head>
 
 {% if username %}
-    {% set menu_bar_content = "<li><a href='/profile' class='button'>Profile</a></li><li><a href='/logout' class='button'>Log Out</a></li>" %}
+    {% set menu_bar_content = "<li><a href='/profile' class='button'>Profile</a></li>" %}
 {% else %}
     {% set menu_bar_content = "<li><a href='/login' class='button'>Log In</a></li><li><a href='/signup' class='button'>Sign Up</a></li>" %}
 {% end %}
@@ -42,6 +42,10 @@
 <li><a href='/about' class='button'>About</a></li>
 <li><a href='/contact' class='button'>Contact</a></li>
 """ %}
+
+{% if username %}
+    {% set menu_bar_content = menu_bar_content + "<li><a href='/logout' class='button'>Log Out</a></li>" %}
+{% end %}
 
 <body>
     <nav class="z-depth-0">

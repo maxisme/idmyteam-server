@@ -84,7 +84,7 @@ class LoginHandler(BaseHandler):
 
     def _screen(self):
         self.tmpl["title"] = "Login"
-        self.render("helpers/form.html", **self.tmpl)
+        self.render("forms/form.html", **self.tmpl)
 
     def _is_valid_captcha(self, args):
         # return True
@@ -146,7 +146,7 @@ class SignUpHandler(LoginHandler):
 
     def _screen(self):
         self.tmpl["title"] = "Sign Up"
-        self.render("helpers/form.html", **self.tmpl)
+        self.render("forms/form.html", **self.tmpl)
 
 
 class ForgotPassword(LoginHandler):
@@ -156,7 +156,7 @@ class ForgotPassword(LoginHandler):
 
     def _screen(self):
         self.tmpl["title"] = "Forgot Password"
-        self.render("helpers/form.html", **self.tmpl)
+        self.render("forms/form.html", **self.tmpl)
 
     def post(self):
         self.tmpl["form"] = form = forms.ForgotForm(self.request.arguments)
@@ -201,7 +201,7 @@ class ResetPassword(LoginHandler):
 
     def _screen(self):
         self.tmpl["title"] = "Reset Password"
-        self.render("helpers/form.html", **self.tmpl)
+        self.render("forms/form.html", **self.tmpl)
 
     def post(self):
         if self._is_valid_captcha(self.request.arguments):

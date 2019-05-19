@@ -1,47 +1,35 @@
-{% extends 'base.html' %}
+{% if failed_captcha %}
+    <strong class="error" id="failed-captcha-msg">You must be a robot. Try again when you pass the Turing Test. </strong>
+{%  end  %}
+<div class="row">
+    <form method="post" action="{{ request.path }}" class="col s12">
+        {% raw xsrf_form_html() %}
 
-{% block content %}
-    {% if failed_captcha %}
-        <strong class="error" id="failed-captcha-msg">You must be a robot. Try again when you pass the Turing Test. </strong>
-    {%  end  %}
-    <div class="row">
-        <form method="post" action="{{ request.path }}" class="col s12">
-            {% raw xsrf_form_html() %}
+        {% for field in form %}
+            {% set c = '' %}
+                {% if field.type not in ('BooleanField') %}
+                    {% set c = c + ' input-field' %}
+                {% end %}
+                {% if field.render_kw %}
+                    {% set c = c + ' ' + field.render_kw.get('col', '') %}
+                {% else %}
+                    {% set c = c + ' s12' %}
+                {% end %}
 
-            {% for field in form %}
-                {% set c = '' %}
-                    {% if field.type not in ('BooleanField') %}
-                        {% set c = c + ' input-field' %}
+                <div class="{{ c }} col">
+                    {% raw field %}
+                    {% if field.type not in ('HiddenField') %}
+                        <label {% if field.errors %}data-error="{% raw field.errors[0] %}"{% end %}
+                               for="{{ field.name }}">{% raw field.label %}</label>
                     {% end %}
-                    {% if field.render_kw %}
-                        {% set c = c + ' ' + field.render_kw.get('col', '') %}
-                    {% else %}
-                        {% set c = c + ' s12' %}
-                    {% end %}
-
-                    <div class="{{ c }} col">
-                        {% raw field %}
-                        {% if field.type not in ('HiddenField') %}
-                            <label {% if field.errors %}data-error="{% raw field.errors[0] %}"{% end %}
-                                   for="{{ field.name }}">{% raw field.label %}</label>
-                        {% end %}
-                    </div>
-            {% end %}
-            <p>&nbsp;</p>
-            <div class="row">
-                <div class="col s12">
-                    <div id="captcha"></div>
-
-                    <!-- hidden submit button -->
-                    <input style="display: none" id="submit" type="submit">
                 </div>
+        {% end %}
+        <div align="center" class="row">
+            <div class="col s12">
+                <div id="captcha"></div>
+                <!-- hidden submit button -->
+                <input style="display: none" id="submit" type="submit">
             </div>
-        </form>
-    </div>
-{% end %}
-
-{% block scripts %}
-    <script src="{{ static_url('js/captcha-handler.js') }}"></script>
-    <!-- recaptcha import -->
-    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
-{% end %}
+        </div>
+    </form>
+</div>

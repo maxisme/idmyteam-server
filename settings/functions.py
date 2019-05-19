@@ -615,7 +615,9 @@ class AESCipher:
         enc = base64.b64decode(enc)
         iv = enc[:16]
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        return self._unpad(cipher.decrypt(enc[16:])).decode("utf8")
+        decrypted = self._unpad(cipher.decrypt(enc[16:])).decode("utf8")
+        self._mock_me(decrypted)
+        return decrypted
 
     def _pad(self, s):
         return bytes(
@@ -624,6 +626,15 @@ class AESCipher:
 
     def _unpad(self, s):
         return s[0 : -ord(s[-1:])]
+
+    def _mock_me(self, val):
+        """
+        Used in pytest to gather the decrypted value
+        TODO surely there is a better way to do this?!
+        :param val:
+        :return:
+        """
+        return val
 
 
 def hash_pw(s):
