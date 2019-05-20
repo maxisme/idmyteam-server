@@ -22,7 +22,6 @@ oyaml
 pycrypto
 numpy
 premailer
-opencv-python
 mock
 faker
 parameterized
