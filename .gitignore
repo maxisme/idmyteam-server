@@ -1,5 +1,4 @@
 conf/secret.conf
 ML/helpers
-*.css
-!animate.css
 *remote.conf
+models

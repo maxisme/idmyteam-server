@@ -6,7 +6,7 @@ var correctCaptcha = function(response) {
 
 var onloadCallback = function() {
     grecaptcha.render('captcha', {
-        'sitekey' : '6LfthEQUAAAAAPUBIJyG1jTHZhipxk_CUhzUGejR',
+        'sitekey' : '6LfcU6QUAAAAAKZ5Cv2P6Rcu1il4-250zuLP9bPe',
         'callback' : correctCaptcha
     });
 };
