@@ -28,7 +28,7 @@ pipeline {
         """
       }
     }
-    timeout(time: 3, unit: 'MINUTES') stage('test') {
+    stage('test') {
       steps {
         sh """
         . ${virtualenv}/bin/activate
