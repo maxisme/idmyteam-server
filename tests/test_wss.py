@@ -70,7 +70,7 @@ class WSSTest(WebTest):
                 "credentials": credentials,
                 "local-ip": team.ip,
             },
-        )
+        ) 
         ws = TestWSS(request)
         ws.connect()
 
