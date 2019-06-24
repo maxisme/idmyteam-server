@@ -8644,7 +8644,8 @@ label {
 }
 
 .input-field {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  margin-top: 10px;
 }
 
 * {
@@ -8831,4 +8832,4 @@ img.svg {
   font-size: 1.2em;
 }
 
-/*# sourceMappingURL=style.css.map */
+/*# sourceMappingURL=main.css.map */

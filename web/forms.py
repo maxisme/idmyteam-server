@@ -59,7 +59,8 @@ class SignUpForm(CustomForm):
     confirm = PasswordField("Confirm Password", render_kw={"col": "m6 s12"})
     email = EmailField("Email", [validators.InputRequired()])
     store = BooleanField(
-        "Allow us to Store Images for <a href='/store'>increased accuracy over time</a>", render_kw={"col": "s12"}
+        "Allow us to Store Images for <a href='/store'>increased accuracy over time</a>",
+        render_kw={"col": "s12"},
     )
     TS_MESSAGE = "You must accept our Terms & Conditions!"
     ts = BooleanField(
