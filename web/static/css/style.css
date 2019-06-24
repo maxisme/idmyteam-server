@@ -8643,6 +8643,10 @@ label {
   fill: #1c1c1c;
 }
 
+.input-field {
+  margin-bottom: 30px;
+}
+
 * {
   color: #1c1c1c;
   font-family: "Montserrat", Georgia, sans-serif;

@@ -1,5 +1,4 @@
 # emulates connection from web panel
-import time
 
 import mock
 from tornado.httpclient import HTTPRequest
