@@ -117,23 +117,22 @@ class SignUpHandler(LoginHandler):
         if self._is_valid_captcha(self.request.arguments):
             if form.validate():
                 self.conn = db.pool.connect()
-                if not functions.Team.ConfirmEmail.send_confirmation(
+                if functions.Team.sign_up(
                     self.conn,
-                    form.email.data,
                     form.username.data,
-                    config.EMAIL_CONFIG,
-                    config.ROOT,
-                    config.SECRETS["token"],
+                    form.password.data,
+                    form.email.data,
+                    form.store.data,
+                    config.SECRETS["crypto"],
                 ):
-                    if functions.Team.sign_up(
+                    functions.Team.ConfirmEmail.send_confirmation(
                         self.conn,
-                        form.username.data,
-                        form.password.data,
                         form.email.data,
-                        form.store.data,
-                        config.SECRETS["crypto"],
-                    ):
-                        self.flash_error(self.INVALID_SIGNUP_MESSAGE)
+                        form.username.data,
+                        config.EMAIL_CONFIG,
+                        config.ROOT,
+                        config.SECRETS["token"],
+                    )
                 else:
                     self.flash_error(self.INVALID_SIGNUP_MESSAGE)
             else:
