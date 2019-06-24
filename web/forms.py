@@ -41,6 +41,7 @@ class CustomForm(Form):
 class LoginForm(CustomForm):
     username = StringField("Username", [validators.InputRequired()])
     password = PasswordField("Password", [validators.InputRequired()])
+    recaptcha = HiddenField(_name='g-recaptcha-response')
 
 
 class SignUpForm(CustomForm):
@@ -68,6 +69,7 @@ class SignUpForm(CustomForm):
         [validators.DataRequired(TS_MESSAGE)],
         render_kw={"col": "s12"},
     )
+    recaptcha = HiddenField(_name='g-recaptcha-response')
 
 
 class ForgotForm(CustomForm):
@@ -89,3 +91,4 @@ class ResetPasswordForm(CustomForm):
     token = HiddenField("Token", [validators.InputRequired()])
     email = HiddenField()
     username = HiddenField()
+    recaptcha = HiddenField(_name='g-recaptcha-response')

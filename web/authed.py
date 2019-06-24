@@ -125,14 +125,18 @@ class SignUpHandler(LoginHandler):
                     form.store.data,
                     config.SECRETS["crypto"],
                 ):
-                    functions.Team.ConfirmEmail.send_confirmation(
+                    if functions.Team.ConfirmEmail.send_confirmation(
                         self.conn,
                         form.email.data,
                         form.username.data,
                         config.EMAIL_CONFIG,
                         config.ROOT,
                         config.SECRETS["token"],
-                    )
+                    ):
+                        self.flash_success("Please confirm your email!")
+                        self.redirect("/login")
+                    else:
+                        self.flash_error(self.INVALID_SIGNUP_MESSAGE)
                 else:
                     self.flash_error(self.INVALID_SIGNUP_MESSAGE)
             else:
@@ -141,7 +145,6 @@ class SignUpHandler(LoginHandler):
                     break
         else:
             self.tmpl["failed_captcha"] = True
-
         return self._screen()
 
     def _screen(self):
