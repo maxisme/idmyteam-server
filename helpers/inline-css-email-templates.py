@@ -19,5 +19,5 @@ for filename in os.listdir(email_dir):
     if os.path.isfile(path):
         file_content = open(path, "r").read()
         inline_html = unquote(transform(html_head + file_content))
-        f = open(path.replace("emails/", "emails/inline/"), "w")
+        f = open(path.replace("emails/", "emails/inline/"), "w+")
         f.write(inline_html)

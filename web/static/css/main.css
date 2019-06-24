@@ -8643,9 +8643,12 @@ label {
   fill: #1c1c1c;
 }
 
-.input-field {
-  margin-bottom: 20px;
-  margin-top: 10px;
+.row .col {
+  margin-top: 20px;
+}
+
+form a {
+  border-bottom: 1px dashed #474747;
 }
 
 * {
