@@ -12,13 +12,6 @@ from sklearn.model_selection import ShuffleSplit, cross_val_score
 from sklearn.externals import joblib
 from sklearn.svm import SVC
 
-from creme.linear_model import LogisticRegression
-from creme.multiclass import OneVsRestClassifier
-from creme.preprocessing import StandardScaler
-from creme.compose import Pipeline
-from creme.metrics import Accuracy
-from creme import stream
-
 from settings import functions, config, db
 
 
@@ -113,15 +106,7 @@ class Classifier(object):
                     },
                 )
             else:
-                clf = Pipeline(
-                    [
-                        ("scale", StandardScaler()),
-                        (
-                            "learn",
-                            OneVsRestClassifier(binary_classifier=LogisticRegression()),
-                        ),
-                    ]
-                )
+                clf = SVC(probability=True)
         else:
             return functions.send_to_client(
                 socket,
@@ -133,8 +118,7 @@ class Classifier(object):
                 },
             )
 
-        for i, X in enumerate(training_input):
-            clf.fit_one(X, training_output[i])
+        clf.fit(training_input, training_output, sample_weight=sample_weight)
 
         functions.log_data(
             conn,
