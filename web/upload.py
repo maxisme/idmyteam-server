@@ -32,7 +32,7 @@ class ImageUploadHandler(BaseHandler):
 
         content_len = functions.bytes_to_kb(int(self.request.headers["Content-Length"]))
         if content_len > config.MAX_TRAIN_UPLOAD_SIZE_KB:
-            return self.write("Upload file too large")
+            return self.write("Uploaded file too large")
 
         self.conn = db.pool.connect()
         hashed_username = functions.hash(username)
@@ -98,40 +98,14 @@ class ImageUploadHandler(BaseHandler):
                             io.BytesIO(self.request.files["ZIP"][0]["body"])
                         )
                         if z:
-                            imgs_to_upload = defaultdict(list)
-                            for file in z.infolist():
-                                if file.file_size > 0:
-                                    if (
-                                        file.file_size / 1024
-                                        > config.MAX_IMG_UPLOAD_SIZE_KB
-                                    ):
-                                        return self.return_error(
-                                            "Training image {} file is too large!".format(
-                                                file.filename
-                                            )
-                                        )
-
-                                    try:
-                                        member = int(os.path.dirname(file.filename))
-                                    except:
-                                        logging.error("Invalid file uploaded")
-                                        continue
-
-                                    imgs_to_upload[member].append(file)
-
                             train_quota = max_train_imgs_per_hr - num_trained
-
-                            imgs_to_upload = functions.crop_arr(
-                                imgs_to_upload, train_quota
-                            )
+                            imgs_to_upload = self._fetch_imgs_to_upload(z, train_quota)
 
                             if not imgs_to_upload:
                                 return self.return_error(
                                     "You have uploaded too many training images. Please try again later..."
                                 )
-                            elif len(imgs_to_upload) < 2 and not Classifier.exists(
-                                hashed_username
-                            ):
+                            elif len(imgs_to_upload) < 2 and not Classifier.exists(hashed_username):
                                 return self.return_error(
                                     "You must train with at least 2 team members."
                                 )
@@ -175,3 +149,18 @@ class ImageUploadHandler(BaseHandler):
             message = {"message": message}
         message = json.dumps(message)
         return self.set_status(400, message)
+
+    def _fetch_imgs_to_upload(self, z, train_quota):
+        imgs_to_upload = defaultdict(list)
+        for file in z.infolist():
+            if file.file_size > 0:
+                if file.file_size / 1024 > config.MAX_IMG_UPLOAD_SIZE_KB:
+                    return self.return_error("Training image {} file is too large!".format(file.filename))
+                try:
+                    member = int(os.path.dirname(file.filename))
+                except:
+                    logging.error("Invalid named file uploaded")
+                    continue
+                imgs_to_upload[member].append(file)
+
+        return functions.crop_arr(imgs_to_upload, train_quota)

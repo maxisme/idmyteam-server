@@ -269,27 +269,34 @@ class Detecter(object):
                         conn, hashed_username, member_id, features, manual=False
                     )
 
+                # forward to client they can now delete the training image locally
+                functions.send_to_client(
+                    socket,
+                    hashed_username,
+                    {"type": "delete_trained_image", "img_path": file_name},
+                )
+
                 if store_image:  # permission granted by team to store image
                     # move uploaded image to directory for pending semi anonymous face training (FE and FL).
                     hashed_team_member = str(
                         functions.hash(str(member_id) + hashed_username)
                     )
-                    file_type = os.path.splitext(file_name)[1]
-                    file_path = (
-                        config.STORE_IMAGES_DIR
-                        + hashed_team_member
-                        + "_"
-                        + str(randint(0, 1e20))
-                        + file_type
-                    )
-                    original_image.save(file_path)
 
-                # forward to client they can now delete the training image locally
-                functions.send_json_socket(
-                    socket,
-                    hashed_username,
-                    {"type": "delete_trained_image", "img_path": file_name},
-                )
+                    # get unique filepath to store face with
+                    while True:
+                        file_path = (
+                            config.STORE_IMAGES_DIR
+                            + hashed_username
+                            + "/"
+                            + hashed_team_member
+                            + "_"
+                            + str(randint(0, 1e20))
+                            + config.IMG_TYPE
+                        )
+                        if not os.path.isfile(file_path):
+                            break
+
+                    original_image.save(file_path)
 
             else:
                 #######################################################

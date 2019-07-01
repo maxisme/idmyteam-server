@@ -27,12 +27,14 @@ class DeleteAccountHandler(view.BaseHandler):
     def post(self):
         username = self.tmpl["username"]
         if username:
+            self.conn = db.pool.connect()
+
             hashed_username = functions.hash(username)
             if Classifier.delete(hashed_username):
                 self._send_delete_model(hashed_username)
-            self.conn = db.pool.connect()
-            functions.Team.delete(self.conn, hashed_username)
-            self.clear_all_cookies()
+            functions.Team.delete_stored_images(hashed_username, config.STORE_IMAGES_DIR)
+            functions.Team.delete_rows(self.conn, hashed_username)
+        self.clear_all_cookies()
 
     @classmethod
     def _send_delete_model(cls, hashed_username):
@@ -44,6 +46,14 @@ class DeleteAccountHandler(view.BaseHandler):
         wss.send_local_message(
             json.dumps({"hashed_username": hashed_username, "delete-model": True})
         )
+
+
+class DeleteStorageHandler(view.BaseHandler):
+    def post(self):
+        username = self.tmpl["username"]
+        if username:
+            hashed_username = functions.hash(username)
+            functions.Team.delete_stored_images(hashed_username, config.STORE_IMAGES_DIR)
 
 
 class DeleteModelHandler(DeleteAccountHandler):

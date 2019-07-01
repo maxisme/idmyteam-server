@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import random
+import shutil
 import smtplib
 import string
 import time
@@ -108,7 +109,7 @@ def send_classification(
     :param hashed_username:
     :return:
     """
-    send_json_socket(
+    send_to_client(
         socket,
         hashed_username,
         {
@@ -434,7 +435,17 @@ class Team:
             return None
 
     @classmethod
-    def delete(cls, conn, hashed_username):
+    def delete_stored_images(cls, hashed_username, stored_images_dir):
+        """
+        Delete directory containing stored recognition images of team members
+        """
+        shutil.rmtree(stored_images_dir + "/" + hashed_username)
+
+    @classmethod
+    def delete_rows(cls, conn, hashed_username):
+        """
+        Delete all db rows relating to hashed_username
+        """
         x = conn.cursor()
 
         # delete logs
@@ -583,8 +594,9 @@ def create_local_socket(url):
     return create_connection(url + "/local")
 
 
-def send_json_socket(socket, hashed_username, dic):
+def send_to_client(socket, hashed_username, dic):
     """
+    Sends a json dic to client connected web socket
     :type dic: dict
     :param hashed_username:
     :param dic:

@@ -5,7 +5,7 @@
         Visit the web panel hosted on your Raspberry Pi by clicking on the IP address below. Then login using the temporary Name and Password below. After login please create a new account and delete the root user.
     </p>
     <div class="flex row">
-        <div class="col s12 m4 ">
+        <div class="col s12">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title">
@@ -14,7 +14,7 @@
                         {% else %}
                             <span class="material-icons">sync_disabled</span>
                         {% end %}
-                        Web Panel (IP)
+                        Web Panel (Local IP)
                     </span>
                     <p>
                         {% if local_ip %}
@@ -28,7 +28,9 @@
                 </div>
             </div>
         </div>
-        <div class="col s12 m4">
+    </div>
+    <div class="flex row">
+        <div class="col s12 m6">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title"><span class="material-icons">face</span> Temporary Name</span>
@@ -36,7 +38,7 @@
                 </div>
             </div>
         </div>
-        <div class="col s12 m4">
+        <div class="col s12 m6">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title"><span class="material-icons">vpn_key</span> Temporary Password</span>
@@ -48,7 +50,7 @@
 
     <h3>Server Credentials</h3>
     <p>
-        Private server connection credentials for recognising your team.
+        Private server connection credentials for recognising your team (<b>do not share!</b>).
     </p>
     <div class="row">
         <div class="col s12 m6">
@@ -88,11 +90,17 @@
                         <span class="material-icons">show_chart</span> Statistics
                     </span>
                     <p>
-                        <span class="material-icons">face</span> {{ team['num_classifications'] }} recognitions have been made!
+                        <span class="material-icons">face</span> {{ team['num_classifications'] }} recognitions have been made.
                     </p>
                     <p>
-                        <span class="material-icons">people_outline</span> Trained {{ num_members }} out of a maximum of {{ team['max_class_num'] }} members!
+                        <span class="material-icons">people_outline</span> Trained {{ num_members }} out of a maximum of {{ team['max_class_num'] }} members.
                     </p>
+                    {% if team['allow_storage'] %}
+                        <p>
+                            <span class="material-icons">storage</span> Stored {{ num_members }} out of a maximum of {{ team['max_class_num'] }} members.
+                            <a href="#" id="delete-storage">Delete stored images.</a>
+                        </p>
+                    {% end %}
                 </div>
             </div>
         </div>
@@ -172,6 +180,13 @@
                     });
                     location.reload();
                 }
+            });
+
+            $("#delete-storage").click(function () {
+                $.post("/delete-storage", {
+                    '_xsrf': '{{ xsrf_token }}'
+                });
+                location.reload();
             });
         });
     </script>

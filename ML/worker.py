@@ -86,6 +86,8 @@ class MainWorker(Worker):
                     )
                     thread.daemon = True
                     thread.start()
+                else:
+                    logging.error("Asked to train team that is not connected to ws")
             elif type == "add":
                 classifiers[hashed_username] = Classifier(hashed_username)
                 logging.info("Added classifier for %s", hashed_username)

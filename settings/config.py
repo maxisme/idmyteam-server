@@ -12,7 +12,9 @@ SECRETS = dict(conf.items("secrets"))
 SENTRY_URL = conf["sentry"]["url"]
 
 IMAGE_UPLOAD_DIR = ROOT + "/images/"
-STORE_IMAGES_DIR = ROOT + "/faces/"
+STORE_IMAGES_DIR = ROOT + "/images/faces/"
+ALLOWED_STORAGE_DAYS = 5
+IMG_TYPE = ".jpg"
 MODEL_DIR = ROOT + "/models/"
 LOCALISATION_MODEL = ROOT + "/models/face_localisation.model"
 FEATURE_MODEL_DIR = ROOT + "/models/feature_extractor.model"

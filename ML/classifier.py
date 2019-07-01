@@ -104,7 +104,7 @@ class Classifier(object):
         if training_input is not None:
             # make sure there are more than 1 classes to train model
             if len(np.unique(training_output)) <= 1:
-                return functions.send_json_socket(
+                return functions.send_to_client(
                     socket,
                     self.hashed_username,
                     {
@@ -118,7 +118,7 @@ class Classifier(object):
                     ("learn", OneVsRestClassifier(binary_classifier=LogisticRegression()))
                 ])
         else:
-            return functions.send_json_socket(
+            return functions.send_to_client(
                 socket,
                 self.hashed_username,
                 {
@@ -151,7 +151,7 @@ class Classifier(object):
         )
 
         # send message to client with who has been trained
-        functions.send_json_socket(
+        functions.send_to_client(
             socket,
             self.hashed_username,
             {

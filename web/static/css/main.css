@@ -6835,6 +6835,11 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
   stroke-linecap: round;
   /*shape-rendering: crispEdges;*/ }
 
+.btn-floating {
+  border-bottom: none; }
+  .btn-floating:hover {
+    box-shadow: none !important; }
+
 .card {
   box-shadow: none; }
   .card .card-title {
@@ -6916,15 +6921,17 @@ label {
   top: -0.5em; }
 
 .nav-wrapper {
-  background-color: #67A062;
+  background-color: #e7e7e7;
   padding-bottom: 10px;
   border-bottom: #1c1c1c 3px solid; }
   .nav-wrapper a {
     color: #1c1c1c;
     font-weight: 800;
-    font-family: monospace; }
+    font-family: monospace;
+    border-bottom: none; }
     .nav-wrapper a:hover {
-      font-weight: 200; }
+      font-weight: 200;
+      border-bottom: none; }
   .nav-wrapper li {
     border-left: #1c1c1c 3px solid; }
   .nav-wrapper .brand-logo {
@@ -6954,11 +6961,12 @@ body {
 
 a {
   font-size: inherit;
-  color: #1c1c1c; }
-  a:not(.button, .btn, .btn-large) {
-    border-bottom: 1px dashed #b3b3b3; }
+  color: inherit;
+  border-bottom: 1px dashed #b3b3b3; }
+  a:hover {
+    border-bottom: 1px solid #b3b3b3; }
 
-strong {
+b, strong {
   font-weight: 600;
   font-size: inherit; }
 

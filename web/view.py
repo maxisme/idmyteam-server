@@ -75,6 +75,12 @@ class TermsHandler(BaseHandler):
         self.render("terms.html", **self.tmpl)
 
 
+class StorageHandler(BaseHandler):
+    def get(self):
+        self.tmpl["title"] = "Image Storage"
+        self.render("storage.html", **self.tmpl)
+
+
 class TutorialListHandler(BaseHandler):
     def get(self):
         self.tmpl["title"] = "Tutorials"
