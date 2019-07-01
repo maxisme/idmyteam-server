@@ -12,8 +12,9 @@ for root, dirs, files in os.walk(config.STORE_IMAGES_DIR):
     for file in files:
         if file.endswith(config.IMG_TYPE):
             file_path = os.path.join(root, file)
-            allowed_time = datetime.datetime.fromtimestamp(os.stat(file_path).st_mtime) + datetime.timedelta(
-                config.ALLOWED_STORAGE_DAYS)
+            allowed_time = datetime.datetime.fromtimestamp(
+                os.stat(file_path).st_mtime
+            ) + datetime.timedelta(config.ALLOWED_STORAGE_DAYS)
 
             num_seen += 1
             if allowed_time <= datetime.datetime.now():
@@ -23,5 +24,6 @@ for root, dirs, files in os.walk(config.STORE_IMAGES_DIR):
                 except Exception as e:
                     logging.error(e)
 
-print("Deleted {} images. Iterated {} others.".format(num_deleted, num_seen - num_deleted))
-
+print(
+    "Deleted {} images. Iterated {} others.".format(num_deleted, num_seen - num_deleted)
+)

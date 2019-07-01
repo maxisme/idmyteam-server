@@ -113,10 +113,15 @@ class Classifier(object):
                     },
                 )
             else:
-                clf = Pipeline([
-                    ("scale", StandardScaler()),
-                    ("learn", OneVsRestClassifier(binary_classifier=LogisticRegression()))
-                ])
+                clf = Pipeline(
+                    [
+                        ("scale", StandardScaler()),
+                        (
+                            "learn",
+                            OneVsRestClassifier(binary_classifier=LogisticRegression()),
+                        ),
+                    ]
+                )
         else:
             return functions.send_to_client(
                 socket,

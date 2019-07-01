@@ -105,7 +105,9 @@ class ImageUploadHandler(BaseHandler):
                                 return self.return_error(
                                     "You have uploaded too many training images. Please try again later..."
                                 )
-                            elif len(imgs_to_upload) < 2 and not Classifier.exists(hashed_username):
+                            elif len(imgs_to_upload) < 2 and not Classifier.exists(
+                                hashed_username
+                            ):
                                 return self.return_error(
                                     "You must train with at least 2 team members."
                                 )
@@ -155,7 +157,9 @@ class ImageUploadHandler(BaseHandler):
         for file in z.infolist():
             if file.file_size > 0:
                 if file.file_size / 1024 > config.MAX_IMG_UPLOAD_SIZE_KB:
-                    return self.return_error("Training image {} file is too large!".format(file.filename))
+                    return self.return_error(
+                        "Training image {} file is too large!".format(file.filename)
+                    )
                 try:
                     member = int(os.path.dirname(file.filename))
                 except:

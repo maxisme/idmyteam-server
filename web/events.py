@@ -32,7 +32,9 @@ class DeleteAccountHandler(view.BaseHandler):
             hashed_username = functions.hash(username)
             if Classifier.delete(hashed_username):
                 self._send_delete_model(hashed_username)
-            functions.Team.delete_stored_images(hashed_username, config.STORE_IMAGES_DIR)
+            functions.Team.delete_stored_images(
+                hashed_username, config.STORE_IMAGES_DIR
+            )
             functions.Team.delete_rows(self.conn, hashed_username)
         self.clear_all_cookies()
 
@@ -53,7 +55,9 @@ class DeleteStorageHandler(view.BaseHandler):
         username = self.tmpl["username"]
         if username:
             hashed_username = functions.hash(username)
-            functions.Team.delete_stored_images(hashed_username, config.STORE_IMAGES_DIR)
+            functions.Team.delete_stored_images(
+                hashed_username, config.STORE_IMAGES_DIR
+            )
 
 
 class DeleteModelHandler(DeleteAccountHandler):
