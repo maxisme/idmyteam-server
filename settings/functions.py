@@ -13,7 +13,7 @@ from email.mime.text import MIMEText
 
 import MySQLdb
 import cv2
-import scipy
+from PIL import Image
 import yaml
 import zlib
 import socket
@@ -23,7 +23,6 @@ from Crypto.Cipher import AES
 import bcrypt
 import hashlib
 from itsdangerous import URLSafeTimedSerializer
-from premailer import transform
 
 from tornado import template
 from websocket import create_connection
@@ -156,8 +155,7 @@ def purge_log(conn, name, type, method, user):
 
 # Pre process a cropped image of the face for the feature extractor model.
 def pre_process_img(img, size):
-    img = scipy.misc.imresize(img, (size, size), interp="bilinear")
-    # img = np.expand_dims(img, axis=0)
+    img = Image.fromarray(img).resize((size, size), Image.BILINEAR)
     return img
 
 
@@ -223,11 +221,11 @@ def img_augmentation(img):
     img[img < 0] = 0
     img = img.astype(np.uint8)
 
-    ############
-    # rotation #
-    ############
-    if np.random.randint(3) == 0:  # rotate 1/3 times
-        img = scipy.misc.imrotate(img, angle, "bicubic")
+    # ############
+    # # rotation #
+    # ############
+    # if np.random.randint(3) == 0:  # rotate 1/3 times
+    #     img = scipy.misc.imrotate(img, angle, "bicubic")
 
     return img
 

@@ -6916,9 +6916,9 @@ label {
 
 .input-field label {
   width: 100%;
-  left: 0.5rem !important;
+  left: 5px !important;
   font-size: 20px !important;
-  top: -0.5em; }
+  top: -2px; }
 
 .nav-wrapper {
   background-color: #e7e7e7;
@@ -7035,6 +7035,11 @@ table {
 
 .flex {
   display: flex; }
+
+.material-icons {
+  border-bottom: none; }
+  .material-icons:hover {
+    border-bottom: none; }
 
 .break-all {
   word-break: break-all; }
