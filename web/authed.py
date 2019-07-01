@@ -18,6 +18,7 @@ class ProfileHandler(BaseHandler):
         if username:
             hashed_username = functions.hash(username)
             self.conn = db.pool.connect()
+
             self.tmpl["team"] = team = functions.Team.get(
                 self.conn, username=hashed_username
             )
