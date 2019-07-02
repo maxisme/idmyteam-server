@@ -3,7 +3,6 @@ import os
 import tornado.httpserver
 import tornado.wsgi
 from raven.contrib.tornado import AsyncSentryClient
-from sqlalchemy import pool
 from tornado.ioloop import IOLoop
 from tornado.web import url
 
@@ -18,6 +17,7 @@ server_settings = {
     "xsrf_cookies": True,
     "debug": True,
     "default_handler_class": view.Error404,
+    "websocket_ping_interval": 15
 }
 
 app = tornado.web.Application(handlers=web_urls.www_urls, **server_settings)
