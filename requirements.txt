@@ -25,3 +25,4 @@ premailer
 mock
 faker
 parameterized
+joblib

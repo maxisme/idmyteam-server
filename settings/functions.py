@@ -155,7 +155,7 @@ def purge_log(conn, name, type, method, user):
 
 # Pre process a cropped image of the face for the feature extractor model.
 def pre_process_img(img, size):
-    img = Image.fromarray(img).resize((size, size), Image.BILINEAR)
+    img = cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
     return img
 
 

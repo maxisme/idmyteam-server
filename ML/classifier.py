@@ -9,7 +9,7 @@ import numpy as np
 import logging
 
 from sklearn.model_selection import ShuffleSplit, cross_val_score
-from sklearn.externals import joblib
+import joblib
 from sklearn.svm import SVC
 
 from settings import functions, config, db
@@ -90,7 +90,7 @@ class Classifier(object):
         logging.info("Creating new model for %s", self.hashed_username)
 
         # create a new model using ALL the team training data
-        training_input, training_output, sample_weight, results = self._get_training_data(
+        training_input, training_output, sample_weight = self._get_training_data(
             conn
         )
 
@@ -106,7 +106,7 @@ class Classifier(object):
                     },
                 )
             else:
-                clf = SVC(probability=True)
+                clf = SVC(probability=True, gamma='scale')
         else:
             return functions.send_to_client(
                 socket,

@@ -6922,6 +6922,7 @@ label {
 
 .nav-wrapper {
   background-color: #e7e7e7;
+  background-image: linear-gradient(to right, #e7e7e7, #b3b3b3);
   padding-bottom: 10px;
   border-bottom: #1c1c1c 3px solid; }
   .nav-wrapper a {
@@ -6953,7 +6954,8 @@ form label {
 
 * {
   color: #1c1c1c;
-  font-family: "Montserrat", Georgia, sans-serif; }
+  font-family: "Roboto Mono", Georgia, sans-serif;
+  font-weight: 300; }
 
 body {
   border: #1c1c1c 3px solid;

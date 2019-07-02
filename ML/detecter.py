@@ -284,10 +284,12 @@ class Detecter(object):
 
                     # get unique filepath to store face with
                     while True:
+                        dir = config.STORE_IMAGES_DIR + hashed_username + "/"
+                        if not os.path.exists(dir):
+                            os.makedirs(dir)
+
                         file_path = (
-                            config.STORE_IMAGES_DIR
-                            + hashed_username
-                            + "/"
+                            dir
                             + hashed_team_member
                             + "_"
                             + str(randint(0, 1e20))
