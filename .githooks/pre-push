@@ -1,8 +1,0 @@
-#!/bin/bash
-export CONF="/conf/test_local.conf"
-export PYTHONPATH="$(pwd):$(pwd)/web:$(pwd)/settings:$(pwd)/helpers"
-export PATH="$PATH:/usr/local/bin/"
-
-/usr/local/bin/pytest
-
-exit $?

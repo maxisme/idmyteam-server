@@ -11,4 +11,10 @@ python3 helpers/inline-css-email-templates.py > /dev/null 2>&1
 
 black .
 
-exit 0
+export CONF="/conf/test_local.conf"
+export PYTHONPATH="$(pwd):$(pwd)/web:$(pwd)/settings:$(pwd)/helpers"
+export PATH="$PATH:/usr/local/bin/"
+
+/usr/local/bin/pytest
+
+exit $?
