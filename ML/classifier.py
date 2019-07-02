@@ -90,9 +90,7 @@ class Classifier(object):
         logging.info("Creating new model for %s", self.hashed_username)
 
         # create a new model using ALL the team training data
-        training_input, training_output, sample_weight = self._get_training_data(
-            conn
-        )
+        training_input, training_output, sample_weight = self._get_training_data(conn)
 
         if training_input is not None:
             # make sure there are more than 1 classes to train model
@@ -106,7 +104,7 @@ class Classifier(object):
                     },
                 )
             else:
-                clf = SVC(probability=True, gamma='scale')
+                clf = SVC(probability=True, gamma="scale")
         else:
             return functions.send_to_client(
                 socket,

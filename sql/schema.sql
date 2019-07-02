@@ -37,7 +37,7 @@ CREATE TABLE `Features` (
   PRIMARY KEY (`id`),
   KEY `account_username` (`username`),
   CONSTRAINT `Features_ibfk_1` FOREIGN KEY (`username`) REFERENCES `Accounts` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 CREATE TABLE `Accounts` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(64) NOT NULL,
