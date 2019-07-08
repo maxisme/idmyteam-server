@@ -31,11 +31,13 @@ class BaseHandler(SentryMixin, tornado.web.RequestHandler):
         self.clear_cookie("success_message")
 
     def flash_error(self, message, redirect_url=""):
-        self.set_secure_cookie("error_message", message)
+        self.tmpl["error_message"] = message
         if redirect_url:
+            self.set_secure_cookie("error_message", message)
             return self.redirect(redirect_url)
 
     def flash_success(self, message, redirect_url=""):
+        self.tmpl["success_message"] = message
         self.set_secure_cookie("success_message", message)
         if redirect_url:
             return self.redirect(redirect_url)

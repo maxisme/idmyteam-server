@@ -18,6 +18,7 @@ class TeamGenerator(object):
         self.ip = fake.ipv4_private()
 
 
+@mock.patch("view.BaseHandler.flash_error")
 @mock.patch("smtplib.SMTP")
 @mock.patch("authed.LoginHandler._is_valid_captcha", return_value=True)
 @mock.patch("settings.functions.AESCipher._mock_me")
@@ -43,24 +44,25 @@ class TestWeb(WebTest):
 
         # test duplicate signup
         self.post("/signup", form_data)
+        error_message = args[3].call_args[0][0]
         assert (
-            self.get_cookie("error_message")
-            == authed.SignUpHandler.INVALID_SIGNUP_MESSAGE
+            error_message == authed.SignUpHandler.INVALID_SIGNUP_MESSAGE
         ), "Duplicate signup"
 
         # test unchecked ts
         form_data.pop("ts")
         self.post("/signup", form_data, follow_redirects=False)
+        error_message = args[3].call_args[0][0]
         assert (
-            self.get_cookie("error_message") == forms.SignUpForm.TS_MESSAGE
+            error_message == forms.SignUpForm.TS_MESSAGE
         ), "Not checked ts"
 
     def test_email_retry(self, template, *args):
         team = TeamGenerator()
         self.fetch("/resend?email={email}&username={username}".format(**team.__dict__))
+        error_message = args[3].call_args[0][0]
         assert (
-            self.get_cookie("error_message")
-            == events.ResendConfirmationEmail.CONFIRMATION_ERROR
+            error_message == events.ResendConfirmationEmail.CONFIRMATION_ERROR
         ), "No such team signed up"
 
         self._signup(team)
@@ -69,9 +71,9 @@ class TestWeb(WebTest):
         self._confirm_account_tests(email_token, team)
 
         self.fetch("/resend?email={email}&username={username}".format(**team.__dict__))
+        error_message = args[3].call_args[0][0]
         assert (
-            self.get_cookie("error_message")
-            == events.ResendConfirmationEmail.CONFIRMATION_ERROR
+            error_message == events.ResendConfirmationEmail.CONFIRMATION_ERROR
         ), "Already confirmed"
 
     def test_login(self, template, *args):
@@ -79,7 +81,8 @@ class TestWeb(WebTest):
         self._signup(team)
 
         self.post("/login", team.__dict__)
-        assert "not confirmed" in self.get_cookie("error_message"), "Not yet confirmed"
+        error_message = args[3].call_args[0][0]
+        assert "not confirmed" in error_message, "Not yet confirmed"
 
         # confirm signup
         email_token = template.call_args[1]["token"]
@@ -100,8 +103,9 @@ class TestWeb(WebTest):
 
         # test invalid login details
         self.post("/login", TeamGenerator().__dict__)
+        error_message = args[3].call_args[0][0]
         assert (
-            self.get_cookie("error_message") == authed.LoginHandler.INVALID_MESSAGE
+                error_message == authed.LoginHandler.INVALID_MESSAGE
         ), "incorrect login details"
 
     def _confirm_account_tests(self, email_token, team):
@@ -158,7 +162,8 @@ class TestWeb(WebTest):
                 "token": "foo",
             },
         )
-        assert self.get_cookie("error_message") == authed.ResetPassword.ERROR
+        error_message = args[3].call_args[0][0]
+        assert error_message == authed.ResetPassword.ERROR
 
         # successful reset
         self.post(
@@ -193,7 +198,8 @@ class TestWeb(WebTest):
                 "token": "foo",
             },
         )
-        assert self.get_cookie("error_message") == authed.ResetPassword.ERROR
+        error_message = args[3].call_args[0][0]
+        assert error_message == authed.ResetPassword.ERROR
 
         # successful reset
         self.post(

@@ -17,7 +17,7 @@ server_settings = {
     "xsrf_cookies": True,
     "debug": True,
     "default_handler_class": view.Error404,
-    "websocket_ping_interval": 15
+    "websocket_ping_interval": 15,
 }
 
 app = tornado.web.Application(handlers=web_urls.www_urls, **server_settings)
