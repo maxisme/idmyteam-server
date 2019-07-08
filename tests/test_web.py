@@ -53,9 +53,7 @@ class TestWeb(WebTest):
         form_data.pop("ts")
         self.post("/signup", form_data, follow_redirects=False)
         error_message = args[3].call_args[0][0]
-        assert (
-            error_message == forms.SignUpForm.TS_MESSAGE
-        ), "Not checked ts"
+        assert error_message == forms.SignUpForm.TS_MESSAGE, "Not checked ts"
 
     def test_email_retry(self, template, *args):
         team = TeamGenerator()
@@ -105,7 +103,7 @@ class TestWeb(WebTest):
         self.post("/login", TeamGenerator().__dict__)
         error_message = args[3].call_args[0][0]
         assert (
-                error_message == authed.LoginHandler.INVALID_MESSAGE
+            error_message == authed.LoginHandler.INVALID_MESSAGE
         ), "incorrect login details"
 
     def _confirm_account_tests(self, email_token, team):
