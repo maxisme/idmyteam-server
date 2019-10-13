@@ -5,12 +5,13 @@
 
 cd /var/www/idmyteam-server
 
+git checkout master
 git fetch &> /dev/null
 diffs=$(git diff master origin/master)
+
 if [ ! -z "$diffs" ]
 then
     echo "Pulling code from GitHub..."
-    git checkout master
     git pull origin master
 
     supervisorctl restart idmyteamweb:*
