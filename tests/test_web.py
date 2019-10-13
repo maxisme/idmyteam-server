@@ -24,11 +24,11 @@ class TeamGenerator(object):
 @mock.patch("settings.functions.AESCipher._mock_me")
 @mock.patch("settings.functions.Email.template")
 class TestWeb(WebTest):
-    url_blacklist = ["/socket", "/local", "/upload", "/profile", "/reset"]
+    protected_urls = ["/socket", "/local", "/upload", "/profile", "/reset", "/profile/stored-images"]
 
     def test_urls(self, *args):
         for url in server.web_urls.www_urls:
-            if url[1].__module__ != "events" and url[0] not in self.url_blacklist:
+            if url[1].__module__ != "events" and url[0] not in self.protected_urls:
                 response = self.fetch(url[0])
                 assert response.code == 200, url[0]
 
