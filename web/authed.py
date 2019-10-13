@@ -135,7 +135,7 @@ class SignUpHandler(LoginHandler):
                         config.SECRETS["token"],
                     ):
                         self.flash_success("Please confirm your email!")
-                        self.redirect("/login")
+                        return self.redirect("/login")
                     else:
                         self.flash_error(self.INVALID_SIGNUP_MESSAGE)
                 else:
