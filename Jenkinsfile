@@ -19,7 +19,7 @@ pipeline {
   }
 
   stages {
-    stage('venv-setup') {
+    stage('test-setup') {
       steps {
         sh """
         virtualenv ${virtualenv}
@@ -34,6 +34,11 @@ pipeline {
         . ${virtualenv}/bin/activate
         pytest
         """
+      }
+    }
+    stage('deploy') {
+      steps {
+        sh 'ssh -o StrictHostKeyChecking=no jenk@idmy.team "sudo /bin/bash /var/www/idmyteam-server/deploy.sh"'
       }
     }
   }
