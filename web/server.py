@@ -15,7 +15,6 @@ server_settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     "cookie_secret": config.SECRETS["cookie"],
     "xsrf_cookies": True,
-    "debug": True,
     "default_handler_class": view.Error404,
     "websocket_ping_interval": 15,
 }
@@ -27,10 +26,7 @@ app.sentry_client = AsyncSentryClient(config.SENTRY_URL)
 def main():
     server = tornado.httpserver.HTTPServer(app)
     server.bind(8888)
-    if not app.settings["debug"]:
-        server.start(0)  # all cpus
-    else:
-        server.start(1)  # 1 cpu
+    server.start(1)
     IOLoop.current().start()
 
 

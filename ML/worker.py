@@ -19,7 +19,7 @@ rq_conn = redis.from_url(redis_url)
 
 classifiers = {}
 no_classifier_jobs = {}
-detecter = None
+detecter: Detecter = None
 
 
 def main():
@@ -27,9 +27,9 @@ def main():
     detecter = Detecter()
 
     with Connection(rq_conn):
-        worker = MainWorker(list(map(Queue, listen)))
+        worker = MainWorker(list(map(Queue, listen)))  # TODO this replaces queue
 
-        # use sentry with worker
+        # add sentry logging to worker
         client = Client(config.SENTRY_URL, transport=HTTPTransport)
         register_sentry(client, worker)
 
@@ -90,7 +90,7 @@ class MainWorker(Worker):
                     logging.error("Asked to train team that is not connected to ws")
             elif type == "add":
                 classifiers[hashed_username] = Classifier(hashed_username)
-                logging.info("Added classifier for %s", hashed_username)
+                print("Added classifier for {}".format(hashed_username))
 
                 # enque 'detect' jobs that have been pending the addition of this classifier
                 if hashed_username in no_classifier_jobs:
@@ -100,7 +100,7 @@ class MainWorker(Worker):
             elif type == "remove":
                 # remove classifier
                 classifiers.pop(hashed_username, None)
-                logging.info("Removed classifier for %s", hashed_username)
+                print("Removed classifier for {}".format(hashed_username))
 
 
 if __name__ == "__main__":

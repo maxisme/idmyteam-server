@@ -7043,6 +7043,9 @@ table {
   .material-icons:hover {
     border-bottom: none; }
 
+.card-content p {
+  padding-bottom: 10px; }
+
 .break-all {
   word-break: break-all; }
 

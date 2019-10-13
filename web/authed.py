@@ -26,6 +26,12 @@ class ProfileHandler(BaseHandler):
                 self.tmpl["num_members"] = functions.Team.num_users(
                     self.conn, hashed_username
                 )
+                self.tmpl["num_members"] = functions.Team.num_users(
+                    self.conn, hashed_username
+                )
+                self.tmpl["num_images"] = functions.Team.num_stored_images(
+                    hashed_username, config.STORE_IMAGES_DIR
+                )
                 self.tmpl["local_ip"] = (
                     clients[hashed_username].local_ip
                     if hashed_username in clients
@@ -41,6 +47,18 @@ class ProfileHandler(BaseHandler):
             else:
                 self.clear_cookie("username")
         return self.redirect("/login")
+
+
+class ProfileStoredImagesHandler(BaseHandler):
+    def get(self):
+        self.tmpl["title"] = "Stored Images"
+        username = self.tmpl["username"]
+        if username:
+            self.tmpl["images"] = functions.Team.get_stored_images(
+                functions.hash(username), config.STORE_IMAGES_DIR
+            )
+            return self.render("profile/images.html", **self.tmpl)
+        self.redirect("/")
 
 
 class LoginHandler(BaseHandler):

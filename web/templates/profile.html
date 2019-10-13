@@ -97,8 +97,10 @@
                     </p>
                     {% if team['allow_storage'] %}
                         <p>
-                            <span class="material-icons">storage</span> Stored {{ num_members }} out of a maximum of {{ team['max_class_num'] }} members.
-                            <a href="#" id="delete-storage">Delete stored images.</a>
+                            <span class="material-icons">storage</span> Stored <a href="/profile/stored-images">{{ num_images }}</a> team images for <a href="https://idmy.team/storage">training</a>.
+                            {% if num_images > 0 %}
+                                    <a href="#" class="red btn material-icons" id="delete-storage">delete</a>
+                            {% end %}
                         </p>
                     {% end %}
                 </div>
@@ -143,7 +145,7 @@
                         <i class="material-icons {% if not has_model %}disabled{% end %}">delete</i>
                     </a>
                     <p>
-                        All your data will be permanently deleted including your teams model.
+                        All your data will be permanently deleted.
                     </p>
                 </div>
             </div>

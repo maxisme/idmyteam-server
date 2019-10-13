@@ -25,7 +25,7 @@ class WiderDataset(chainer.dataset.DatasetMixin):
                         if len(file_bboxs) > 0:
                             if (
                                 current_path
-                                == "/var/www/idmy.team/data-sets/Faces/WIDER/WIDER_train/images/0--Parade/0_Parade_marchingband_1_849.jpg"
+                                == "/var/www/idmyteam-server/data-sets/Faces/WIDER/WIDER_train/images/0--Parade/0_Parade_marchingband_1_849.jpg"
                             ):
                                 print(file_bboxs)
                             self.paths.append(current_path)

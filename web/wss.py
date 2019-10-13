@@ -48,7 +48,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
                 self.local_ip = local_ip
                 authed.clients[self.hashed_username] = self
-                logging.info("%s connected to socket", self.hashed_username)
+                print("%s connected to socket", self.hashed_username)
 
                 # send all pending messages to client
                 if self.hashed_username in pending_messages:
@@ -71,7 +71,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 func=".",
                 kwargs={"type": "remove", "hashed_username": self.hashed_username},
             )
-            logging.info("%s disconnected from socket", self.hashed_username)
+            print("%s disconnected from socket", self.hashed_username)
 
     def on_message(self, message):
         """

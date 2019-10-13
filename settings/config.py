@@ -4,7 +4,7 @@ import os
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
 conf = configparser.ConfigParser()
-conf.read(ROOT + os.environ["CONF"])
+conf.read(ROOT + "/" + os.environ["CONF"])
 
 EMAIL_CONFIG = dict(conf.items("emails"))
 DB = dict(conf.items("database"))

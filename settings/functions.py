@@ -233,6 +233,7 @@ def img_augmentation(img):
 class Team:
     @classmethod
     def get(cls, conn, **search):
+        # TODO cache
         WHERE, val = cls._get_where(search)
         x = conn.cursor(MySQLdb.cursors.DictCursor)
         try:
@@ -321,7 +322,7 @@ class Team:
 
             return AESCipher(key).decrypt(encrypted_credentials) == credentials
         except Exception as e:
-            logging.info("Couldn't fetch credentials %s", e)
+            print("Couldn't fetch credentials %s", e)
             return False
 
     @classmethod
@@ -398,7 +399,7 @@ class Team:
             conn.commit()
             return True
         except MySQLdb.Error as e:
-            print(("Couldn't increment num_classifications: " + str(e)))
+            print("Couldn't increment num_classifications: " + str(e))
             conn.rollback()
             return False
 
@@ -416,7 +417,7 @@ class Team:
             conn.commit()
             return True
         except MySQLdb.Error as e:
-            print(("Couldn't toggle_storage: " + str(e)))
+            print("Couldn't toggle_storage: " + str(e))
             conn.rollback()
             return False
 
@@ -431,6 +432,32 @@ class Team:
             return x.fetchall()[0][0]
         except IndexError:
             return None
+
+    @classmethod
+    def num_stored_images(cls, hashed_username, stored_images_dir):
+        return sum(
+            [
+                len(files)
+                for r, d, files in os.walk(stored_images_dir + hashed_username + "/")
+            ]
+        )
+
+    @classmethod
+    def get_stored_images(cls, hashed_username, stored_images_dir):
+        """
+        :param hashed_username:
+        :param stored_images_dir:
+        :return: base64 encoded images for html rendering
+        """
+        images = []
+        dir = stored_images_dir + hashed_username + "/"
+        for r, d, f in os.walk(dir):
+            for file in f:
+                image_path = dir + file
+                with open(image_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+                    images.append(encoded_string)
+        return images
 
     @classmethod
     def delete_stored_images(cls, hashed_username, stored_images_dir):

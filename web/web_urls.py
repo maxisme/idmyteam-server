@@ -11,6 +11,7 @@ www_urls = [
     (r"/login", authed.LoginHandler),
     (r"/signup", authed.SignUpHandler),
     (r"/profile", authed.ProfileHandler),
+    (r"/profile/stored-images", authed.ProfileStoredImagesHandler),
     (r"/logout", events.LogoutHandler),
     (r"/delete-model", events.DeleteModelHandler),
     (r"/delete-account", events.DeleteAccountHandler),

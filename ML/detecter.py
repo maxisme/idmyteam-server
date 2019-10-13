@@ -43,7 +43,7 @@ class Detecter(object):
         def predict(self, img, conn=None):
             t = time.time()
 
-            predict = self.sess.run(
+            features = self.sess.run(
                 self.endpoints["emb"], feed_dict={self.image_placeholder: [img]}
             ).tolist()
 
@@ -51,7 +51,7 @@ class Detecter(object):
                 functions.log_data(
                     conn, "Feature Extractor", "Model", "Predict", str(time.time() - t)
                 )
-            return predict
+            return features
 
         def _load_model(self):
             print("Loading feature extractor model ...")
@@ -101,6 +101,7 @@ class Detecter(object):
             functions.purge_log(
                 conn, "Feature Extractor", "Model", "Predict", "system"
             )  # clear all prediction scores
+            conn.close()
 
     class FaceLocalisation(object):
         def __init__(self):
@@ -178,7 +179,7 @@ class Detecter(object):
         is_training = bool(member_id)
 
         # parse image to array
-        format_time = time.time()
+        start_time = time.time()
         try:
             original_image = Image.open(io.BytesIO(img))
             # convert to ML readable image
@@ -188,7 +189,6 @@ class Detecter(object):
         except Exception as e:
             print("not a valid image {}".format(e))
             return False
-        print("image format took: %s" % (time.time() - format_time))
 
         face_coords = None
         if not is_training:
@@ -203,6 +203,7 @@ class Detecter(object):
                 bbox = None
                 best_coord_score = 0
                 if len(scores[0]) > 0:
+                    print(scores)
                     # pick bbox with best score that it is a face
                     for i, score in enumerate(scores):
                         s = score[0]
@@ -276,11 +277,14 @@ class Detecter(object):
                     {"type": "delete_trained_image", "img_path": file_name},
                 )
 
+                print("storing imae")
                 if store_image:  # permission granted by team to store image
+                    print("storing image")
                     # move uploaded image to directory for pending semi anonymous face training (FE and FL).
                     hashed_team_member = str(
                         functions.hash(str(member_id) + hashed_username)
                     )
+                    print("storing image2")
 
                     # get unique filepath to store face with
                     while True:
@@ -298,6 +302,7 @@ class Detecter(object):
                         if not os.path.isfile(file_path):
                             break
 
+                    print("stored {}".format(file_path))
                     original_image.save(file_path)
 
             else:
@@ -316,4 +321,4 @@ class Detecter(object):
                 json.dumps(face_coords), -1, 0, file_name, hashed_username, socket
             )
 
-        print("total took: %s" % (time.time() - format_time))
+        print("total took: %s" % (time.time() - start_time))

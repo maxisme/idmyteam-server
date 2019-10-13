@@ -34,12 +34,6 @@ class Classifier(object):
             classes = self.clf.classes_
             probabilities = self.clf.predict_proba(np.array(features))
             for i, prob in enumerate(probabilities[0]):
-                logging.info(
-                    "User: %s\nClass: %s\nProb: %s",
-                    self.hashed_username,
-                    str(classes[i]),
-                    str(prob),
-                )
                 if prob >= max_prob:
                     member_id = classes[i]
                     max_prob = prob
@@ -87,7 +81,7 @@ class Classifier(object):
         # mark team as currently training
         functions.toggle_team_training(conn, self.hashed_username)
 
-        logging.info("Creating new model for %s", self.hashed_username)
+        print("Creating new model for %s", self.hashed_username)
 
         # create a new model using ALL the team training data
         training_input, training_output, sample_weight = self._get_training_data(conn)
@@ -197,7 +191,7 @@ class Classifier(object):
         print(str(scores.mean()) + " -- +/-" + str(scores.std()))
 
         mb_size = sys.getsizeof(clf) * 1e6
-        logging.info("%s %sMB", mb_size, self.hashed_username)
+        print("%s %sMB", mb_size, self.hashed_username)
 
         if mb_size < config.MAX_CLASSIFIER_SIZE_MB:
             # check if this mean score is better than the last within margin

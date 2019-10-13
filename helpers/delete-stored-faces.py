@@ -1,5 +1,5 @@
 # attached to cron ran every hour
-# 18 * * * * PYTHONPATH="/var/www/idmy.team/:$PYTHONPATH" && CONF=/conf/prod_remote.conf && python /var/www/idmy.team/helpers/delete-stored-faces.py
+# 18 * * * * PYTHONPATH="/var/www/idmyteam-server/:$PYTHONPATH" && CONF=/conf/prod_remote.conf && python /var/www/idmyteam-server/helpers/delete-stored-faces.py
 import datetime
 import logging
 
