@@ -6931,6 +6931,7 @@ label {
     border-bottom: none; }
     .nav-wrapper a:hover {
       font-weight: 200;
+      color: #f6f6f6;
       border-bottom: none; }
   .nav-wrapper li {
     border-left: #1c1c1c 3px solid; }
@@ -6950,6 +6951,9 @@ form a {
   border-bottom: 1px dashed #474747; }
 form label {
   font-weight: 400; }
+
+#captcha {
+  padding-bottom: 10px; }
 
 * {
   color: #1c1c1c;
