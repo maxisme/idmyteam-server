@@ -277,14 +277,11 @@ class Detecter(object):
                     {"type": "delete_trained_image", "img_path": file_name},
                 )
 
-                print("storing imae")
                 if store_image:  # permission granted by team to store image
-                    print("storing image")
                     # move uploaded image to directory for pending semi anonymous face training (FE and FL).
                     hashed_team_member = str(
                         functions.hash(str(member_id) + hashed_username)
                     )
-                    print("storing image2")
 
                     # get unique filepath to store face with
                     while True:
@@ -302,7 +299,6 @@ class Detecter(object):
                         if not os.path.isfile(file_path):
                             break
 
-                    print("stored {}".format(file_path))
                     original_image.save(file_path)
 
             else:
