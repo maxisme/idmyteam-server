@@ -39,8 +39,8 @@ class CustomForm(Form):
 
 
 class LoginForm(CustomForm):
-    username = StringField("Username", [validators.InputRequired()])
-    password = PasswordField("Password", [validators.InputRequired()])
+    username = StringField("Username", [validators.InputRequired()], render_kw={"col": "m6 s12"})
+    password = PasswordField("Password", [validators.InputRequired()], render_kw={"col": "m6 s12"})
     recaptcha = HiddenField(_name="g-recaptcha-response")
 
 

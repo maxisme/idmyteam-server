@@ -15,6 +15,7 @@ server_settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     "cookie_secret": config.SECRETS["cookie"],
     "xsrf_cookies": True,
+    "debug": True if "DEBUG" in os.environ else False,
     "default_handler_class": view.Error404,
     "websocket_ping_interval": 15,
 }

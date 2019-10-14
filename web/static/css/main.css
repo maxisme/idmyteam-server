@@ -6897,7 +6897,6 @@ label {
   top: 0;
   text-shadow: 0 0 20 #1c1c1c; }
   .btn:hover, .btn-large:hover {
-    top: -2px;
     box-shadow: none; }
 
 .btn-small {
@@ -6918,7 +6917,7 @@ label {
   width: 100%;
   left: 5px !important;
   font-size: 20px !important;
-  top: -2px; }
+  top: -5px; }
 
 .nav-wrapper {
   background-color: #e7e7e7;
@@ -7094,7 +7093,11 @@ img.svg {
 
 .chat-text {
   font-size: 1.1em;
-  text-align: justify; }
+  text-align: justify;
+  background-color: #fff;
+  padding: 30px; }
+  .chat-text li {
+    font-size: 1.1em; }
   .chat-text h3 {
     font-size: 1.2em;
     border-bottom: #1c1c1c 3px solid;
