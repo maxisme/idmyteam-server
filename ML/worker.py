@@ -10,7 +10,9 @@ from rq import Worker, Queue, Connection
 from rq.contrib.sentry import register_sentry
 from raven import Client
 from raven.transport.http import HTTPTransport
+import sentry_sdk
 
+sentry_sdk.init(os.getenv(config.SENTRY_URL))
 logging.basicConfig(level="CRITICAL")
 
 listen = ["high", "medium", "low"]
