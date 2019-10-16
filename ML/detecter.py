@@ -318,3 +318,4 @@ class Detecter(object):
             )
 
         print("total took: %s" % (time.time() - start_time))
+        conn.close()
