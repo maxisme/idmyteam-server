@@ -159,7 +159,6 @@ class Detecter(object):
         file_name,
         hashed_username,
         classifier,
-        conn,
         member_id=False,
         store_image=False,
         store_image_features=True,
@@ -175,6 +174,8 @@ class Detecter(object):
         :param bool store_image_features: whether to store the predicted images features for constant learning.
         :return:
         """
+
+        conn = db.pool.connect()
 
         is_training = bool(member_id)
 

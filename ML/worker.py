@@ -48,7 +48,7 @@ class MainWorker(Worker):
                 if hashed_username in classifiers:
                     db_conn = db.pool.connect()
                     if "member_id" in job.kwargs:
-                        # training image
+                        # image used for training
                         num_trained = functions.Team.get_num_trained_last_hr(
                             db_conn, hashed_username
                         )
@@ -61,10 +61,10 @@ class MainWorker(Worker):
                                 hashed_username,
                             )
                             return
+                    db_conn.close()
 
                     detecter.run(
                         classifier=classifiers[hashed_username],
-                        conn=db_conn,
                         **job.kwargs
                     )
                 else:
@@ -73,7 +73,6 @@ class MainWorker(Worker):
                     )
 
                     # TODO force reconect all sockets
-                    # socket = functions.create_socket()
 
                     # add to failed classification jobs
                     if hashed_username in no_classifier_jobs:
@@ -82,9 +81,8 @@ class MainWorker(Worker):
                         no_classifier_jobs[hashed_username] = [(job, queue)]
             elif type == "train":
                 if hashed_username in classifiers:
-                    db_conn = db.pool.connect()
                     thread = Thread(
-                        target=classifiers[hashed_username].train, args=(db_conn,)
+                        target=classifiers[hashed_username].train
                     )
                     thread.daemon = True
                     thread.start()

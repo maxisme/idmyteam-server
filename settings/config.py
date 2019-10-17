@@ -30,6 +30,4 @@ MIN_PROB = 0
 MAX_IMG_UPLOAD_SIZE_KB = 1000
 MAX_TRAIN_UPLOAD_SIZE_KB = 100 * 1024  # 100MB - approx 200 images
 
-###
-# socket
 LOCAL_SOCKET_URL = "ws://localhost:8888"

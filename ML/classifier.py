@@ -74,7 +74,8 @@ class Classifier(object):
         else:
             logging.error("Missing model for: %s", self.hashed_username)
 
-    def train(self, conn):
+    def train(self):
+        conn = db.pool.connect()
         t = time.time()
         socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
 
