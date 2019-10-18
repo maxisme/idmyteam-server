@@ -1,5 +1,6 @@
 from settings import functions, config
-from sqlalchemy import pool
+from sqlalchemy import create_engine
+from sqlalchemy.pool import QueuePool
 
 
 def get_conn():
@@ -8,4 +9,4 @@ def get_conn():
     )
 
 
-pool = pool.QueuePool(get_conn, max_overflow=10, pool_size=5)
+pool = create_engine(creator=get_conn, poolclass=QueuePool, pool_recycle=3600)
