@@ -34,7 +34,7 @@ class ImageUploadHandler(BaseHandler):
         if content_len > config.MAX_TRAIN_UPLOAD_SIZE_KB:
             return self.write("Uploaded file too large")
 
-        self.conn = db.pool.connect()
+        self.conn = db.pool.raw_connection()
         hashed_username = functions.hash(username)
         if functions.Team.valid_credentials(
             self.conn, hashed_username, credentials, config.SECRETS["crypto"]

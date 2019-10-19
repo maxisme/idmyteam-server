@@ -5,7 +5,7 @@ import subprocess, string
 import psutil
 from settings import functions, config, db
 
-conn = db.pool.connect()
+conn = db.pool.raw_connection()
 
 gpu = subprocess.check_output(
     "nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv", shell=True

@@ -31,7 +31,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         self.hashed_username = functions.hash(username)
         if self.hashed_username not in authed.clients:
-            conn = db.pool.connect()
+            conn = db.pool.raw_connection()
             if functions.Team.valid_credentials(
                 conn, self.hashed_username, credentials, config.SECRETS["crypto"]
             ):

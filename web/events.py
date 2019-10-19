@@ -17,7 +17,7 @@ class AllowUploadStorageHandler(view.BaseHandler):
         username = self.tmpl["username"]
         if username:
             hashed_username = functions.hash(username)
-            self.conn = db.pool.connect()
+            self.conn = db.pool.raw_connection()
             if not functions.Team.toggle_storage(self.conn, hashed_username):
                 logging.error("unable to toggle storage for %s", hashed_username)
                 return self.write_error(501)
@@ -27,7 +27,7 @@ class DeleteAccountHandler(view.BaseHandler):
     def post(self):
         username = self.tmpl["username"]
         if username:
-            self.conn = db.pool.connect()
+            self.conn = db.pool.raw_connection()
 
             hashed_username = functions.hash(username)
             if Classifier.delete(hashed_username):
@@ -78,7 +78,7 @@ class ConfirmEmail(view.BaseHandler):
         token = self.get_argument("token", "")
         username = self.get_argument("username", "")
 
-        self.conn = db.pool.connect()
+        self.conn = db.pool.raw_connection()
         email_to_username = functions.Team.email_to_username(self.conn, email)
         hashed_username = functions.hash(username)
         if email_to_username == hashed_username:
@@ -100,7 +100,7 @@ class ResendConfirmationEmail(view.BaseHandler):
         username = self.get_argument("username", "")
 
         # check if there is an email and also that it hasn't already been confirmed
-        self.conn = db.pool.connect()
+        self.conn = db.pool.raw_connection()
         if not functions.Team.ConfirmEmail.send_confirmation(
             self.conn,
             email,

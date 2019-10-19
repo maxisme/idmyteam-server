@@ -26,7 +26,7 @@ class Classifier(object):
     def predict(self, features, file_name, face_coords, store_features):
         if self.clf:
             t = time.time()
-            conn = db.pool.connect()
+            conn = db.pool.raw_connection()
 
             # predict member id based on face_coords
             member_id = 0
@@ -75,7 +75,7 @@ class Classifier(object):
             logging.error("Missing model for: %s", self.hashed_username)
 
     def train(self):
-        conn = db.pool.connect()
+        conn = db.pool.raw_connection()
         t = time.time()
         socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
 
@@ -168,7 +168,7 @@ class Classifier(object):
         model_path = self.get_model_path(self.hashed_username)
         if model_path:
             t = time.time()
-            conn = db.pool.connect()
+            conn = db.pool.raw_connection()
             model = joblib.load(model_path)
 
             # log how long it took to load model

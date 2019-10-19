@@ -46,7 +46,7 @@ class MainWorker(Worker):
             hashed_username = job.kwargs["hashed_username"]
             if type == "detect":
                 if hashed_username in classifiers:
-                    db_conn = db.pool.connect()
+                    db_conn = db.pool.raw_connection()
                     if "member_id" in job.kwargs:
                         # image used for training
                         num_trained = functions.Team.get_num_trained_last_hr(

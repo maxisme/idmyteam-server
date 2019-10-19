@@ -17,7 +17,7 @@ class ProfileHandler(BaseHandler):
         username = self.tmpl["username"]
         if username:
             hashed_username = functions.hash(username)
-            self.conn = db.pool.connect()
+            self.conn = db.pool.raw_connection()
 
             self.tmpl["team"] = team = functions.Team.get(
                 self.conn, username=hashed_username
@@ -76,7 +76,7 @@ class LoginHandler(BaseHandler):
         self.tmpl["form"] = form = forms.LoginForm(self.request.arguments)
         if self._is_valid_captcha(self.request.arguments):
             if form.validate():
-                self.conn = db.pool.connect()
+                self.conn = db.pool.raw_connection()
                 user = functions.Team.get(
                     self.conn, username=functions.hash(form.username.data)
                 )
@@ -135,7 +135,7 @@ class SignUpHandler(LoginHandler):
         self.tmpl["form"] = form = forms.SignUpForm(self.request.arguments)
         if self._is_valid_captcha(self.request.arguments):
             if form.validate():
-                self.conn = db.pool.connect()
+                self.conn = db.pool.raw_connection()
                 if functions.Team.sign_up(
                     self.conn,
                     form.username.data,
@@ -183,7 +183,7 @@ class ForgotPassword(LoginHandler):
     def post(self):
         self.tmpl["form"] = form = forms.ForgotForm(self.request.arguments)
         if form.validate():
-            self.conn = db.pool.connect()
+            self.conn = db.pool.raw_connection()
             if form.email.data or form.username.data:
                 if form.email.data:
                     args = {"email": form.email.data}
@@ -233,7 +233,7 @@ class ResetPassword(LoginHandler):
                     args = {"email": form.email.data}
                 else:
                     args = {"username": functions.hash(form.username.data)}
-                self.conn = db.pool.connect()
+                self.conn = db.pool.raw_connection()
                 team = functions.Team.get(self.conn, **args)
                 if team and functions.Team.PasswordReset.validate(
                     self.conn, team["email"], form.token.data, config.SECRETS["token"]
