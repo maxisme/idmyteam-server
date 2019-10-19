@@ -9,4 +9,4 @@ def get_conn():
     )
 
 
-pool = create_engine(creator=get_conn, poolclass=QueuePool, pool_recycle=3600)
+pool = create_engine('mysql+mysqldb://', creator=get_conn, poolclass=QueuePool, pool_recycle=3600)
