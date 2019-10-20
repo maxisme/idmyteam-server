@@ -3,7 +3,7 @@ from settings.config import ROOT
 
 logging.getLogger("tornado.access").disabled = True
 
-logger = logging.getLogger()
+logger = logging.getLogger('')
 c_handler = logging.StreamHandler()
 f_handler = logging.FileHandler(ROOT + '/idmyteam.log')
 c_handler.setLevel(logging.NOTSET)
