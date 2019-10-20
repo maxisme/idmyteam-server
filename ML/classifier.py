@@ -13,6 +13,7 @@ import joblib
 from sklearn.svm import SVC
 
 from settings import functions, config, db
+from settings.logs import logger
 
 
 class Classifier(object):
@@ -82,7 +83,7 @@ class Classifier(object):
         # mark team as currently training
         functions.toggle_team_training(conn, self.hashed_username)
 
-        print("Creating new model for %s", self.hashed_username)
+        logger.info(f"Creating new model for {self.hashed_username}")
 
         # create a new model using ALL the team training data
         training_input, training_output, sample_weight = self._get_training_data(conn)
@@ -127,10 +128,7 @@ class Classifier(object):
         num_outputs = np.nonzero(unique_outputs)[0]
         cnt_uni = list(zip(num_outputs, unique_outputs[num_outputs]))
 
-        print(
-            "fitted %d features from %d classes"
-            % (len(training_input), len(set(training_output)))
-        )
+        logger.info(f"fitted {len(training_input)} features from {len(set(training_output))} classes")
 
         # send message to client with who has been trained
         functions.send_to_client(
@@ -149,7 +147,7 @@ class Classifier(object):
             joblib.dump(clf, model_path)  # save model
             self.clf = clf  # reload the new model
         else:
-            print("no improvement in model")
+            logger.warning("no improvement in model")
 
         # mark all features as not new
         cur = conn.cursor()
@@ -189,10 +187,10 @@ class Classifier(object):
     def _should_update_model(self, clf, x, y, conn):
         cv = ShuffleSplit(n_splits=30)
         scores = cross_val_score(clf, x, y, cv=cv)
-        print(str(scores.mean()) + " -- +/-" + str(scores.std()))
+        logger.info(f"{scores.mean()} -- +/- {scores.std()}")
 
         mb_size = sys.getsizeof(clf) * 1e6
-        print("%s %sMB", mb_size, self.hashed_username)
+        logger.info(f"{mb_size}MB {self.hashed_username}", mb_size, self.hashed_username)
 
         if mb_size < config.MAX_CLASSIFIER_SIZE_MB:
             # check if this mean score is better than the last within margin

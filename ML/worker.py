@@ -2,7 +2,6 @@ from classifier import Classifier
 from detecter import Detecter
 from settings import config, functions, db
 
-import logging
 import os
 import redis
 from threading import Thread
@@ -12,8 +11,9 @@ from raven import Client
 from raven.transport.http import HTTPTransport
 import sentry_sdk
 
+from settings.logs import logger
+
 sentry_sdk.init(os.getenv(config.SENTRY_URL))
-logging.basicConfig(level="CRITICAL")
 
 listen = ["high", "medium", "low"]
 redis_url = os.getenv("REDISTOGO_URL", "redis://localhost:6379")
@@ -56,10 +56,7 @@ class MainWorker(Worker):
                             db_conn, username=hashed_username
                         )["max_train_imgs_per_hr"]
                         if num_trained >= num_allowed:
-                            logging.warning(
-                                "User (%s) has uploaded too many images.",
-                                hashed_username,
-                            )
+                            logger.warning(f"User {hashed_username} has uploaded too many images.")
                             return
                     db_conn.close()
 
@@ -68,11 +65,9 @@ class MainWorker(Worker):
                         **job.kwargs
                     )
                 else:
-                    logging.error(
-                        "No classifier to run detector with. Reconnect websocket."
-                    )
+                    logger.error(f"{hashed_username} has no classifier to run detector with. Reconnect websocket.")
 
-                    # TODO force reconect all sockets
+                    # TODO force reconnect all sockets
 
                     # add to failed classification jobs
                     if hashed_username in no_classifier_jobs:
@@ -87,10 +82,10 @@ class MainWorker(Worker):
                     thread.daemon = True
                     thread.start()
                 else:
-                    logging.error("Asked to train team that is not connected to ws")
+                    logger.error(f"Asked to train team that is not connected to ws {hashed_username}")
             elif type == "add":
                 classifiers[hashed_username] = Classifier(hashed_username)
-                print("Added classifier for {}".format(hashed_username))
+                logger.info(f"Added classifier for {hashed_username}")
 
                 # enque 'detect' jobs that have been pending the addition of this classifier
                 if hashed_username in no_classifier_jobs:
@@ -100,7 +95,7 @@ class MainWorker(Worker):
             elif type == "remove":
                 # remove classifier
                 classifiers.pop(hashed_username, None)
-                print("Removed classifier for {}".format(hashed_username))
+                logger.info(f"Removed classifier for {hashed_username}")
 
 
 if __name__ == "__main__":

@@ -1,14 +1,12 @@
 import json
 import urllib.request, urllib.parse, urllib.error
 
-import logging
 from settings import functions, config, db
 from view import BaseHandler
 import forms
 from ML.classifier import Classifier
 
 clients = {}
-logging.basicConfig(level="INFO")
 
 
 class ProfileHandler(BaseHandler):

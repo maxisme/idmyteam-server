@@ -7,6 +7,7 @@ import logging
 from settings import functions, config, db
 from ML.classifier import Classifier
 import upload, authed
+from settings.logs import logger
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -48,7 +49,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
                 self.local_ip = local_ip
                 authed.clients[self.hashed_username] = self
-                print("%s connected to socket", self.hashed_username)
+                logger.info(f"{self.hashed_username} connected to socket")
 
                 # send all pending messages to client
                 if self.hashed_username in pending_messages:
@@ -71,7 +72,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 func=".",
                 kwargs={"type": "remove", "hashed_username": self.hashed_username},
             )
-            print("%s disconnected from socket", self.hashed_username)
+            logger.info(f"{self.hashed_username} disconnected from socket")
 
     def on_message(self, message):
         """
@@ -91,12 +92,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.close(1004, "Invalid Message")
 
     def close(self, code=None, reason=None):
-        logging.error(
-            "Close socket reason:%s - %s : %s",
-            reason,
-            self.hashed_username,
-            self.request.headers.get("X-Real-Ip"),
-        )
+        ip = self.request.headers.get("X-Real-Ip")
+        logging.error(f"Close socket reason:{reason} - {self.hashed_username} : {ip}")
         self.write_message("Invalid request")
         super(WebSocketHandler, self).close(code)
 
@@ -122,7 +119,7 @@ def send_local_message(message):
     try:
         message = json.loads(message)
     except:
-        logging.error("Invalid local message sent %s", message)
+        logging.error(f"Invalid local message sent {message}")
         return False
 
     hashed_username = message.pop("hashed_username")

@@ -7,6 +7,8 @@ import math
 from random import randint
 import tensorflow as tf
 
+from settings.logs import logger
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # reduce tensorflow logging
 import numpy as np
 
@@ -28,10 +30,10 @@ classifier_q = Queue("low", connection=redis_conn)
 
 class Detecter(object):
     def __init__(self):
-        print("Started loading ML models...")
+        logger.info("Started loading ML models...")
         self.face_localiser = self.FaceLocalisation()
         self.feaure_extractor = self.FeatureExtractor()
-        print("Finished loading ML models!")
+        logger.info("Finished loading ML models!")
 
     class FeatureExtractor(object):
         model = import_module("train.resnet_v1_50")
@@ -54,7 +56,7 @@ class Detecter(object):
             return features
 
         def _load_model(self):
-            print("Loading feature extractor model ...")
+            logger.info("Loading feature extractor model ...")
             load_model_begin = time.time()
 
             ############ LOAD MODEL ##################
@@ -95,7 +97,7 @@ class Detecter(object):
 
             # how long it took to load model
             load_time = str(time.time() - load_model_begin)
-            print("loading feature extractor took" + load_time)
+            logger.info(f"loading feature extractor took {load_time}")
             conn = db.pool.raw_connection()
             functions.log_data(conn, "Feature Extractor", "Model", "Load", load_time)
             functions.purge_log(
@@ -118,7 +120,7 @@ class Detecter(object):
             try:
                 prediction = self.localisation_model.predict([img])
             except Exception as e:
-                logging.critical("Localisation model error: %s", e)
+                logging.error(f"Localisation model error: {e}")
                 return None, None, None
 
             if conn:
@@ -128,7 +130,7 @@ class Detecter(object):
             return prediction
 
         def _load_model(self):
-            print("Loading localisation model...")
+            logger.info("Loading localisation model...")
             t = time.time()
 
             ############ LOAD MODEL ##################
@@ -146,7 +148,6 @@ class Detecter(object):
 
             # log how long it took to load model
             load_time = str(time.time() - t)
-            print("loading localisation took: " + load_time)
             conn = db.pool.raw_connection()
             functions.log_data(conn, "Face Localisation", "Model", "Load", load_time)
             functions.purge_log(
@@ -188,7 +189,7 @@ class Detecter(object):
             img = np.asarray(img, dtype=np.float32)
             img = img.transpose((2, 0, 1))
         except Exception as e:
-            print("not a valid image {}".format(e))
+            logger.warning(f"not a valid image {e} from {hashed_username}")
             return False
 
         face_coords = None
@@ -204,7 +205,7 @@ class Detecter(object):
                 bbox = None
                 best_coord_score = 0
                 if len(scores[0]) > 0:
-                    print(scores)
+                    logger.info(scores)
                     # pick bbox with best score that it is a face
                     for i, score in enumerate(scores):
                         s = score[0]
@@ -229,7 +230,7 @@ class Detecter(object):
             try:
                 face_coords = ast.literal_eval(original_image.app["COM"].decode())
             except Exception as e:
-                logging.warning("Training image does not have valid coordinates %s", e)
+                logging.warning(f"Training image does not have valid coordinates {e}")
 
         socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
         if face_coords:
@@ -249,11 +250,11 @@ class Detecter(object):
             )
             img = functions.crop_img(img, x, y, w, h)
             img = functions.pre_process_img(img, config.FEATURE_EXTRACTOR_IMG_SIZE)
-            print("pre_time took: %s" % (time.time() - pre_time))
+            logger.info(f"pre_time took: {time.time() - pre_time}")
 
             feature_time = time.time()
             features = self.feaure_extractor.predict(img, conn)
-            print("feature_time took: %s" % (time.time() - feature_time))
+            logger.info(f"feature_time took: {time.time() - feature_time}")
 
             if member_id:
                 #######################################
@@ -310,7 +311,7 @@ class Detecter(object):
                 classifier.predict(
                     features, file_name, face_coords, store_image_features
                 )
-                print("predict_time took: %s" % (time.time() - predict_time))
+                logger.info(f"predict_time took: {time.time() - predict_time}")
 
         elif not is_training:
             # no face detected so send INVALID classification
@@ -318,5 +319,5 @@ class Detecter(object):
                 json.dumps(face_coords), -1, 0, file_name, hashed_username, socket
             )
 
-        print("total took: %s" % (time.time() - start_time))
+        logger.info(f"total took: {time.time() - start_time}")
         conn.close()

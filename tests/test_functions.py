@@ -17,7 +17,6 @@ test_strings = [
 @pytest.mark.parametrize("input", test_strings)
 def test_encrypt(input):
     key = base64.b64encode(Random.new().read(32))
-    print(key)
 
     cipher = functions.AESCipher(key)
     encrypt = cipher.encrypt(input)

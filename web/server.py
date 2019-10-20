@@ -9,9 +9,6 @@ from tornado.web import url
 import view
 import web_urls
 from settings import config
-import logging
-
-logging.getLogger("tornado.access").disabled = True
 
 server_settings = {
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),

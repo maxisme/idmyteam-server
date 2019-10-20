@@ -27,6 +27,8 @@ from itsdangerous import URLSafeTimedSerializer
 from tornado import template
 from websocket import create_connection
 
+from settings.logs import logger
+
 
 def get_YAML(file):
     with open(file, "r") as f:
@@ -65,7 +67,7 @@ def toggle_team_training(conn, hashed_username, training=True):
         )
         conn.commit()
     except Exception as e:
-        print("error - didn't mark as finished training %s" % e)
+        logger.critical(f"didn't mark as finished training {e}")
         conn.rollback()
     finally:
         x.close()
@@ -90,7 +92,7 @@ def store_feature(
         )
         conn.commit()
     except MySQLdb.Error as e:
-        print(("Couldn't write feature: " + str(e)))
+        logger.critical(f"Couldn't write feature: {e}")
         conn.rollback()
     finally:
         x.close()
@@ -155,8 +157,7 @@ def purge_log(conn, name, type, method, user):
 
 # Pre process a cropped image of the face for the feature extractor model.
 def pre_process_img(img, size):
-    img = cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
-    return img
+    return cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
 
 
 # adds some `padding` to bbox
@@ -322,7 +323,7 @@ class Team:
 
             return AESCipher(key).decrypt(encrypted_credentials) == credentials
         except Exception as e:
-            print("Couldn't fetch credentials %s", e)
+            logger.critical(f"Couldn't fetch credentials {e}")
             return False
 
     @classmethod
@@ -347,7 +348,7 @@ class Team:
                 if t - last_upload < upload_retry_limit:
                     return False
         except Exception as e:
-            logging.error("allowed_to_predict %s", e)
+            logging.error(f"allowed_to_predict {e}")
             return False
 
         # insert new last_upload time
@@ -362,7 +363,7 @@ class Team:
             conn.commit()
             return True
         except MySQLdb.Error as e:
-            logging.error("Couldn't add last_upload: %s", e)
+            logging.error(f"Couldn't add last_upload: {e}")
             conn.rollback()
             return False
 
@@ -381,7 +382,7 @@ class Team:
             )
             return x.fetchall()[0][0]
         except Exception as e:
-            logging.error("get_num_trained_last_hr %s", e)
+            logging.error(f"get_num_trained_last_hr {e}")
             return False
 
     @classmethod
@@ -399,7 +400,7 @@ class Team:
             conn.commit()
             return True
         except MySQLdb.Error as e:
-            print("Couldn't increment num_classifications: " + str(e))
+            logger.critical(f"Couldn't increment num_classifications: {e}")
             conn.rollback()
             return False
 
@@ -417,7 +418,7 @@ class Team:
             conn.commit()
             return True
         except MySQLdb.Error as e:
-            print("Couldn't toggle_storage: " + str(e))
+            logger.critical(f"Couldn't toggle_storage: {e}")
             conn.rollback()
             return False
 
@@ -483,7 +484,7 @@ class Team:
             )
             conn.commit()
         except MySQLdb.Error as e:
-            print(("Couldn't delete users logs: " + str(e)))
+            logger.critical(f"Couldn't delete users logs: {e}")
             return False
 
         # delete features
@@ -496,7 +497,7 @@ class Team:
             )
             conn.commit()
         except MySQLdb.Error as e:
-            print(("Couldn't delete users features: " + str(e)))
+            logger.critical(f"Couldn't delete users features: {e}")
             return False
 
         # delete account
@@ -509,7 +510,7 @@ class Team:
             )
             conn.commit()
         except MySQLdb.Error as e:
-            print(("Couldn't delete user account: " + str(e)))
+            logger.critical(f"Couldn't delete user account: {e}")
             return False
 
         return True
