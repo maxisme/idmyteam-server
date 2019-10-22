@@ -1,4 +1,4 @@
-[![Build Status](http://51.15.224.47:8080/buildStatus/icon?job=idmyteamserver)](http://51.158.167.251:8080/job/idmyteamserver/)
+[![Build Status](https://jenk.ml/job/idmyteam-server/badge/icon)](https://jenk.ml/job/idmyteam-server/)
 
 [Client Code](https://github.com/maxisme/idmyteam-server)
 
