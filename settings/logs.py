@@ -2,6 +2,7 @@ import logging
 from settings.config import ROOT
 
 logging.getLogger("tornado.access").disabled = True
+logging.getLogger("rq.worker").disabled = True
 
 logger = logging.getLogger('')
 logger.setLevel(logging.NOTSET)
