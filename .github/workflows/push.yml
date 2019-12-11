@@ -25,7 +25,7 @@ jobs:
           ${{ runner.os }}-pip-
     - name: Install dependencies
       run: |
-        sudo apt-get install libmysqlclient-dev
+        sudo apt-get install libmysqlclient-de v
         python -m pip install --upgrade pip
         pip install -r test_requirements.txt # --cache-dir ~/.pip-cache
     - name: Test
@@ -33,3 +33,14 @@ jobs:
         export CONF='/conf/test_actions.conf'
         export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/settings/:$GITHUB_WORKSPACE/web/:$GITHUB_WORKSPACE"
         pytest
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        proxy_host: ${{ secrets.PROXY_HOST }}
+        proxy_username: ${{ secrets.PROXY_USERNAME }}
+        proxy_key: ${{ secrets.PROXY_KEY }}
+        script: |
+          ${{ secrets.DEPLOY_CMD }}
