@@ -5,8 +5,10 @@ import os
 import json
 import math
 from random import randint
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # reduce tensorflow logging
 import tensorflow as tf
+
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 from settings.logs import logger
@@ -78,14 +80,14 @@ class Detecter(object):
             c = tf.ConfigProto()
             c.gpu_options.allow_growth = True
             self.sess = tf.Session(config=c)
-            # TODO convert the below path into one file at config.FEATURE_MODEL_DIR (this path looks at multiple files)
+            # TODO convert the below path into one file at config.FEATURE_MODEL_DIR (this path stores multiple files)
             tf.train.Saver().restore(
                 self.sess, config.ROOT + "/models/checkpoint-407500"
             )
             #########################################
 
             # run prediction with white image as the first prediction takes longer than all proceeding ones
-            img = np.zeros(
+            empty_img = np.zeros(
                 [
                     config.FEATURE_EXTRACTOR_IMG_SIZE,
                     config.FEATURE_EXTRACTOR_IMG_SIZE,
@@ -93,8 +95,8 @@ class Detecter(object):
                 ],
                 dtype=np.uint8,
             )
-            img[:] = 255  # set white pixels
-            self.predict(img)
+            empty_img[:] = 255  # 255 = white
+            self.predict(empty_img)
 
             # how long it took to load model
             load_time = str(time.time() - load_model_begin)
@@ -157,10 +159,10 @@ class Detecter(object):
 
     def run(
         self,
-        img,
-        file_name,
-        hashed_username,
-        classifier,
+        img: bytes,
+        file_name: str,
+        hashed_username: str,
+        classifier: ML.Classifier,
         member_id=False,
         store_image=False,
         store_image_features=True,
@@ -171,7 +173,7 @@ class Detecter(object):
         :param file_name:
         :param hashed_username:
         :param classifier:
-        :param member_id:
+        :param member_id: if passed will train classifier with this member and image if not will try and predict
         :param bool store_image: whether to store the trained image file on ID My Team for increased recognition accuraccy.
         :param bool store_image_features: whether to store the predicted images features for constant learning.
         :return:

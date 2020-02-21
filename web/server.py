@@ -26,7 +26,7 @@ app.sentry_client = AsyncSentryClient(config.SENTRY_URL)
 
 def main():
     server = tornado.httpserver.HTTPServer(app)
-    server.bind(8888)
+    server.bind(8080)
     server.start(1)
     IOLoop.current().start()
 

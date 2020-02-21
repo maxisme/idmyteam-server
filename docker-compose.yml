@@ -1,0 +1,46 @@
+version: '3.2'
+services:
+  server:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+
+  ML:
+    build:
+      context: "."
+      dockerfile: "ML/Dockerfile"
+    depends_on:
+      - redis
+
+  db:
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: idmyteam
+      MYSQL_USER: idmyteam
+      MYSQL_PASSWORD: idmyteam
+    container_name: idmyteam-db
+    tty: true
+    restart: always
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - .sql:/sql
+    command: ["-path", "/sql", "-database", "mysql://idmyteam:idmyteam@tcp(db:3306)/idmyteam", "up"]
+    links:
+      - db
+
+  redis:
+    image: redis
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:

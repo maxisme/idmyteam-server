@@ -16,9 +16,9 @@ import authed
 
 redis_conn = Redis()
 
-high_q = Queue("high", connection=redis_conn, default_timeout=60)
-med_q = Queue("medium", connection=redis_conn, default_timeout=60)
-low_q = Queue("low", connection=redis_conn, default_timeout=600)
+high_q = Queue("high", connection=redis_conn, default_timeout=5) # 5 seconds
+med_q = Queue("medium", connection=redis_conn, default_timeout=5) # 5 seconds
+low_q = Queue("low", connection=redis_conn, default_timeout=6000) # allowed to be in the queueue for an hour
 
 
 class ImageUploadHandler(BaseHandler):
@@ -59,6 +59,7 @@ class ImageUploadHandler(BaseHandler):
                                 img = upload["body"]
                                 file_name = self.request.arguments["file-name"][0]
 
+                                # add to redis
                                 med_q.enqueue_call(
                                     func=".",
                                     kwargs={
@@ -94,6 +95,7 @@ class ImageUploadHandler(BaseHandler):
                         user = functions.Team.get(self.conn, username=hashed_username)
                         max_train_imgs_per_hr = user["max_train_imgs_per_hr"]
 
+                        # unzip
                         z = zipfile.ZipFile(
                             io.BytesIO(self.request.files["ZIP"][0]["body"])
                         )
@@ -115,7 +117,7 @@ class ImageUploadHandler(BaseHandler):
                             for member in imgs_to_upload:
                                 for file in imgs_to_upload[member]:
                                     img = z.read(file)
-                                    low_q.enqueue_call(
+                                    if not low_q.enqueue_call(
                                         func=".",
                                         kwargs={
                                             "type": "detect",
@@ -125,7 +127,8 @@ class ImageUploadHandler(BaseHandler):
                                             "member_id": member,
                                             "store_image": bool(user["allow_storage"]),
                                         },
-                                    )
+                                    ):
+                                        return 504
 
                             # tell model to train
                             low_q.enqueue_call(

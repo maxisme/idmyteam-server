@@ -6,6 +6,7 @@ import os
 import redis
 from threading import Thread
 from rq import Worker, Queue, Connection
+from rq.job import Job
 from rq.contrib.sentry import register_sentry
 from raven import Client
 from raven.transport.http import HTTPTransport
@@ -15,21 +16,18 @@ from settings.logs import logger
 
 sentry_sdk.init(os.getenv(config.SENTRY_URL))
 
-listen = ["high", "medium", "low"]
-redis_url = os.getenv("REDISTOGO_URL", "redis://localhost:6379")
-rq_conn = redis.from_url(redis_url)
 
 classifiers = {}
-no_classifier_jobs = {}
 detecter: Detecter = None
 
 
 def main():
     global detecter
     detecter = Detecter()
+    listen = ["high", "medium", "low"]
 
-    with Connection(rq_conn):
-        worker = MainWorker(list(map(Queue, listen)))  # TODO this replaces queue
+    with Connection(redis.from_url(os.getenv("REDISTOGO_URL", "redis://localhost:6379"))):
+        worker = Worker(queues=list(map(Queue, listen)), job_class=CustomJob)
 
         # add sentry logging to worker
         client = Client(config.SENTRY_URL, transport=HTTPTransport)
@@ -39,15 +37,16 @@ def main():
         worker.work()
 
 
-class MainWorker(Worker):
-    def execute_job(self, job, queue):
-        if "hashed_username" in job.kwargs:
-            type = job.kwargs.pop("type")
-            hashed_username = job.kwargs["hashed_username"]
+class CustomJob(Job):
+    def _execute(self):
+        if "hashed_username" in self.kwargs:
+            type = self.kwargs.pop("type")
+            hashed_username = self.kwargs["hashed_username"]
+
             if type == "detect":
                 if hashed_username in classifiers:
                     db_conn = db.pool.raw_connection()
-                    if "member_id" in job.kwargs:
+                    if "member_id" in self.kwargs:
                         # image used for training
                         num_trained = functions.Team.get_num_trained_last_hr(
                             db_conn, hashed_username
@@ -62,18 +61,11 @@ class MainWorker(Worker):
 
                     detecter.run(
                         classifier=classifiers[hashed_username],
-                        **job.kwargs
+                        **self.kwargs
                     )
                 else:
-                    logger.error(f"{hashed_username} has no classifier to run detector with. Reconnect websocket.")
+                    raise Exception(f"{hashed_username} has no classifier to run detector with. Reconnect websocket.")
 
-                    # TODO force reconnect all sockets
-
-                    # add to failed classification jobs
-                    if hashed_username in no_classifier_jobs:
-                        no_classifier_jobs[hashed_username].append((job, queue))
-                    else:
-                        no_classifier_jobs[hashed_username] = [(job, queue)]
             elif type == "train":
                 if hashed_username in classifiers:
                     thread = Thread(
@@ -83,19 +75,17 @@ class MainWorker(Worker):
                     thread.start()
                 else:
                     logger.error(f"Asked to train team that is not connected to ws {hashed_username}")
+
             elif type == "add":
+                # add Classifier to group of classifiers stored in memory
                 classifiers[hashed_username] = Classifier(hashed_username)
                 logger.info(f"Added classifier for {hashed_username}")
 
-                # enque 'detect' jobs that have been pending the addition of this classifier
-                if hashed_username in no_classifier_jobs:
-                    for arr in no_classifier_jobs[hashed_username]:
-                        job, queue = arr
-                        queue.enqueue_job(job)
             elif type == "remove":
                 # remove classifier
                 classifiers.pop(hashed_username, None)
                 logger.info(f"Removed classifier for {hashed_username}")
+        return self.func(*self.args, **self.kwargs)
 
 
 if __name__ == "__main__":
