@@ -6,3 +6,8 @@
 $ git config core.hooksPath .githooks/
 $ chmod +x .githooks/*
 ```
+
+To create new migrations run:
+```
+$ migrate create -ext sql -dir sql/ -seq "description"
+```
