@@ -1,9 +1,6 @@
 # emulates connection from web panel
 
 import mock
-from tornado.httpclient import HTTPRequest
-from tornado.websocket import websocket_connect
-from tornado import gen
 
 from test_web import TeamGenerator
 from web_helpers import WebTest
