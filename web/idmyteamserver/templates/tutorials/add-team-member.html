@@ -1,4 +1,4 @@
-{% extends '../helpers/base.html' %}
+{% extends 'base.html' %}
 {% block content %}
     <div class="chat-text row">
         <div class="col s12">
@@ -10,14 +10,14 @@
             Fill out the members details:
         </div>
         <div align="center" class="col s12 m6">
-            <img src="{% static 'images/tutorials/member_form.gif' %}"/>
+            <img src="{{ static_url('images/tutorials/member_form.gif') }}"/>
         </div>
 
         <div class="col s12">
             And train your team member:
         </div>
         <div align="center" class="col s12 m6">
-            <img src="{% static 'images/tutorials/member_form.gif' %}"/>
+            <img src="{{ static_url('images/tutorials/member_form.gif') }}"/>
         </div>
         <div class="col s12">
             First of all you should set your camera to training mode if it is not already.

@@ -2,18 +2,15 @@ import json
 import urllib.request, urllib.parse, urllib.error
 
 from settings import functions, config, db
-from view import BaseHandler
-import forms
 from ML.classifier import Classifier
 
 clients = {}
 
 
 class ProfileHandler(BaseHandler):
-    def get(self):
+    def profile_handler(self):
         self.tmpl["title"] = "Profile"
-        username = self.tmpl["username"]
-        if username:
+        if request.user.is_authenticated:
             hashed_username = functions.hash(username)
             self.conn = db.pool.raw_connection()
 

@@ -1,31 +1,30 @@
-{% load static %}
 <html>
 <head>
     <!-- custom meta -->
     <title>{{ title }}</title>
     <meta property="og:title" content="{{ title }}" />
-    <meta property="og:description" content="{{  meta.description }}"/>
-    <meta property="og:image" content="{% static 'images/og_logo.png' %}" />
-    <meta name="keywords" content="{{ meta.keywords }}">
-    <meta name="description" content="{{ meta.description }}">
-    <link rel="shortcut icon" href="{% static 'images/icon.ico' %}">
+    <meta property="og:description" content="{{  meta['description'] }}"/>
+    <meta property="og:image" content="{{ static_url('images/og_logo.png')}}" />
+    <meta name="keywords" content="{{ meta['keywords'] }}">
+    <meta name="description" content="{{ meta['description'] }}">
+    <link rel="shortcut icon" href="{{ static_url('images/icon.ico')}}">
 
     {% block scripts %}{% endblock %}
 
     <!-- mobile meta -->
     <meta name="viewport" content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
     <!-- jQuery -->
-    <script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+    <script type="text/javascript" src="{{ static_url('js/jquery-3.2.1.min.js') }}"></script>
     <!-- Third party JavaScript -->
-    <script src="{% static 'js/materialize.min.js' %}"></script>
+    <script src="{{ static_url('js/materialize.min.js') }}"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="{{ static_url('css/main.css') }}" rel="stylesheet">
     <!-- Custom JS -->
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{{ static_url('js/script.js') }}"></script>
 
     <!-- custom js -->
     {% block js %}{% endblock %}
@@ -50,25 +49,24 @@
 <body>
     <nav class="z-depth-0">
         <div class="nav-wrapper">
-            <a href="/" class="brand-logo"><img class="svg" src="{% static 'images/logo.svg' %}"/></a>
+            <a href="/" class="brand-logo"><img class="svg" src="{{ static_url('images/logo.svg') }}"/></a>
             <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
             <ul class="right hide-on-med-and-down">
-                {%  raw menu_bar_content %}
+                {{ menu_bar_content|safe }}
             </ul>
             <ul class="side-nav" id="mobile-demo">
-                {%  raw menu_bar_content %}
+                {{ menu_bar_content|safe }}
             </ul>
         </div>
     </nav>
     <div class="content" align="center">
         {% if title %} <h2><strong>{{ title }}</strong></h2> {% endif %}
         {% if error_message %}
-            <div class='flash-bar error'>{% raw error_message %}</div>
+            <div class='flash-bar error'>{{ error_message }}</div>
         {% elif success_message %}
-            <div class='flash-bar success'>{% raw success_message %}</div>
+            <div class='flash-bar success'>{{ success_message }}</div>
         {% endif %}
 
         {% block content %}{% endblock %}
-
     </div>
 </body>

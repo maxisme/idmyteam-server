@@ -3,3 +3,4 @@ ML/helpers
 *remote.conf
 models
 !.empty
+*.pyc

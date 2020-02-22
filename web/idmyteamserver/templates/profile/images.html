@@ -1,4 +1,4 @@
-{% extends '../helpers/base.html' %}
+{% extends 'base.html' %}
 {% block content %}
 <style>
     .row{
@@ -17,6 +17,6 @@
     <div class="row">
         {% for src in images %}
                 <img src="data:image/jpeg;base64, {{ src }}" width="100%">
-        {% end %}
+        {% endfor %}
     </div>
-{% end %}
+{% endblock %}

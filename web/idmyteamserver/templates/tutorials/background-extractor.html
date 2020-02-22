@@ -1,4 +1,4 @@
-{% extends '../helpers/base.html' %}
+{% extends 'base.html' %}
 {% block content %}
     <div class="chat-text row">
         <div class="col s12">
@@ -13,7 +13,7 @@
                 class="material-icons">photo_camera</span>), so that the live stream shows you extracted movement:
         </div>
         <div align="center" class="col s12 m6">
-            <img src="{% static 'images/tutorials/mask_settings.gif' %}"/>
+            <img src="{{ static_url('images/tutorials/mask_settings.gif') }}"/>
         </div>
 
         <div class="col s12">
@@ -33,7 +33,7 @@
         </div>
 
         <div align="center" class="col s12 m6">
-            <img src="{% static 'images/tutorials/noisy_mask.gif' %}"/>
+            <img src="{{ static_url('images/tutorials/noisy_mask.gif') }}"/>
         </div>
 
         <div class="col s12">
@@ -43,7 +43,7 @@
         </div>
 
         <div align="center" class="col s12 m6">
-            <img src="{% static 'images/tutorials/mask_settings_thresh.gif' %}"/>
+            <img src="{{ static_url('images/tutorials/mask_settings_thresh.gif') }}"/>
         </div>
 
         <div class="col s12">
