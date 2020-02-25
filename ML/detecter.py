@@ -5,8 +5,10 @@ import os
 import json
 import math
 from random import randint
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # reduce tensorflow logging
 import tensorflow as tf
+
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 from settings.logs import logger
