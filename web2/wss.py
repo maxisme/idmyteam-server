@@ -9,7 +9,7 @@ import upload, authed
 from settings.logs import logger
 
 
-class WebSocketHandler():
+class WebSocketHandler:
     hashed_username = None
     local_ip = None
 
@@ -97,7 +97,7 @@ class WebSocketHandler():
         super(WebSocketHandler, self).close(code)
 
 
-class LocalWebSocketHandler():
+class LocalWebSocketHandler:
     def check_origin(self, origin):
         if origin == config.LOCAL_SOCKET_URL.replace("ws", "http"):
             return True

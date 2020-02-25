@@ -16,5 +16,5 @@ Including another URLconf
 from django.urls import path, include
 
 urlpatterns = [
-    path('', include('idmyteamserver.urls')),
+    path("", include("idmyteamserver.urls")),
 ]

@@ -44,53 +44,59 @@ clients = {}
 
 
 def view_stored_images_handler(request):
-    context = {'title': 'Stored Images'}
+    context = {"title": "Stored Images"}
     if request.user.is_authenticated():
         context["images"] = functions.Team.get_stored_images(
             functions.hash(request.user.username), config.STORE_IMAGES_DIR
         )
         return render("profile/images.html", context)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect("/")
 
 
 INVALID_LOGIN_MESSAGE = "Invalid credentials! Please try again."
-INVALID_SIGNUP_MESSAGE = "Error with user information! Please try a different username or email"
+INVALID_SIGNUP_MESSAGE = (
+    "Error with user information! Please try a different username or email"
+)
 
 
 def login_handler(request):
     cookies = {}
-    if request.method == 'POST':
+    if request.method == "POST":
         form = forms.LoginForm(request.POST)
         if form.validate():
             user = authenticate(request.POST)
             if user and user["confirmed_email"]:
-                return HttpResponseRedirect('/profile')
+                return HttpResponseRedirect("/profile")
             else:
                 logout(request)
                 cookies = {
                     ERROR_COOKIE_KEY: """
                     You have not confirmed your email! <a href='/resend?email={}'>Resend confirmation?</a>
-                    """.format(user["email"])
+                    """.format(
+                        user["email"]
+                    )
                 }
         else:
-            cookies = {
-                ERROR_COOKIE_KEY: INVALID_LOGIN_MESSAGE
-            }
+            cookies = {ERROR_COOKIE_KEY: INVALID_LOGIN_MESSAGE}
     else:
         form = forms.LoginForm()
-    return render(request, 'forms/form.html', {'title': 'Login', 'form': form}, cookies=cookies)
+    return render(
+        request, "forms/form.html", {"title": "Login", "form": form}, cookies=cookies
+    )
 
 
 def signup_handler(request):
     cookies = {}
-    if request.method == 'POST':
+    if request.method == "POST":
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
             form.save()
     else:
         form = forms.SignUpForm()
 
-    return render(request, 'forms/form.html', {'title': 'Login', 'form': form}, cookies=cookies)
+    return render(
+        request, "forms/form.html", {"title": "Login", "form": form}, cookies=cookies
+    )
 
 
 # context["form"] = form = forms.SignUpForm(self.request.arguments)
@@ -197,10 +203,10 @@ class ResetPassword(LoginHandler):
                 self.conn = db.pool.raw_connection()
                 team = functions.Team.get(self.conn, **args)
                 if team and functions.Team.PasswordReset.validate(
-                        self.conn, team["email"], form.token.data, config.SECRETS["token"]
+                    self.conn, team["email"], form.token.data, config.SECRETS["token"]
                 ):
                     if functions.Team.reset_password(
-                            self.conn, form.password.data, **args
+                        self.conn, form.password.data, **args
                     ):
                         return self.flash_success(self.SUCCESS, "/login")
             return self.flash_error(self.ERROR, "/forgot")

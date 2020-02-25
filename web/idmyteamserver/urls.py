@@ -17,11 +17,11 @@ from django.urls import path
 from idmyteamserver import views
 
 urlpatterns = [
-    path('', views.welcome_handler),
-    path('about', views.about_handler),
-    path('contact', views.contact_handler),
-    path('terms', views.terms_handler),
-    path('storage', views.storage_handler),
-    path('tutorials', views.tutorials_handler),
-    path("tutorials/<slug:slug>", views.tutorial_hander)
+    path("", views.welcome_handler),
+    path("about", views.about_handler),
+    path("contact", views.contact_handler),
+    path("terms", views.terms_handler),
+    path("storage", views.storage_handler),
+    path("tutorials", views.tutorials_handler),
+    path("tutorials/<slug:slug>", views.tutorial_hander),
 ]
