@@ -5,7 +5,16 @@ ERROR_COOKIE_KEY = "error_message"
 SUCCESS_COOKIE_KEY = "success_message"
 
 
-def render(request, template_name, context={}, cookies={}, redirect="", content_type=None, status=None, using=None):
+def render(
+    request,
+    template_name,
+    context={},
+    cookies={},
+    redirect="",
+    content_type=None,
+    status=None,
+    using=None,
+):
     """
     Return a HttpResponse whose content is filled with the result of calling
     django.template.loader.render_to_string() with the passed arguments.
@@ -28,7 +37,9 @@ def render(request, template_name, context={}, cookies={}, redirect="", content_
         if context.get("username", False):
             context["username"] = context["username"].decode("utf-8")
 
-        content = loader.render_to_string(template_name, {**c, **context}, request, using=using)
+        content = loader.render_to_string(
+            template_name, {**c, **context}, request, using=using
+        )
         resp = HttpResponse(content, content_type, status)
 
         # remove flash messages

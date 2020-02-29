@@ -3,7 +3,7 @@ socket_clients = set()
 classifiers = {}
 
 
-class BaseHandler():
+class BaseHandler:
     def __init__(self, *args, **kwargs):
         super(BaseHandler, self).__init__(*args, **kwargs)
 

@@ -9,17 +9,19 @@ class LoginForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ['username', 'password']
+        fields = ["username", "password"]
 
 
 class SignUpForm(ModelForm):
-    confirm_password = forms.CharField(min_length=8, widget=forms.PasswordInput(), required=True)
+    confirm_password = forms.CharField(
+        min_length=8, widget=forms.PasswordInput(), required=True
+    )
     terms = forms.BooleanField(required=True)
     captcha = ReCaptchaField()
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'allow_storage']
+        fields = ["username", "password", "email", "allow_storage"]
 
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()
@@ -27,9 +29,8 @@ class SignUpForm(ModelForm):
         confirm_password = cleaned_data.get("confirm_password")
 
         if password != confirm_password:
-            raise forms.ValidationError(
-                "password and confirm_password does not match"
-            )
+            raise forms.ValidationError("password and confirm_password does not match")
+
 
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):

@@ -56,16 +56,17 @@ class MainWorker(Worker):
                             db_conn, username=hashed_username
                         )["max_train_imgs_per_hr"]
                         if num_trained >= num_allowed:
-                            logger.warning(f"User {hashed_username} has uploaded too many images.")
+                            logger.warning(
+                                f"User {hashed_username} has uploaded too many images."
+                            )
                             return
                     db_conn.close()
 
-                    detecter.run(
-                        classifier=classifiers[hashed_username],
-                        **job.kwargs
-                    )
+                    detecter.run(classifier=classifiers[hashed_username], **job.kwargs)
                 else:
-                    logger.error(f"{hashed_username} has no classifier to run detector with. Reconnect websocket.")
+                    logger.error(
+                        f"{hashed_username} has no classifier to run detector with. Reconnect websocket."
+                    )
 
                     # TODO force reconnect all sockets
 
@@ -76,13 +77,13 @@ class MainWorker(Worker):
                         no_classifier_jobs[hashed_username] = [(job, queue)]
             elif type == "train":
                 if hashed_username in classifiers:
-                    thread = Thread(
-                        target=classifiers[hashed_username].train
-                    )
+                    thread = Thread(target=classifiers[hashed_username].train)
                     thread.daemon = True
                     thread.start()
                 else:
-                    logger.error(f"Asked to train team that is not connected to ws {hashed_username}")
+                    logger.error(
+                        f"Asked to train team that is not connected to ws {hashed_username}"
+                    )
             elif type == "add":
                 classifiers[hashed_username] = Classifier(hashed_username)
                 logger.info(f"Added classifier for {hashed_username}")
