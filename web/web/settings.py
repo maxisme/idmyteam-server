@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'idmyteam.apps.IdmyteamConfig',
-    'captcha'
+    'captcha',
+    'simple_email_confirmation'
 ]
 
 MIDDLEWARE = [

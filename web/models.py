@@ -1,16 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
+from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
 
-class User(User):
+class User(SimpleEmailConfirmationUserMixin, User):
     RESET_TOKEN_LEN = 200
     HASH_LEN = 64
 
     username = models.CharField(max_length=HASH_LEN, unique=True)
     email = models.EmailField(unique=True)
-
-    confirmed_email_dttm = models.TimeField()
-    email_confirm_token = models.CharField(max_length=RESET_TOKEN_LEN)
 
     password_reset_token = models.CharField(max_length=RESET_TOKEN_LEN)
 

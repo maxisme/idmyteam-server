@@ -87,6 +87,14 @@ def signup_handler(request):
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
             form.save()
+            if functions.Team.ConfirmEmail.send_confirmation(
+                    self.conn,
+                    form.email.data,
+                    form.username.data,
+                    config.EMAIL_CONFIG,
+                    config.ROOT,
+                    config.SECRETS["token"],
+            ):
     else:
         form = forms.SignUpForm()
 
@@ -127,9 +135,9 @@ def signup_handler(request):
 #     context["failed_captcha"] = True
 # return self._screen()
 
-# def _screen(self):
-#     context["title"] = "Sign Up"
-#     self.render("forms/form.html", **context)
+def _screen(self):
+    context["title"] = "Sign Up"
+    self.render("forms/form.html", **context)
 
 
 class ForgotPassword(LoginHandler):
