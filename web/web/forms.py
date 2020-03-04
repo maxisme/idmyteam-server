@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from models import User
+from idmyteamserver.models import Account
 from captcha.fields import ReCaptchaField
 
 
@@ -8,7 +8,7 @@ class LoginForm(ModelForm):
     captcha = ReCaptchaField()
 
     class Meta:
-        model = User
+        model = Account
         fields = ["username", "password"]
 
 
@@ -20,7 +20,7 @@ class SignUpForm(ModelForm):
     captcha = ReCaptchaField()
 
     class Meta:
-        model = User
+        model = Account
         fields = ["username", "password", "email", "allow_storage"]
 
     def clean(self):

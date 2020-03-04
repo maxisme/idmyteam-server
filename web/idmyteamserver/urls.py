@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from idmyteamserver import views
+from idmyteamserver import views, auth
 
 urlpatterns = [
     path("", views.welcome_handler),
@@ -24,4 +24,5 @@ urlpatterns = [
     path("storage", views.storage_handler),
     path("tutorials", views.tutorials_handler),
     path("tutorials/<slug:slug>", views.tutorial_hander),
+    path("signup", auth.signup_handler),
 ]

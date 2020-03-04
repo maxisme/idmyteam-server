@@ -3,16 +3,12 @@ from django.contrib.auth.models import User
 from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
 
-class User(SimpleEmailConfirmationUserMixin, User):
-    RESET_TOKEN_LEN = 200
-    HASH_LEN = 64
+class Account(SimpleEmailConfirmationUserMixin, User):
+    PASS_RESET_TOKEN_LEN = 200
 
-    username = models.CharField(max_length=HASH_LEN, unique=True)
-    email = models.EmailField(unique=True)
+    password_reset_token = models.CharField(max_length=PASS_RESET_TOKEN_LEN)
 
-    password_reset_token = models.CharField(max_length=RESET_TOKEN_LEN)
-
-    credentials = models.CharField()
+    credentials = models.CharField(max_length=150)
 
     num_classifications = models.IntegerField()
 
@@ -20,7 +16,7 @@ class User(SimpleEmailConfirmationUserMixin, User):
     max_class_num = models.IntegerField()
     upload_retry_limit = models.FloatField()
 
-    local_ip = models.IPAddressField()
+    local_ip = models.GenericIPAddressField()
 
     last_upload = models.TimeField()
 
@@ -32,5 +28,5 @@ class User(SimpleEmailConfirmationUserMixin, User):
 
 class Login(models.Model):
     dttm = models.TimeField(auto_now=True)
-    account = models.ForeignKey(User, on_delete=models.CASCADE)
-    ip = models.IPAddressField()
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    ip = models.GenericIPAddressField()

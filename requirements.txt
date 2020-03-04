@@ -1,5 +1,3 @@
-# cupy-cuda100 # doesn't work for macos
-# tf via https://www.pytorials.com/how-to-install-tensorflow-gpu-with-cuda-10-0-for-python-on-ubuntu/
 asgiref==3.2.3
 attrs==19.3.0
 bcrypt==3.1.7
@@ -14,6 +12,10 @@ cssselect==1.1.0
 cssutils==1.0.2
 cycler==0.10.0
 Django==3.0.3
+django-ranged-response==0.2.0
+Jinja2==2.11.1
+django-recaptcha==2.0.6
+django-simple-email-confirmation==0.70
 Faker==4.0.1
 filelock==3.0.12
 idna==2.9
