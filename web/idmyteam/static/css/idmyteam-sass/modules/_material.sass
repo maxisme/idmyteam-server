@@ -4,8 +4,11 @@
   vertical-align: middle
   line-height: unset
 
+.input-field.col label
+  left: 0.5em !important
+
 label
-  font-size: 0.8em !important
+  font-size: 0.5em !important
   color: $black
   cursor: default !important
 
@@ -14,6 +17,7 @@ label
   position: relative
   transition: all 0.3s ease 0s
   top: 0
+
   &:hover
     box-shadow: none
   text-shadow: 0 0 20 $black
@@ -24,12 +28,14 @@ label
   padding: 0 0.7rem
   font-size: 10px
   background-color: $light-grey
+
   &:hover
     background-color: $grey
 
 .toast
   a
     color: $green
+
   span
     color: $white !important
 

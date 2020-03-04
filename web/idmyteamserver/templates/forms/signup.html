@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="col s12">
+        <div class="card">
+            <div class="card-content">
+                <form method="post" action="{{ request.path }}">
+                    {{ csrf_input }}
+
+                    <div class="row">
+                        <div class="input-field s12 col">
+                            {{ form.username }}
+                            <label for="{{ form.username.name }}">
+                                {{ form.username.field.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field s6 col">
+                            {{ form.password }}
+                            <label for="{{ form.password.name }}">
+                                {{ form.password.field.label }}
+                            </label>
+                        </div>
+
+                        <div class="input-field s6 col">
+                            {{ form.confirm }}
+                            <label for="{{ form.confirm.name }}">
+                                {{ form.confirm.field.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field s12 col">
+                            {{ form.email }}
+                            <label for="{{ form.email.name }}">
+                                {{ form.email.field.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="s12 col">
+                            {{ form.store }}
+                            <label for="{{ form.store.name }}">
+                                {{ form.store.field.label|safe }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="s12 col">
+                            {{ form.terms }}
+                            <label for="{{ form.terms.name }}">
+                                {{ form.terms.field.label|safe }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div align="center" class="row">
+                        <br>
+                        {{ form.captcha }}
+                    </div>
+
+                    <div align="center" class="row">
+                        <button class="btn waves-effect waves-light" type="submit" name="action">
+                        Submit
+                        </input>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

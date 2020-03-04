@@ -98,7 +98,7 @@ def signup_handler(request):
         form = forms.SignUpForm()
 
     return render(
-        request, "forms/form.html", {"title": "Login", "form": form}, cookies=cookies
+        request, "forms/signup.html", {"title": "Login", "form": form}, cookies=cookies
     )
 
 

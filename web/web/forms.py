@@ -13,22 +13,36 @@ class LoginForm(ModelForm):
 
 
 class SignUpForm(ModelForm):
-    confirm_password = forms.CharField(
-        min_length=8, widget=forms.PasswordInput(), required=True
+    password = forms.CharField(
+        min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
     )
-    terms = forms.BooleanField(required=True)
+    confirm = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(),
+        required=True,
+        label="Confirm Password",
+    )
+    store = forms.BooleanField(
+        label="Allow us to store images for <a href='/storage'>increased accuracy over time</a>",
+        widget=forms.CheckboxInput(attrs={"id": "store"}),
+    )
+    terms = forms.BooleanField(
+        label="Accept <a href='/terms'>Terms & Conditions</a>",
+        required=True,
+        widget=forms.CheckboxInput(attrs={"id": "terms"}),
+    )
     captcha = ReCaptchaField()
 
     class Meta:
         model = Account
-        fields = ["username", "password", "email", "allow_storage"]
+        fields = ["username", "password", "confirm", "email", "store", "terms"]
 
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()
         password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
+        confirm = cleaned_data.get("confirm")
 
-        if password != confirm_password:
+        if password != confirm:
             raise forms.ValidationError("password and confirm_password does not match")
 
 
