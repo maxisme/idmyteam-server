@@ -42,14 +42,14 @@ clients = {}
 #     return self.redirect("/login")
 
 
-def view_stored_images_handler(request):
-    context = {"title": "Stored Images"}
-    if request.user.is_authenticated():
-        context["images"] = functions.Team.get_stored_images(
-            functions.hash(request.user.username), config.STORE_IMAGES_DIR
-        )
-        return render("profile/images.html", context)
-    return HttpResponseRedirect("/")
+# def view_stored_images_handler(request):
+#     context = {"title": "Stored Images"}
+#     if request.user.is_authenticated():
+#         context["images"] = functions.Team.get_stored_images(
+#             functions.hash(request.user.username), config.STORE_IMAGES_DIR
+#         )
+#         return render("profile/images.html", context)
+#     return HttpResponseRedirect("/")
 
 
 INVALID_LOGIN_MESSAGE = "Invalid credentials! Please try again."

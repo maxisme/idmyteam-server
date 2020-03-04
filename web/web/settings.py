@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "idmyteamserver.apps.IdmyteamserverConfig",
     "captcha",
     "simple_email_confirmation",
+    "materializecssform",
 ]
 
 MIDDLEWARE = [
