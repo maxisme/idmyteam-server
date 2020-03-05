@@ -5,3 +5,5 @@ models
 !.empty
 *.pyc
 .env
+*.sassc
+*.scssc

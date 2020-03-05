@@ -24,6 +24,7 @@ class SignUpForm(ModelForm):
     )
     store = forms.BooleanField(
         label="Allow us to store images for <a href='/storage'>increased accuracy over time</a>",
+        required=False,
         widget=forms.CheckboxInput(attrs={"id": "store"}),
     )
     terms = forms.BooleanField(
@@ -43,7 +44,7 @@ class SignUpForm(ModelForm):
         confirm = cleaned_data.get("confirm")
 
         if password != confirm:
-            raise forms.ValidationError("password and confirm_password does not match")
+            raise forms.ValidationError("Passwords do not match!")
 
 
 # class CustomForm(Form):

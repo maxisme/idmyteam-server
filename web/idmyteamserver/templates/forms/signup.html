@@ -4,6 +4,13 @@
     <div class="col s12">
         <div class="card">
             <div class="card-content">
+                <div align="center">
+                {% for error in form.errors %}
+                    {% if error in ("__all__", "captcha") %}
+                        {{ form.errors[error] }}
+                    {% endif %}
+                {% endfor %}
+                </div>
                 <form method="post" action="{{ request.path }}">
                     {{ csrf_input }}
 
@@ -22,6 +29,7 @@
                             <label for="{{ form.password.name }}">
                                 {{ form.password.field.label }}
                             </label>
+                            {{ form.password.errors }}
                         </div>
 
                         <div class="input-field s6 col">
@@ -29,6 +37,7 @@
                             <label for="{{ form.confirm.name }}">
                                 {{ form.confirm.field.label }}
                             </label>
+                            {{ form.confirm.errors }}
                         </div>
                     </div>
 
@@ -67,7 +76,7 @@
                     <div align="center" class="row">
                         <button class="btn waves-effect waves-light" type="submit" name="action">
                         Submit
-                        </input>
+                        </button>
                     </div>
                 </form>
             </div>

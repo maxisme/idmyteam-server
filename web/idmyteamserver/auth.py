@@ -1,12 +1,13 @@
 from django.contrib.auth import authenticate, logout
 from django.http import HttpResponseRedirect
+from django.core.mail import send_mail
 
 from idmyteamserver.helpers import ERROR_COOKIE_KEY
+from idmyteamserver.models import Account
 from idmyteamserver.views import render
-from web import forms
+from idmyteamserver import forms
 
 clients = {}
-
 
 # def profile_handler(request):
 #     if request.user.is_authenticated:
@@ -93,14 +94,15 @@ def signup_handler(request):
     if request.method == "POST":
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = Account.objects.create_user(**request.POST.dict())
+            print(user)
+
     else:
         form = forms.SignUpForm()
 
     return render(
         request, "forms/signup.html", {"title": "Login", "form": form}, cookies=cookies
     )
-
 
 # context["form"] = form = forms.SignUpForm(self.request.arguments)
 # if self._is_valid_captcha(self.request.arguments):

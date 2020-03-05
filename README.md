@@ -8,3 +8,5 @@ $ chmod +x .githooks/*
 ```
 
 1. create db
+
+2. `python manage.py makemigrations idmyteamserver`

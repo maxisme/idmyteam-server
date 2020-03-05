@@ -38,6 +38,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'idmyteamserver.Account'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -107,9 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator", },
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator", },
 ]
 
 PASSWORD_HASHERS = [
@@ -136,3 +138,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = "/static/"
+
+# project stuff
+DEFAULT_NUM_TRAINING_IMGS_PER_HOUR = 60
+DEFAULT_NUM_CLASSES = 5
+DEFAULT_UPLOAD_RETRY_LIMIT = 0.5
+PASS_RESET_TOKEN_LEN = 200
