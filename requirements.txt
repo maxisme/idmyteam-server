@@ -12,6 +12,7 @@ cssselect==1.1.0
 cssutils==1.0.2
 cycler==0.10.0
 Django==3.0.3
+django-captcha==1.0.0
 django-ranged-response==0.2.0
 django-recaptcha==2.0.6
 django-simple-email-confirmation==0.70
@@ -45,6 +46,7 @@ pycrypto==2.6.1
 pyparsing==2.4.6
 pytest==5.3.5
 python-dateutil==2.8.1
+python-dotenv==0.12.0
 pytz==2019.3
 PyYAML==5.3
 raven==6.10.0
@@ -59,6 +61,7 @@ sklearn==0.0
 SQLAlchemy==1.3.13
 sqlparse==0.3.0
 text-unidecode==1.3
+tornado==6.0.3
 typing-extensions==3.7.4.1
 urllib3==1.25.8
 wcwidth==0.1.8

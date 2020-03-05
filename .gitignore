@@ -4,3 +4,4 @@ ML/helpers
 models
 !.empty
 *.pyc
+.env
