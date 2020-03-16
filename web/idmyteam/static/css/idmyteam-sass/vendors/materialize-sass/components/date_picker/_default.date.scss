@@ -155,7 +155,7 @@
   letter-spacing: -.3;
   padding: .75rem 0;
   font-weight: 400;
-  border: 1px solid transparent;
+  border: 3px solid transparent;
 
 }
 
@@ -236,7 +236,7 @@
 .picker__button--today,
 .picker__button--clear,
 .picker__button--close {
-  border: 1px solid #ffffff;
+  border: 3px solid #ffffff;
   background: #ffffff;
   font-size: .8em;
   padding: .66em 0;
@@ -382,7 +382,7 @@
   letter-spacing: -.3px;
   padding: 0.75rem 0;
   font-weight: 400;
-  border: 1px solid transparent;
+  border: 3px solid transparent;
 }
 @media only screen and (min-width: 601px) {
 	.picker__day--infocus {

@@ -35,11 +35,11 @@
 // 1. Colors
 // ==========================================================================
 
-$primary-color: color("materialize-red", "lighten-2") !default;
+$primary-color: #b0b0b0 !default;
 $primary-color-light: lighten($primary-color, 15%) !default;
 $primary-color-dark: darken($primary-color, 15%) !default;
 
-$secondary-color: color("teal", "lighten-1") !default;
+$secondary-color: #5D6A70 !default;
 $success-color: color("green", "base") !default;
 $error-color: color("red", "base") !default;
 $link-color: color("light-blue", "darken-1") !default;
@@ -162,7 +162,7 @@ $roboto-font-path: "../fonts/roboto/" !default;
 // Text Inputs + Textarea
 $input-height: 3rem !default;
 $input-border-color: color("grey", "base") !default;
-$input-border: 1px solid $input-border-color !default;
+$input-border: 3px solid #333 !default;
 $input-background: #fff !default;
 $input-error-color: $error-color !default;
 $input-success-color: $success-color !default;
@@ -175,8 +175,8 @@ $input-transition: all .3s !default;
 $label-font-size: .8rem !default;
 $input-disabled-color: rgba(0,0,0, .42) !default;
 $input-disabled-solid-color: #949494 !default;
-$input-disabled-border: 1px dotted $input-disabled-color !default;
-$input-invalid-border: 1px solid $input-error-color !default;
+$input-disabled-border: 3px dotted $input-disabled-color !default;
+$input-invalid-border: 3px solid $input-error-color !default;
 $placeholder-text-color: lighten($input-border-color, 20%) !default;
 
 // Radio Buttons
@@ -190,9 +190,9 @@ $range-width: 14px !default;
 $track-height: 3px !default;
 
 // Select
-$select-border: 1px solid #f2f2f2 !default;
+$select-border: 3px solid #f2f2f2 !default;
 $select-background: rgba(255, 255, 255, 0.90) !default;
-$select-focus: 1px solid lighten($secondary-color, 47%) !default;
+$select-focus: 3px solid lighten($secondary-color, 47%) !default;
 $select-option-hover: rgba(0,0,0,.06) !default;
 $select-option-focus: rgba(0,0,0,.03) !default;
 $select-padding: 5px !default;
