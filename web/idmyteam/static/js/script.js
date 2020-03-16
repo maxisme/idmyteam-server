@@ -1,7 +1,5 @@
 $(document).ready(function(){
 	$(".button-collapse").sideNav();
-
-    // $("#submit").attr("disabled", "disabled");
 	
 	/* Replace all SVG images with inline SVG */
 	jQuery('img.svg').each(function(){

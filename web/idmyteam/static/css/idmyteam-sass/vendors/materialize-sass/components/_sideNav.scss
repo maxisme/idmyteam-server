@@ -38,7 +38,7 @@
     &.active { background-color: rgba(0,0,0,.05); }
   }
 
-  li> a {
+  li > a {
     color: $sidenav-font-color;
     display: block;
     font-size: $sidenav-font-size;
@@ -62,9 +62,9 @@
     &.btn-large:hover { background-color: lighten($button-raised-background, 5%); }
     &.btn-floating:hover { background-color: $button-raised-background; }
 
-    &> i,
-    &> [class^="mdi-"], li> a> [class*="mdi-"],
-    &> i.material-icons {
+    & > i,
+    & > [class^="mdi-"], li > a > [class*="mdi-"],
+    & > i.material-icons {
       float: left;
       height: $sidenav-item-height;
       line-height: $sidenav-line-height;
@@ -98,7 +98,7 @@
     padding: ($sidenav-padding * 2) ($sidenav-padding * 2) 0;
     margin-bottom: $sidenav-padding / 2;
 
-    &> a {
+    & > a {
       &:hover { background-color: transparent; }
       height: auto;
       padding: 0;
@@ -188,8 +188,8 @@
 }
 
 
-.side-nav .collapsible-body> ul:not(.collapsible)> li.active,
-.side-nav.fixed .collapsible-body> ul:not(.collapsible)> li.active {
+.side-nav .collapsible-body > ul:not(.collapsible) > li.active,
+.side-nav.fixed .collapsible-body > ul:not(.collapsible) > li.active {
   background-color: $primary-color;
   a {
     color: $sidenav-bg-color;

@@ -47,7 +47,7 @@ def render(
         resp.set_cookie(SUCCESS_COOKIE_KEY)
 
     # add cookies
-    for key, val in cookies:
-        resp.set_cookie(key, val)
+    for key in cookies:
+        resp.set_cookie(key, cookies[key])
 
     return resp

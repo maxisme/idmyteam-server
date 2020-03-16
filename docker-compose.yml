@@ -1,0 +1,15 @@
+version: '3.2'
+
+services:
+  recognition-worker:
+    build:
+      context: "./ML/"
+    depends_on:
+      - redis
+
+  redis:
+    container_name: redis
+    image: redis
+    volumes:
+      - ../data/redis:/data
+    entrypoint: redis-server --appendonly yes

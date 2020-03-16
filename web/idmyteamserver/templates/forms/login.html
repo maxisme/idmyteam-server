@@ -1,0 +1,16 @@
+{% extends 'form.html' %}
+{% load materializecss %}
+{% block form %}
+    <div class="row">
+        {{ form.username|materializecss:'s12 m6' }}
+        {{ form.password|materializecss:'s12 m6' }}
+    </div>
+
+    <div align="center">
+        <a class="small" href="/forgot">Forgot password?</a>
+    </div>
+
+    <div align="center" class="row">
+        {{ form.captcha|materializecss }}
+    </div>
+{% endblock %}

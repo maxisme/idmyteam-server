@@ -158,14 +158,14 @@ class Detecter(object):
             )  # clear all predicted scores
 
     def run(
-        self,
-        img,
-        file_name,
-        hashed_username,
-        classifier,
-        member_id=False,
-        store_image=False,
-        store_image_features=True,
+            self,
+            img,
+            file_name,
+            hashed_username,
+            classifier,
+            member_id=False,
+            store_image=False,
+            store_image_features=True,
     ):
         """
         :type classifier: ML.Classifier
@@ -295,11 +295,11 @@ class Detecter(object):
                             os.makedirs(dir)
 
                         file_path = (
-                            dir
-                            + hashed_team_member
-                            + "_"
-                            + str(randint(0, 1e20))
-                            + config.IMG_TYPE
+                                dir
+                                + hashed_team_member
+                                + "_"
+                                + str(randint(0, 1e20))
+                                + config.IMG_TYPE
                         )
                         if not os.path.isfile(file_path):
                             break

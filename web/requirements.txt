@@ -1,0 +1,5 @@
+Django==3.0.3
+django-captcha==1.0.0
+django-ranged-response==0.2.0
+django-recaptcha==2.0.6
+django-simple-email-confirmation==0.70

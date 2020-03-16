@@ -171,7 +171,7 @@ button.btn-floating {
 
   &.toolbar {
     &.active {
-      &> a i {
+      & > a i {
         opacity: 0;
       }
     }

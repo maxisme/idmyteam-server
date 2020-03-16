@@ -85,7 +85,7 @@ def login_handler(request):
         cookies = {ERROR_COOKIE_KEY: INVALID_LOGIN_MESSAGE}
 
     return render(
-        request, "forms/form.html", {"title": "Login", "form": form}, cookies=cookies
+        request, "forms/login.html", {"title": "Login", "form": form}, cookies=cookies
     )
 
 

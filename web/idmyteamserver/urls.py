@@ -24,5 +24,7 @@ urlpatterns = [
     path("storage", views.storage_handler),
     path("tutorials", views.tutorials_handler),
     path("tutorials/<slug:slug>", views.tutorial_hander),
+
     path("signup", auth.signup_handler),
+    path("login", auth.login_handler),
 ]
