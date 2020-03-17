@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from idmyteamserver import views, auth
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("", views.welcome_handler),
@@ -27,4 +28,11 @@ urlpatterns = [
 
     path("signup", auth.signup_handler),
     path("login", auth.login_handler),
+    path("logout", auth_views.auth_logout, name='logout'),
+
+    path('reset-password', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('reset-password/done', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset-password/confirm/<uidb64>[0-9A-Za-z]+)-<token>/', auth_views.PasswordResetConfirmView.as_view(),
+         name='password_reset_confirm'),
+    path('reset-password/complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]

@@ -1,0 +1,15 @@
+{% extends 'form.html' %}
+{% load materializecss %}
+{% block form %}
+    <div class="row">
+        {{ form.email|materializecss:'s12 m6' }}
+    </div>
+    or
+    <div class="row">
+        {{ form.email|materializecss:'s12 m6' }}
+    </div>
+
+    <div align="center" class="row">
+        {{ form.captcha|materializecss }}
+    </div>
+{% endblock %}

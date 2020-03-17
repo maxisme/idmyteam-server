@@ -31,14 +31,14 @@ redis_conn = Redis()
 classifier_q = Queue("low", connection=redis_conn)
 
 
-class Detecter(object):
+class Detecter:
     def __init__(self):
         logger.info("Started loading ML models...")
         self.face_localiser = self.FaceLocalisation()
         self.feaure_extractor = self.FeatureExtractor()
         logger.info("Finished loading ML models!")
 
-    class FeatureExtractor(object):
+    class FeatureExtractor:
         model = import_module("train.resnet_v1_50")
         head = import_module("train.fc1024")
 

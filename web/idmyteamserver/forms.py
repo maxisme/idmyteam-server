@@ -4,15 +4,17 @@ from idmyteamserver.models import Account
 from captcha.fields import ReCaptchaField
 
 
-class LoginForm(ModelForm):
-    captcha = ReCaptchaField()
+class RecaptchaForm(forms.Form):
+    class CustomCaptcha(ReCaptchaField):
+        def validate(self, value):
+            # only validate if there is a private_key
+            if self.private_key:
+                super().validate(value)
 
-    class Meta:
-        model = Account
-        fields = ["username", "password"]
+    captcha = CustomCaptcha()
 
 
-class SignUpForm(ModelForm):
+class SignUpForm(RecaptchaForm, ModelForm):
     password = forms.CharField(
         min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
     )
@@ -32,7 +34,6 @@ class SignUpForm(ModelForm):
         required=True,
         widget=forms.CheckboxInput(attrs={"id": "terms"}),
     )
-    captcha = ReCaptchaField()
 
     class Meta:
         model = Account
@@ -47,6 +48,22 @@ class SignUpForm(ModelForm):
             raise forms.ValidationError("Passwords do not match!")
 
 
+class LoginForm(RecaptchaForm):
+    username = forms.CharField(
+        required=True, label="Username",
+    )
+    password = forms.CharField(
+        min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
+    )
+
+    class Meta:
+        fields = ["username", "password"]
+
+
+class ForgotForm(RecaptchaForm):
+    class Meta:
+        model = Account
+        fields = ["username", "email"]
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):
 #         args = self.SimpleMultiDict(*args)

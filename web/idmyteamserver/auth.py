@@ -63,8 +63,11 @@ def login_handler(request):
     cookies = {}
     if request.method == "POST":
         form = forms.LoginForm(request.POST)
-        if form.validate():
-            user = authenticate(request.POST)
+        if form.is_valid():
+            user = authenticate(
+                username=request.POST.get("username", ""),
+                password=request.POST.get("password", "")
+            )
             if user:
                 if user.is_confirmed:
                     return HttpResponseRedirect("/profile")
@@ -77,12 +80,12 @@ def login_handler(request):
                             user["email"]
                         )
                     }
+
+        if not cookies:
+            # show invalid login error cookie
+            cookies = {ERROR_COOKIE_KEY: INVALID_LOGIN_MESSAGE}
     else:
         form = forms.LoginForm()
-
-    if not cookies:
-        # show invalid login error cookie
-        cookies = {ERROR_COOKIE_KEY: INVALID_LOGIN_MESSAGE}
 
     return render(
         request, "forms/login.html", {"title": "Login", "form": form}, cookies=cookies
@@ -94,7 +97,12 @@ def signup_handler(request):
     if request.method == "POST":
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
-            user = Account.objects.create_user(**request.POST.dict())
+            post_data = request.POST.dict()
+            del post_data["csrfmiddlewaretoken"]
+            del post_data["confirm"]  # password
+            del post_data["terms"]
+            del post_data["action"]
+            user = Account.objects.create_user(**post_data)
             print(user)
 
     else:
@@ -104,40 +112,16 @@ def signup_handler(request):
         request, "forms/signup.html", {"title": "Login", "form": form}, cookies=cookies
     )
 
-# context["form"] = form = forms.SignUpForm(self.request.arguments)
-# if self._is_valid_captcha(self.request.arguments):
-#     if form.validate():
-#         self.conn = db.pool.raw_connection()
-#         if functions.Team.sign_up(
-#                 self.conn,
-#                 form.username.data,
-#                 form.password.data,
-#                 form.email.data,
-#                 form.store.data,
-#                 config.SECRETS["crypto"],
-#         ):
-#             if functions.Team.ConfirmEmail.send_confirmation(
-#                     self.conn,
-#                     form.email.data,
-#                     form.username.data,
-#                     config.EMAIL_CONFIG,
-#                     config.ROOT,
-#                     config.SECRETS["token"],
-#             ):
-#                 self.flash_success("Please confirm your email!")
-#                 return self.redirect("/login")
-#             else:
-#                 self.flash_error(self.INVALID_SIGNUP_MESSAGE)
-#         else:
-#             self.flash_error(self.INVALID_SIGNUP_MESSAGE)
-#     else:
-#         for error in form.errors:
-#             self.flash_error(form.errors[error][0])
-#             break
-# else:
-#     context["failed_captcha"] = True
-# return self._screen()
 
+def forgot_handler(request):
+    if request.method == "POST":
+        form = forms.ForgotForm(request.POST)
+    else:
+        form = forms.ForgotForm()
+
+    return render(
+        request, "forms/forgot.html", {"title": "Forgot Password", "form": form}
+    )
 
 # def _screen(self):
 #     context["title"] = "Sign Up"
