@@ -24,10 +24,10 @@ class SignUpForm(RecaptchaForm, ModelForm):
         required=True,
         label="Confirm Password",
     )
-    store = forms.BooleanField(
+    allow_image_storage = forms.BooleanField(
         label="Allow us to store images for <a href='/storage'>increased accuracy over time</a>",
         required=False,
-        widget=forms.CheckboxInput(attrs={"id": "store"}),
+        widget=forms.CheckboxInput(attrs={"id": "allow_image_storage"}),
     )
     terms = forms.BooleanField(
         label="Accept <a href='/terms'>Terms & Conditions</a>",
@@ -37,7 +37,7 @@ class SignUpForm(RecaptchaForm, ModelForm):
 
     class Meta:
         model = Account
-        fields = ["username", "password", "confirm", "email", "store", "terms"]
+        fields = ["username", "password", "confirm", "email", "allow_image_storage", "terms"]
 
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()

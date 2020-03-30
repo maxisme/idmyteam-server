@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, logout
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 
-from idmyteamserver.helpers import ERROR_COOKIE_KEY
+from idmyteamserver.helpers import SUCCESS_COOKIE_KEY
 from idmyteamserver.models import Account
 from idmyteamserver.views import render
 from idmyteamserver import forms
@@ -32,7 +32,7 @@ clients = {}
 #                 else False
 #             )
 #             context["has_model"] = Classifier.exists(hashed_username)
-#             context["root_password"] = "zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQ9laRHZ5b"
+#             context["root_password"] = "zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQForgot password?9laRHZ5b"
 #             context["credentials"] = functions.AESCipher(
 #                 config.SECRETS["crypto"]
 #             ).decrypt(team["credentials"])
@@ -60,56 +60,54 @@ INVALID_SIGNUP_MESSAGE = (
 
 
 def login_handler(request):
-    cookies = {}
+    error_message = ""
     if request.method == "POST":
         form = forms.LoginForm(request.POST)
         if form.is_valid():
-            user = authenticate(
-                username=request.POST.get("username", ""),
-                password=request.POST.get("password", "")
+            username = request.POST['username']
+            password = request.POST['password']
+            user: Account = authenticate(
+                username=username,
+                password=password
             )
             if user:
                 if user.is_confirmed:
                     return HttpResponseRedirect("/profile")
                 else:
                     logout(request)
-                    cookies = {
-                        ERROR_COOKIE_KEY: """
-                        You have not confirmed your email! <a href='/resend?email={}'>Resend confirmation?</a>
-                        """.format(
-                            user["email"]
-                        )
-                    }
-
-        if not cookies:
-            # show invalid login error cookie
-            cookies = {ERROR_COOKIE_KEY: INVALID_LOGIN_MESSAGE}
+                    error_message = """
+                    You have not confirmed your email! <a href='/resend?email={}'>Resend confirmation?</a>
+                    """.format(
+                        user.email
+                    )
+            else:
+                error_message = INVALID_LOGIN_MESSAGE
     else:
         form = forms.LoginForm()
 
     return render(
-        request, "forms/login.html", {"title": "Login", "form": form}, cookies=cookies
+        request, "forms/login.html", {"title": "Login", "form": form}, error_message=error_message
     )
 
 
 def signup_handler(request):
-    cookies = {}
+    unstored_keys = ("confirm", "terms", "captcha")
+
     if request.method == "POST":
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
-            post_data = request.POST.dict()
-            del post_data["csrfmiddlewaretoken"]
-            del post_data["confirm"]  # password
-            del post_data["terms"]
-            del post_data["action"]
-            user = Account.objects.create_user(**post_data)
-            print(user)
-
+            post_data = form.cleaned_data
+            for key in unstored_keys:
+                del post_data[key]
+            Account.objects.create_user(**post_data)
+            return render(request, redirect="/", cookies={
+                SUCCESS_COOKIE_KEY: "Welcome to the Team 🎉 Please confirm your email to complete signup!"
+            })
     else:
         form = forms.SignUpForm()
 
     return render(
-        request, "forms/signup.html", {"title": "Login", "form": form}, cookies=cookies
+        request, "forms/signup.html", {"title": "Login", "form": form}
     )
 
 

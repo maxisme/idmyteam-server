@@ -22,6 +22,6 @@ class Account(AbstractUser, SimpleEmailConfirmationUserMixin):
 
     last_upload = models.TimeField(null=True)
 
-    allow_storage = models.BooleanField(default=False)
+    allow_image_storage = models.BooleanField(default=False)
     is_training = models.BooleanField(default=False)
 

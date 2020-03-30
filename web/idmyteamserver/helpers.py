@@ -1,19 +1,18 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 
-ERROR_COOKIE_KEY = "error_message"
 SUCCESS_COOKIE_KEY = "success_message"
-
 
 def render(
     request,
-    template_name,
+    redirect=None,
+    template_name=None,
     context={},
     cookies={},
-    redirect="",
     content_type=None,
     status=None,
     using=None,
+    **kwargs
 ):
     """
     Return a HttpResponse whose content is filled with the result of calling
@@ -22,16 +21,15 @@ def render(
     if redirect:
         resp = HttpResponseRedirect(redirect)
     else:
-        # add global context
+        # set global context values
         c = {
             "title": "",
             "meta": {
                 "description": "A recognition system for your team.",
-                "keywords": "detect, recognise, facial, detection, team, id, recogniser, id my team, idmy.team",
+                "keywords": "detect, recognise, facial, recognition, facial recognition, detection, team, id, recogniser, ID My Team, idmy.team",
             },
             "username": request.COOKIES.get("username"),
-            "error_message": request.COOKIES.get("error_message"),
-            "success_message": request.COOKIES.get("success_message"),
+            **kwargs
         }
 
         if context.get("username", False):
@@ -42,8 +40,7 @@ def render(
         )
         resp = HttpResponse(content, content_type, status)
 
-        # remove flash messages
-        resp.set_cookie(ERROR_COOKIE_KEY)
+        # remove flash success cookie
         resp.set_cookie(SUCCESS_COOKIE_KEY)
 
     # add cookies
