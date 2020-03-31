@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate, logout
 from django.http import HttpResponseRedirect
-from django.core.mail import send_mail
 
-from idmyteamserver.helpers import SUCCESS_COOKIE_KEY
+from idmyteamserver.email import send_confirm
+from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, is_valid_email, redirect
 from idmyteamserver.models import Account
 from idmyteamserver.views import render
 from idmyteamserver import forms
@@ -99,16 +99,33 @@ def signup_handler(request):
             post_data = form.cleaned_data
             for key in unstored_keys:
                 del post_data[key]
-            Account.objects.create_user(**post_data)
-            return render(request, redirect="/", cookies={
-                SUCCESS_COOKIE_KEY: "Welcome to the Team 🎉 Please confirm your email to complete signup!"
-            })
+            user = Account.objects.create_user(**post_data)
+            if user:
+                # send confirmation email
+                send_confirm(request, to=form.cleaned_data.get("email"), key=user.confirmation_key)
+
+                return redirect("/", cookies={
+                    SUCCESS_COOKIE_KEY: "Welcome! Please confirm your email to complete signup!"
+                })
+            else:
+                form.add_error()
     else:
         form = forms.SignUpForm()
 
     return render(
         request, "forms/signup.html", {"title": "Login", "form": form}
     )
+
+
+def confirm_handler(request, key):
+    user_email = request.GET.get('email', None)
+    if is_valid_email(user_email):
+        user = Account.objects.get(email=user_email)
+        if user:
+            user.confirm_email(key)
+            return redirect("/", cookies={
+                SUCCESS_COOKIE_KEY: f"Welcome to the Team {user.username}!"
+            })
 
 
 def forgot_handler(request):

@@ -13,3 +13,8 @@ $ chmod +x .githooks/*
 ### Helpers
 When editing the models files run:
  - `python manage.py makemigrations idmyteamserver`
+
+
+#### sass
+ - `sass source/stylesheets/index.scss build/stylesheets/index.css`
+ - `$FilePath$ $FileNameWithoutExtension$.css` (intelij)
