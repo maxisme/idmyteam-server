@@ -1,8 +1,10 @@
+import logging
+
 from django.contrib.auth import authenticate, logout
 from django.http import HttpResponseRedirect
 
 from idmyteamserver.email import send_confirm
-from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, is_valid_email, redirect
+from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, is_valid_email, redirect, ERROR_COOKIE_KEY
 from idmyteamserver.models import Account
 from idmyteamserver.views import render
 from idmyteamserver import forms
@@ -122,10 +124,19 @@ def confirm_handler(request, key):
     if is_valid_email(user_email):
         user = Account.objects.get(email=user_email)
         if user:
-            user.confirm_email(key)
-            return redirect("/", cookies={
-                SUCCESS_COOKIE_KEY: f"Welcome to the Team {user.username}!"
-            })
+            email = None
+            try:
+                email = user.confirm_email(key)
+            except Exception as e:
+                logging.error(e)
+
+            if email:
+                return redirect("/", cookies={
+                    SUCCESS_COOKIE_KEY: f"Confirmed! Welcome to the Team {user.username}!"
+                })
+    return redirect("/", cookies={
+        ERROR_COOKIE_KEY: "Problem confirming your account! Please try again."
+    })
 
 
 def forgot_handler(request):

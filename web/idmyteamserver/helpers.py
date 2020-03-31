@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 
 SUCCESS_COOKIE_KEY = "success_message"
+ERROR_COOKIE_KEY = "error_message"
 
 
 def redirect(path, cookies={}):
@@ -37,12 +38,9 @@ def render(
             "description": "A recognition system for your team.",
             "keywords": "detect, recognise, facial, recognition, facial recognition, detection, team, id, recogniser, ID My Team, idmy.team",
         },
-        "username": request.COOKIES.get("username"),
-        **kwargs
+        **kwargs,
+        **request.COOKIES
     }
-
-    if context.get("username", False):
-        context["username"] = context["username"].decode("utf-8")
 
     content = loader.render_to_string(
         template_name, {**c, **context}, request, using=using
@@ -50,6 +48,7 @@ def render(
     resp = HttpResponse(content, content_type, status)
 
     # remove flash success cookie
+    resp.set_cookie(SUCCESS_COOKIE_KEY)
     resp.set_cookie(SUCCESS_COOKIE_KEY)
 
     return resp

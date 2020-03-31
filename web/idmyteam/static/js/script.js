@@ -26,4 +26,8 @@ $(document).ready(function(){
 
 		}, 'xml');
 	});
+
+	$('#alert-close').click(function(){
+		$( "#alert-box" ).fadeOut("slow");
+	});
 });
