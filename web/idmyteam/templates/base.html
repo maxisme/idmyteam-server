@@ -27,12 +27,11 @@
     <link href="{% static 'css/main.css' %}" rel="stylesheet">
     <!-- Custom JS -->
     <script src="{% static 'js/script.js' %}"></script>
-
-    <!-- custom js -->
+    <!-- custom JS -->
     {% block js %}{% endblock %}
 </head>
 
-{% if username %}
+{% if logged_in %}
     {% define "<li><a href='/profile' class='button'>Profile</a></li>" as menu_bar_content %}
 {% else %}
     {% define "<li><a href='/login' class='button'>Log In</a></li><li><a href='/signup' class='button'>Sign Up</a></li>" as menu_bar_content %}
@@ -40,7 +39,7 @@
 
 {% define menu_bar_content|add:"<li><a href='/tutorials' class='button'>Tutorials</a></li><li><a href='/about' class='button'>About</a></li><li><a href='/contact' class='button'>Contact</a></li>" as menu_bar_content %}
 
-{% if username %}
+{% if logged_in %}
     {% define menu_bar_content|add:"<li><a href='/logout' class='button'>Log Out</a></li>" as menu_bar_content %}
 {% endif %}
 
@@ -66,7 +65,11 @@
                     <div class="row">
                         <div class="col s12 m10">
                             <div class="card-content white-text">
-                                {% if error_message %}{{ error_message }}{% else %}{{ success_message }}{% endif %}
+                                {% if error_message %}
+                                    <i class="material-icons">warning</i> {{ error_message }}
+                                {% else %}
+                                    🎉 {{ success_message }}
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col s12 m2">

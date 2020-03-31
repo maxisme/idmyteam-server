@@ -2,11 +2,10 @@
 {% load materializecss %}
 {% block form %}
     <div class="row">
-        {{ form.email|materializecss:'s12 m6' }}
+        Enter username or email that you have forgotten!
     </div>
-    or
     <div class="row">
-        {{ form.email|materializecss:'s12 m6' }}
+        {{ form.usernameemail|materializecss:'s12' }}
     </div>
 
     <div align="center" class="row">

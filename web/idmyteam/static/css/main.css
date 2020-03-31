@@ -7048,7 +7048,8 @@ table {
   display: flex; }
 
 .material-icons {
-  border-bottom: none; }
+  border-bottom: none;
+  color: inherit; }
   .material-icons:hover {
     border-bottom: none; }
 

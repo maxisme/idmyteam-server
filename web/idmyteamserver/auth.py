@@ -1,13 +1,14 @@
 import logging
 
-from django.contrib.auth import authenticate, logout
-from django.http import HttpResponseRedirect
+from django.contrib.auth import authenticate, logout, login
+from django.http import HttpResponseRedirect, HttpResponseNotFound
 
-from idmyteamserver.email import send_confirm
-from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, is_valid_email, redirect, ERROR_COOKIE_KEY
+from idmyteamserver.email import send_confirm, send_reset
+from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, is_valid_email, redirect, ERROR_COOKIE_KEY, random_str
 from idmyteamserver.models import Account
 from idmyteamserver.views import render
 from idmyteamserver import forms
+from web.settings import PASS_RESET_TOKEN_LEN
 
 clients = {}
 
@@ -34,11 +35,10 @@ clients = {}
 #                 else False
 #             )
 #             context["has_model"] = Classifier.exists(hashed_username)
-#             context["root_password"] = "zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQForgot password?9laRHZ5b"
+#             context["root_password"] = "zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQ9laRHZ5b"
 #             context["credentials"] = functions.AESCipher(
 #                 config.SECRETS["crypto"]
 #             ).decrypt(team["credentials"])
-#             context["xsrf_token"] = self.xsrf_token
 #             return render(request, "profile.html", context)
 #         else:
 #             self.clear_cookie("username")
@@ -74,6 +74,7 @@ def login_handler(request):
             )
             if user:
                 if user.is_confirmed:
+                    login(request, user)
                     return HttpResponseRedirect("/profile")
                 else:
                     logout(request)
@@ -115,7 +116,7 @@ def signup_handler(request):
         form = forms.SignUpForm()
 
     return render(
-        request, "forms/signup.html", {"title": "Login", "form": form}
+        request, "forms/signup.html", {"title": "Sign Up", "form": form}
     )
 
 
@@ -139,15 +140,67 @@ def confirm_handler(request, key):
     })
 
 
+def reset_handler(request):
+    if request.method == "GET":
+        key = request.GET.get('key', '')
+        if len(key) == PASS_RESET_TOKEN_LEN:
+            form = forms.ResetForm(initial={
+                'reset_key': key
+            })
+        else:
+            return HttpResponseNotFound()
+    else:
+        form = forms.ResetForm(request.POST)
+        if form.is_valid():
+            user = Account.objects.get(password_reset_token=form.cleaned_data.get("reset_key"))
+            if user:
+                user.password_reset_token = ""
+                user.set_password(form.cleaned_data.get("password"))
+                user.save()
+
+                return redirect("/", cookies={
+                    SUCCESS_COOKIE_KEY: "Successfully reset password!"
+                })
+
+    return render(
+        request, "forms/reset.html", {"title": "Reset Password", "form": form}
+    )
+
+
 def forgot_handler(request):
     if request.method == "POST":
         form = forms.ForgotForm(request.POST)
+        if form.is_valid():
+            username_email = form.cleaned_data.get("usernameemail")
+            if is_valid_email(username_email):
+                user = Account.objects.get(email=username_email)
+            else:
+                user = Account.objects.get(username=username_email)
+
+            if user:
+                # store reset key
+                key = random_str(PASS_RESET_TOKEN_LEN)
+                user.password_reset_token = key
+                user.save()
+
+                # send reset key
+                send_reset(request, user.email, key)
+
+        return redirect("/", cookies={
+            SUCCESS_COOKIE_KEY: "If the username or email exists you will receive a password reset to your email!"
+        })
+
     else:
         form = forms.ForgotForm()
 
     return render(
         request, "forms/forgot.html", {"title": "Forgot Password", "form": form}
     )
+
+
+def logout_handler(request):
+    logout(request)
+    return redirect('/')
 
 # def _screen(self):
 #     context["title"] = "Sign Up"

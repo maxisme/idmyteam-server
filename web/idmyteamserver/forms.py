@@ -61,9 +61,20 @@ class LoginForm(RecaptchaForm):
 
 
 class ForgotForm(RecaptchaForm):
-    class Meta:
-        model = Account
-        fields = ["username", "email"]
+    usernameemail = forms.CharField(label="Username or Email")
+
+
+class ResetForm(RecaptchaForm):
+    reset_key = forms.CharField(widget=forms.HiddenInput())
+    password = forms.CharField(
+        min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
+    )
+    confirm = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(),
+        required=True,
+        label="Confirm Password",
+    )
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):
 #         args = self.SimpleMultiDict(*args)

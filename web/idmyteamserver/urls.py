@@ -28,7 +28,10 @@ urlpatterns = [
 
     path("signup", auth.signup_handler),
     path("login", auth.login_handler),
-    path("logout", auth_views.auth_logout, name='logout'),
+    path("logout", auth.logout_handler),
 
-    path('confirm/<key>', auth.confirm_handler, name='confirm-email'),
+    path("forgot", auth.forgot_handler),
+    path("reset", auth.reset_handler),
+
+    path('confirm/<key>', auth.confirm_handler),
 ]
