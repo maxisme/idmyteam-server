@@ -1,43 +1,43 @@
 name: ID My Team Server
 on: [push]
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7]
-
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Fetch cached dependencies
-      uses: actions/cache@v1
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/test_requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get install libmysqlclient-dev
-        python -m pip install --upgrade pip
-        pip install -r test_requirements.txt # --cache-dir ~/.pip-cache
-
-    - name: Test
-      run: |
-        export CONF='/conf/test_actions.conf'
-        export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/settings/:$GITHUB_WORKSPACE/web/:$GITHUB_WORKSPACE"
-        pytest
+#  test:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        python-version: [3.6, 3.7, 3.8]
+#
+#    steps:
+#    - uses: actions/checkout@v1
+#
+#    - name: Set up Python ${{ matrix.python-version }}
+#      uses: actions/setup-python@v1
+#      with:
+#        python-version: ${{ matrix.python-version }}
+#
+#    - name: Fetch cached dependencies
+#      uses: actions/cache@v1
+#      with:
+#        path: ~/.cache/pip
+#        key: ${{ runner.os }}-pip-${{ hashFiles('**/test_requirements.txt') }}
+#        restore-keys: |
+#          ${{ runner.os }}-pip-
+#
+#    - name: Install dependencies
+#      run: |
+#        sudo apt-get install libmysqlclient-dev
+#        python -m pip install --upgrade pip
+#        pip install -r test_requirements.txt # --cache-dir ~/.pip-cache
+#
+#    - name: Test
+#      run: |
+#        export CONF='/conf/test_actions.conf'
+#        export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/settings/:$GITHUB_WORKSPACE/web/:$GITHUB_WORKSPACE"
+#        pytest
 
   publish:
     name: Publish Docker image
-    needs: test
+#    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
