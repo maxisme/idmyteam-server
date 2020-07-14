@@ -7,12 +7,12 @@ $ git config core.hooksPath .githooks/
 $ chmod +x .githooks/*
 ```
 
-1. Create a database `idmyteamserver`
+1. `docker-compose up -d db`
 2. `$ python manage.py migrate`
 
 ### Helpers
 When editing the models files run:
- - `python manage.py makemigrations idmyteamserver`
+ - `python manage.py makemigrations idmyteam`
 
 
 #### sass

@@ -1,13 +1,7 @@
 name: ID My Team Server
-
-on:
-  push:
-    branches:
-      - master
-
+on: [push]
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -41,15 +35,32 @@ jobs:
         export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/settings/:$GITHUB_WORKSPACE/web/:$GITHUB_WORKSPACE"
         pytest
 
-    - name: Deploy
-      if: github.ref == 'refs/heads/master'
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
-        proxy_host: ${{ secrets.PROXY_HOST }}
-        proxy_username: ${{ secrets.PROXY_USERNAME }}
-        proxy_key: ${{ secrets.PROXY_KEY }}
-        script: |
-          ${{ secrets.DEPLOY_CMD }}
+  publish:
+    name: Publish Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+      - name: Publish to Docker Registry
+        uses: docker/build-push-action@v1
+        with:
+          path: "web/"
+          cache_froms: python:3
+          repository: ${{ github.repository }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          tag_with_ref: true
+          tag_with_sha: true
+#      - name: Update Swarm
+#        if: github.ref == 'refs/heads/master'
+#        run: |
+#          export sha="${{ github.sha }}"
+#          curl -f -X POST ${{ secrets.SWARM_HOOK }} \
+#          -H 'Content-Type: application/x-www-form-urlencoded' \
+#          -d 'service=notifi-backend_app' \
+#          -d "image=${{ github.repository }}" \
+#          -d "tag=sha-${sha:0:7}" \
+#          -d "token=${{ secrets.HOOK_TOKEN }}"
+

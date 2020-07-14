@@ -7,9 +7,18 @@ services:
     depends_on:
       - redis
 
+  db:
+    image: postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: idmyteam
+      POSTGRES_USER: idmyteam
+      POSTGRES_PASSWORD: idmyteam
+    tty: true
+
   redis:
-    container_name: redis
-    image: redis
-    volumes:
-      - ../data/redis:/data
+    image: "redis:alpine"
+    ports:
+      - "127.0.0.1:6379:6379"
     entrypoint: redis-server --appendonly yes
