@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  app:
+    image: maxisme/idmyteam-server
+    env_file:
+      - ".env"
+    deploy:
+      mode: global
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.idmyteam-server-dev.rule=Host(`idmy.team`)"
+        - "traefik.http.routers.idmyteam-server-dev.entrypoints=web-secure"
+        - "traefik.http.routers.idmyteam-server-dev.tls.certresolver=letsencrypt"
+        - "traefik.http.services.idmyteam-server-dev.loadbalancer.server.port=8080"
+        - "traefik.http.routers.idmyteam-server-dev.middlewares=404"
+    networks:
+      - traefik
+      - db
+
+networks:
+  traefik:
+    external: true
+  db:
+    external: true
