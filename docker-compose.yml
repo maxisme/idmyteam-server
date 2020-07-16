@@ -8,13 +8,14 @@ services:
       - redis
 
   db:
-    image: postgres
+    image: mysql
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:3306:3306"
     environment:
-      POSTGRES_DB: idmyteam
-      POSTGRES_USER: idmyteam
-      POSTGRES_PASSWORD: idmyteam
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: idmyteam
+      MYSQL_USER: idmyteam
+      MYSQL_PASSWORD: idmyteam
     tty: true
 
   redis:

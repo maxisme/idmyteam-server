@@ -29,8 +29,7 @@ class ProfileHandler(BaseHandler):
                 )
                 self.tmpl["local_ip"] = (
                     clients[hashed_username].local_ip
-                    if hashed_username in clients
-                    else False
+                    if hashed_username in clients else False
                 )
                 self.tmpl["has_model"] = Classifier.exists(hashed_username)
                 self.tmpl["root_password"] = "zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQ9laRHZ5b"
@@ -76,7 +75,7 @@ class LoginHandler(BaseHandler):
                     self.conn, username=functions.hash(form.username.data)
                 )
                 if user and functions.check_pw_hash(
-                    form.password.data, user["password"]
+                        form.password.data, user["password"]
                 ):
                     if user["confirmed_email"]:
                         self.set_secure_cookie("username", form.username.data)
@@ -101,7 +100,9 @@ class LoginHandler(BaseHandler):
         self.render("forms/form.html", **self.tmpl)
 
     def _is_valid_captcha(self, args):
-        # return True
+        if not config.SECRETS["recaptcha"]:
+            return True
+
         if "g-recaptcha-response" in args:
             recaptcha_response = args["g-recaptcha-response"][0].decode("utf-8")
             url = "https://www.google.com/recaptcha/api/siteverify"
@@ -132,20 +133,20 @@ class SignUpHandler(LoginHandler):
             if form.validate():
                 self.conn = db.pool.raw_connection()
                 if functions.Team.sign_up(
-                    self.conn,
-                    form.username.data,
-                    form.password.data,
-                    form.email.data,
-                    form.store.data,
-                    config.SECRETS["crypto"],
+                        self.conn,
+                        form.username.data,
+                        form.password.data,
+                        form.email.data,
+                        form.store.data,
+                        config.SECRETS["crypto"],
                 ):
                     if functions.Team.ConfirmEmail.send_confirmation(
-                        self.conn,
-                        form.email.data,
-                        form.username.data,
-                        config.EMAIL_CONFIG,
-                        config.ROOT,
-                        config.SECRETS["token"],
+                            self.conn,
+                            form.email.data,
+                            form.username.data,
+                            config.EMAIL_CONFIG,
+                            config.ROOT,
+                            config.SECRETS["token"],
                     ):
                         self.flash_success("Please confirm your email!")
                         return self.redirect("/login")
@@ -231,10 +232,10 @@ class ResetPassword(LoginHandler):
                 self.conn = db.pool.raw_connection()
                 team = functions.Team.get(self.conn, **args)
                 if team and functions.Team.PasswordReset.validate(
-                    self.conn, team["email"], form.token.data, config.SECRETS["token"]
+                        self.conn, team["email"], form.token.data, config.SECRETS["token"]
                 ):
                     if functions.Team.reset_password(
-                        self.conn, form.password.data, **args
+                            self.conn, form.password.data, **args
                     ):
                         return self.flash_success(self.SUCCESS, "/login")
             return self.flash_error(self.ERROR, "/forgot")

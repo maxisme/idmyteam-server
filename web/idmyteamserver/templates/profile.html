@@ -1,5 +1,78 @@
 {% extends 'base.html' %}
 {% block content %}
+    <h3>Account</h3>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">
+                        <span class="material-icons">show_chart</span> Statistics
+                    </span>
+                    <p>
+                        <span class="material-icons">face</span> X recognitions have been made.
+                    </p>
+                    <p>
+                        <span class="material-icons">people_outline</span> Trained {{ num_members }} out of a maximum of X members. Increase by
+                    </p>
+                    {% if allow_storage %}
+                        <p>
+                            <span class="material-icons">storage</span> Stored <a href="/profile/stored-images">{{ num_images }} team images</a> for training.
+                            {% if num_images > 0 %}
+                                    <a href="#" class="red btn material-icons" id="delete-storage">delete</a>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">
+                        <span class="material-icons">tune</span> Preferences
+                    </span>
+                    <p>
+                        <input {% if allow_storage %}checked{% endif %} name="imagestore" type="checkbox" id="imagestore"/>
+                        <label for="imagestore">Allow us to <a target="_blank" href="/storage">store images</a> for improved
+                            recognition.</label>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Delete Team Model</span>
+                    <a {% if not has_model %}disabled="disabled"{% else %}href="#" id="delete-model"{% endif %} class="btn-floating halfway-fab red">
+                        <i class="material-icons {% if not has_model %}disabled{% endif %}">delete</i>
+                    </a>
+                    <p>Deleting your model is irreversible and you will need to train your team again.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Delete Account</span>
+                    <a href="#" id="delete-account" class="btn-floating halfway-fab red">
+                        <i class="material-icons {% if not has_model %}disabled{% endif %}">delete</i>
+                    </a>
+                    <p>
+                        All your data will be permanently deleted.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p>&nbsp;</p>
+
     <h3>Web Panel login details</h3>
     <p>
         Visit the web panel hosted on your Raspberry Pi by clicking on the IP address below. Then login using the temporary Name and Password below. After login please create a new account and delete the root user.
@@ -61,7 +134,6 @@
                     </span>
                     <p>
                         {{ username }}
-                        <br>&nbsp;
                     </p>
                 </div>
             </div>
@@ -80,78 +152,7 @@
         </div>
     </div>
 
-    <h3>Account</h3>
 
-    <div class="row">
-        <div class="col s12">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">
-                        <span class="material-icons">show_chart</span> Statistics
-                    </span>
-                    <p>
-                        <span class="material-icons">face</span> {{ team['num_classifications'] }} recognitions have been made.
-                    </p>
-                    <p>
-                        <span class="material-icons">people_outline</span> Trained {{ num_members }} out of a maximum of {{ team['max_class_num'] }} members.
-                    </p>
-                    {% if team['allow_storage'] %}
-                        <p>
-                            <span class="material-icons">storage</span> Stored <a href="/profile/stored-images">{{ num_images }} team images</a> for training.
-                            {% if num_images > 0 %}
-                                    <a href="#" class="red btn material-icons" id="delete-storage">delete</a>
-                            {% endif %}
-                        </p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col s12">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">
-                        <span class="material-icons">tune</span> Preferences
-                    </span>
-                    <p>
-                        <input {% if team['allow_storage'] %}checked{% endif %} name="imagestore" type="checkbox" id="imagestore"/>
-                        <label for="imagestore">Allow us to <a target="_blank" href="/storage">store images</a> for improved
-                            recognition.</label>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col s12 m6">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Delete Team Model</span>
-                    <a {% if not has_model %}disabled="disabled"{% else %}href="#" id="delete-model"{% endif %} class="btn-floating halfway-fab red">
-                        <i class="material-icons {% if not has_model %}disabled{% endif %}">delete</i>
-                    </a>
-                    <p>Deleting your model is irreversible and you will need to train your team again.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col s12 m6">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Delete Account</span>
-                    <a href="#" id="delete-account" class="btn-floating halfway-fab red">
-                        <i class="material-icons {% if not has_model %}disabled{% endif %}">delete</i>
-                    </a>
-                    <p>
-                        All your data will be permanently deleted.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <p>&nbsp;</p>
 {% endblock %}
 
 

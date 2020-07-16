@@ -34,4 +34,5 @@ urlpatterns = [
     path("reset", auth.reset_handler),
 
     path('confirm/<key>', auth.confirm_handler),
+    path('profile', auth.profile_handler),
 ]

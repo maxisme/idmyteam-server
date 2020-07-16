@@ -12,9 +12,9 @@ from web.settings import PASS_RESET_TOKEN_LEN
 
 clients = {}
 
+
 # def profile_handler(request):
 #     if request.user.is_authenticated:
-#
 #         context = {}
 #         context["team"] = team = functions.Team.get(
 #             self.conn, username=hashed_username
@@ -44,6 +44,10 @@ clients = {}
 #             self.clear_cookie("username")
 #     return self.redirect("/login")
 
+def profile_handler(request):
+    if request.user.is_authenticated:
+        return render(request, "profile.html")
+    return redirect("/login", {"title": "Login", "team": form})
 
 # def view_stored_images_handler(request):
 #     context = {"title": "Stored Images"}
@@ -78,11 +82,9 @@ def login_handler(request):
                     return HttpResponseRedirect("/profile")
                 else:
                     logout(request)
-                    error_message = """
-                    You have not confirmed your email! <a href='/resend?email={}'>Resend confirmation?</a>
-                    """.format(
-                        user.email
-                    )
+                    error_message = f"""
+                    You have not confirmed your email! <a href='/resend?email={user.email}'>Resend confirmation?</a>
+                    """
             else:
                 error_message = INVALID_LOGIN_MESSAGE
     else:

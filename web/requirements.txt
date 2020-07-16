@@ -4,6 +4,6 @@ django-ranged-response
 django-recaptcha
 django-simple-email-confirmation
 python-dotenv
-psycopg2
 argon2-cffi
 bcrypt
+mysqlclient

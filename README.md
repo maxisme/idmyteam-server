@@ -7,8 +7,12 @@ $ git config core.hooksPath .githooks/
 $ chmod +x .githooks/*
 ```
 
+## Local setup
+### Web
 1. `docker-compose up -d db`
 2. `$ python manage.py migrate`
+
+____
 
 ### Helpers
 When editing the models files run:
