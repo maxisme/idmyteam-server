@@ -1,9 +1,9 @@
 version: '3.8'
 services:
-  app:
-    image: maxisme/idmyteam-server
+  web:
+    image: maxisme/idmyteam-server:tornado-to-django # temporary test
     env_file:
-      - ".env"
+      - "web/.env"
     deploy:
       mode: global
       labels:
