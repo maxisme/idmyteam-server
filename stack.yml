@@ -11,7 +11,7 @@ services:
         - "traefik.http.routers.idmyteam-server-dev.rule=Host(`idmy.team`)"
         - "traefik.http.routers.idmyteam-server-dev.entrypoints=web-secure"
         - "traefik.http.routers.idmyteam-server-dev.tls.certresolver=letsencrypt"
-        - "traefik.http.services.idmyteam-server-dev.loadbalancer.server.port=8080"
+        - "traefik.http.services.idmyteam-server-dev.loadbalancer.server.port=8000"
         - "traefik.http.routers.idmyteam-server-dev.middlewares=404"
     networks:
       - traefik
