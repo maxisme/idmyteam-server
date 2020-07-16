@@ -8,11 +8,11 @@ services:
       mode: global
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.idmyteam-server-dev.rule=Host(`idmy.team`)"
-        - "traefik.http.routers.idmyteam-server-dev.entrypoints=web-secure"
-        - "traefik.http.routers.idmyteam-server-dev.tls.certresolver=letsencrypt"
-        - "traefik.http.services.idmyteam-server-dev.loadbalancer.server.port=8000"
-        - "traefik.http.routers.idmyteam-server-dev.middlewares=404"
+        - "traefik.http.routers.idmyteam.rule=Host(`idmy.team`)"
+        - "traefik.http.routers.idmyteam.entrypoints=web-secure"
+        - "traefik.http.routers.idmyteam.tls.certresolver=letsencrypt"
+        - "traefik.http.services.idmyteam.loadbalancer.server.port=8000"
+        - "traefik.http.routers.idmyteam.middlewares=404"
     networks:
       - traefik
       - db
