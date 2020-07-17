@@ -12,8 +12,8 @@ from sklearn.model_selection import ShuffleSplit, cross_val_score
 import joblib
 from sklearn.svm import SVC
 
-from settings import functions, config, db
-from settings.logs import logger
+from utils import functions, config, db
+from utils.logs import logger
 
 
 class Classifier(object):

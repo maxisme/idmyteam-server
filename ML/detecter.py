@@ -11,14 +11,14 @@ import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 
-from settings.logs import logger
+from utils.logs import logger
 
 import numpy as np
 
 from redis import Redis
 from rq import Queue
 
-from settings import functions, config, db
+from utils import functions, config, db
 from importlib import import_module
 import ast
 import chainer

@@ -3,7 +3,7 @@
 import datetime
 import logging
 
-from settings import config
+from utils import config
 import os
 
 num_deleted = 0

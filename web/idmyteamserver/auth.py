@@ -45,9 +45,19 @@ clients = {}
 #     return self.redirect("/login")
 
 def profile_handler(request):
-    if request.user.is_authenticated:
-        return render(request, "profile.html")
-    return redirect("/login", {"title": "Login", "team": form})
+    user: Account = request.user
+    if user.is_authenticated:
+        return render(request, "profile.html", context={
+            "local_ip": user.local_ip,
+            "root_password": random_str(30),
+            "username": user.username,
+            "credentials": user.credentials,
+            "allow_image_storage": bool(user.allow_image_storage),
+            "max_class_num": user.max_class_num,
+            "num_classifications": user.num_classifications or 0,
+        })  # TODO maybe just pass whole user
+    return redirect("/login")
+
 
 # def view_stored_images_handler(request):
 #     context = {"title": "Stored Images"}
@@ -112,8 +122,6 @@ def signup_handler(request):
                 return redirect("/", cookies={
                     SUCCESS_COOKIE_KEY: "Welcome! Please confirm your email to complete signup!"
                 })
-            else:
-                form.add_error()
     else:
         form = forms.SignUpForm()
 

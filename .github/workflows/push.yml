@@ -32,7 +32,7 @@ jobs:
 #    - name: Test
 #      run: |
 #        export CONF='/conf/test_actions.conf'
-#        export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/settings/:$GITHUB_WORKSPACE/web/:$GITHUB_WORKSPACE"
+#        export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/utils/:$GITHUB_WORKSPACE/web/:$GITHUB_WORKSPACE"
 #        pytest
 
   publish:

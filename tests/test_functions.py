@@ -1,7 +1,7 @@
 import base64
 
 import pytest
-from settings import functions
+from utils import functions
 from Crypto import Random
 
 test_strings = [

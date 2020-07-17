@@ -21,8 +21,8 @@ class TeamGenerator(object):
 @mock.patch("view.BaseHandler.flash_error")
 @mock.patch("smtplib.SMTP")
 @mock.patch("authed.LoginHandler._is_valid_captcha", return_value=True)
-@mock.patch("settings.functions.AESCipher._mock_me")
-@mock.patch("settings.functions.Email.template")
+@mock.patch("utils.functions.AESCipher._mock_me")
+@mock.patch("utils.functions.Email.template")
 class TestWeb(WebTest):
     protected_urls = ["/socket", "/local", "/upload", "/profile", "/reset", "/profile/stored-images"]
 

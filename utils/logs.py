@@ -1,5 +1,5 @@
 import logging
-from settings.config import ROOT
+from utils.config import ROOT
 
 logging.getLogger("rq.worker").disabled = True
 

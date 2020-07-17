@@ -5,7 +5,7 @@ import tornado.testing
 from tornado import escape
 from tornado.web import decode_signed_value
 
-from settings import functions, config
+from utils import functions, config
 import server
 
 

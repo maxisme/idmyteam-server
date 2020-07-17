@@ -43,8 +43,8 @@ class TestSocketClient(object):
 @mock.patch("smtplib.SMTP")
 @mock.patch("rq.queue.Queue.enqueue_job")
 @mock.patch("authed.LoginHandler._is_valid_captcha", return_value=True)
-@mock.patch("settings.functions.Email.template")
-@mock.patch("settings.functions.AESCipher._mock_me")
+@mock.patch("utils.functions.Email.template")
+@mock.patch("utils.functions.AESCipher._mock_me")
 class WSSTest(WebTest):
     def test_initial_team_connection(self, _mock_me, template, *args):
         class TestWSS(TestSocketClient):

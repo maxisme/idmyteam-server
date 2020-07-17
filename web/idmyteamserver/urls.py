@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from idmyteamserver import views, auth
+
+from idmyteamserver import views, auth, api
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -35,4 +36,7 @@ urlpatterns = [
 
     path('confirm/<key>', auth.confirm_handler),
     path('profile', auth.profile_handler),
+
+    path('reset-credentials', api.reset_credentials_handler),
+    path('toggle-storage', api.toggle_storage_handler)
 ]

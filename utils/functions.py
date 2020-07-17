@@ -27,7 +27,7 @@ from itsdangerous import URLSafeTimedSerializer
 from tornado import template
 from websocket import create_connection
 
-from settings.logs import logger
+from utils.logs import logger
 
 
 def get_YAML(file):

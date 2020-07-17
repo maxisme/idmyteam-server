@@ -2,3 +2,5 @@ numpy
 sklearn
 rq
 mysqlclient
+sqlalchemy
+tensorflow

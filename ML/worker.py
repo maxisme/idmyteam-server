@@ -1,6 +1,6 @@
 from classifier import Classifier
 from detecter import Detecter
-from settings import config, functions, db
+from utils import config, functions, db
 
 import os
 import redis
@@ -11,7 +11,7 @@ from raven import Client
 from raven.transport.http import HTTPTransport
 import sentry_sdk
 
-from settings.logs import logger
+from utils.logs import logger
 
 sentry_sdk.init(os.getenv(config.SENTRY_URL))
 

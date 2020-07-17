@@ -1,4 +1,4 @@
-from settings import functions, config
+from utils import functions, config
 from sqlalchemy import create_engine
 from sqlalchemy.pool import QueuePool
 

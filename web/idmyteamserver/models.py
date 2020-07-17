@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
 from web.settings import DEFAULT_NUM_TRAINING_IMGS_PER_HOUR, DEFAULT_NUM_CLASSES, DEFAULT_UPLOAD_RETRY_LIMIT, \
-    PASS_RESET_TOKEN_LEN
+    PASS_RESET_TOKEN_LEN, CREDENTIAL_LEN
 
 
 class Account(AbstractUser, SimpleEmailConfirmationUserMixin):
@@ -13,7 +13,7 @@ class Account(AbstractUser, SimpleEmailConfirmationUserMixin):
 
     password_reset_token = models.CharField(max_length=PASS_RESET_TOKEN_LEN)
 
-    credentials = models.CharField(max_length=150)
+    credentials = models.CharField(max_length=CREDENTIAL_LEN)
 
     num_classifications = models.IntegerField(default=0)
 
