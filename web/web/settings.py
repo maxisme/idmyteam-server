@@ -43,7 +43,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["idmy.team"]
+ALLOWED_HOSTS = ["idmy.team", "127.0.0.1", "localhost"]
 
 AUTH_USER_MODEL = 'idmyteamserver.Account'
 

@@ -10,7 +10,10 @@ $ chmod +x .githooks/*
 ## Local setup
 ### Web
 1. `docker-compose up -d db`
-2. `$ python manage.py migrate`
+2. `cd web`
+3. `$ python manage.py migrate`
+4. `$ python manage.py loaddata test-user.json`
+You can then login with the credentials `testuser`:`testuser`
 
 ____
 
