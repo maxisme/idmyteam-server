@@ -4,3 +4,9 @@ rq
 mysqlclient
 sqlalchemy
 tensorflow
+opencv-python
+Pillow
+pyyaml
+pycrypto
+itsdangerous
+websocket

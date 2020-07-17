@@ -24,8 +24,6 @@ def toggle_storage_handler(request):
     return redirect('/profile')
 
 
-
-
 def reset_credentials_handler(request):
     user: Account = request.user
     if user.is_authenticated:

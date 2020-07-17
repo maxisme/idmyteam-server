@@ -24,7 +24,6 @@ import bcrypt
 import hashlib
 from itsdangerous import URLSafeTimedSerializer
 
-from tornado import template
 from websocket import create_connection
 
 from utils.logs import logger
@@ -753,30 +752,30 @@ class Token:
         return serializer.loads(token, max_age=cls.MAX_AGE) == obj
 
 
-class Email:
-    @classmethod
-    def send(cls, email_config, email, subject, html):
-        # generate email content
-        msg = MIMEMultipart("alternative")
-        msg["From"] = email_config["email"]
-        msg["To"] = email
-        msg["Subject"] = subject
-        msg.attach(html)
-
-        # send email
-        with smtplib.SMTP(
-            email_config["smtp"], port=email_config["smtp_port"]
-        ) as smtp_server:
-            smtp_server.ehlo()
-            smtp_server.starttls()
-            smtp_server.ehlo()
-            smtp_server.login(email_config["email"], email_config["password"])
-            smtp_server.send_message(msg)
-
-    @classmethod
-    def template(cls, root, file, **kwargs):
-        loader = template.Loader(root + "/web/")
-        email_html = (
-            loader.load("templates/emails/inline/" + file).generate(**kwargs).decode()
-        )
-        return MIMEText(email_html, "html")
+# class Email:
+#     @classmethod
+#     def send(cls, email_config, email, subject, html):
+#         # generate email content
+#         msg = MIMEMultipart("alternative")
+#         msg["From"] = email_config["email"]
+#         msg["To"] = email
+#         msg["Subject"] = subject
+#         msg.attach(html)
+#
+#         # send email
+#         with smtplib.SMTP(
+#             email_config["smtp"], port=email_config["smtp_port"]
+#         ) as smtp_server:
+#             smtp_server.ehlo()
+#             smtp_server.starttls()
+#             smtp_server.ehlo()
+#             smtp_server.login(email_config["email"], email_config["password"])
+#             smtp_server.send_message(msg)
+#
+#     @classmethod
+#     def template(cls, root, file, **kwargs):
+#         loader = template.Loader(root + "/web/")
+#         email_html = (
+#             loader.load("templates/emails/inline/" + file).generate(**kwargs).decode()
+#         )
+#         return MIMEText(email_html, "html")
