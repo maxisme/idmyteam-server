@@ -9,4 +9,4 @@ Pillow
 pyyaml
 pycrypto
 itsdangerous
-websocket
+websocket-client
