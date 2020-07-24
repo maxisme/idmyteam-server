@@ -7,3 +7,4 @@ python-dotenv
 argon2-cffi
 bcrypt
 mysqlclient
+django_opentracing

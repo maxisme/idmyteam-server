@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-from dotenv import load_dotenv
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
+
+import django_opentracing
+from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -71,6 +72,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'django_opentracing.OpenTracingMiddleware',
 ]
 
 ROOT_URLCONF = "web.urls"
@@ -146,6 +148,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = "/static/"
+
+################
+# open tracing #
+################
+OPENTRACING_TRACE_ALL = True
+
+# defaults to []
+# only valid if OPENTRACING_TRACE_ALL == True
+# OPENTRACING_TRACED_ATTRIBUTES = ['arg1', 'arg2']
+
+# Callable that returns an `opentracing.Tracer` implementation.
+OPENTRACING_TRACER_CALLABLE = 'opentracing.Tracer'
+
+# Parameters for the callable (Depending on the tracer implementation chosen)
+OPENTRACING_TRACER_PARAMETERS = {
+    'example-parameter-host': 'collector',
+}
 
 # project stuff
 DEFAULT_NUM_TRAINING_IMGS_PER_HOUR = 60
