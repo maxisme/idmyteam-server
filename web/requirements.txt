@@ -6,5 +6,5 @@ django-simple-email-confirmation
 python-dotenv
 argon2-cffi
 bcrypt
-mysqlclient
+psycopg2-binary
 django_opentracing

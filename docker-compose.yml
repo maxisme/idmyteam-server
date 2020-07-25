@@ -7,15 +7,29 @@ services:
     depends_on:
       - redis
 
-  db:
-    image: mysql
+  web:
+    build:
+      context: "./web/"
     ports:
-      - "127.0.0.1:3306:3306"
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - "./web/.env"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: idmyteam
-      MYSQL_USER: idmyteam
-      MYSQL_PASSWORD: idmyteam
+      DATABASE_USER: idmyteam
+      DATABASE_PASS: idmyteam
+      DATABASE_NAME: idmyteam
+      DATABASE_HOST: db
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DATABASE: idmyteam
+      POSTGRES_USER: idmyteam
+      POSTGRES_PASSWORD: idmyteam
     tty: true
 
   redis:
