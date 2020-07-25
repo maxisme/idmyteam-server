@@ -23,8 +23,8 @@ trace.set_tracer_provider(TracerProvider())
 
 jaeger_exporter = jaeger.JaegerSpanExporter(
     service_name='idmyteam',
-    agent_host_name='jaeger-agent',
-    agent_port=6831
+    collector_host_name='jaeger-collector',
+    collector_port=14268
 )
 trace.get_tracer_provider().add_span_processor(BatchExportSpanProcessor(jaeger_exporter))
 

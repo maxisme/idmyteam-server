@@ -16,14 +16,7 @@ services:
     networks:
       - traefik
       - db
-
-  jaeger-agent:
-    image: jaegertracing/jaeger-agent
-    command: ["--reporter.grpc.host-port=jaeger-collector:14250"]
-    networks:
       - tracing
-    deploy:
-      mode: global
 
 networks:
   traefik:
