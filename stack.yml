@@ -15,6 +15,7 @@ services:
         - "traefik.http.routers.idmyteam.middlewares=404"
     networks:
       - traefik
+      - tracing
       - db
 
 networks:

@@ -7,4 +7,6 @@ python-dotenv
 argon2-cffi
 bcrypt
 psycopg2-binary
-django_opentracing
+opentelemetry-sdk
+opentelemetry-ext-django
+opentelemetry-ext-jaeger

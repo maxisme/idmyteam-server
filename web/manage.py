@@ -2,9 +2,11 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from opentelemetry.ext.django import DjangoInstrumentor
 
 
 def main():
+    DjangoInstrumentor().instrument()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
     try:
         from django.core.management import execute_from_command_line
