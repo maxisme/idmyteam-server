@@ -20,13 +20,17 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (BatchExportSpanProcessor)
 
 trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
 
 jaeger_exporter = jaeger.JaegerSpanExporter(
-    service_name='idmyteam',
+    service_name='ID My Team',
     collector_host_name='jaeger-collector',
     collector_port=14268
 )
 trace.get_tracer_provider().add_span_processor(BatchExportSpanProcessor(jaeger_exporter))
+
+with tracer.start_as_current_span('started ID My Team'):
+    print('Started!')
 
 urlpatterns = [
     path("", include("idmyteamserver.urls")),
