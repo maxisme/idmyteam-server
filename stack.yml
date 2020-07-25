@@ -15,11 +15,20 @@ services:
         - "traefik.http.routers.idmyteam.middlewares=404"
     networks:
       - traefik
-      - tracing
       - db
+
+  jaeger-agent:
+    image: jaegertracing/jaeger-agent
+    command: ["--reporter.grpc.host-port=jaeger-collector:14250"]
+    networks:
+      - tracing
+    deploy:
+      mode: global
 
 networks:
   traefik:
     external: true
   db:
+    external: true
+  tracing:
     external: true
