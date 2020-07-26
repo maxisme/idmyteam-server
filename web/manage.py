@@ -28,7 +28,7 @@ def main():
             collector_host_name='jaeger-collector',
             collector_port=14268
         )
-        trace.get_tracer_provider().add_span_processor(SimpleExportSpanProcessor(jaeger_exporter))
+        trace.get_tracer_provider().add_span_processor(BatchExportSpanProcessor(jaeger_exporter))
 
     with tracer.start_as_current_span('started ID My Team'):
         pass

@@ -1,4 +1,10 @@
+import json
+
+from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
+from opentelemetry import trace
+from opentelemetry.trace import TracerProvider
+
 from idmyteamserver.helpers import render
 
 
@@ -24,6 +30,14 @@ def storage_handler(request):
 
 def tutorials_handler(request):
     return render(request, "tutorials/list.html", {"title": "Tutorials"})
+
+
+def trace_hander(request):
+    tracer = trace.get_tracer(__name__)
+    with tracer.start_as_current_span('hey ho hit the trace'):
+        pass
+
+    return HttpResponse(request.headers.items())
 
 
 def tutorial_hander(request, slug):

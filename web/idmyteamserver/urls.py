@@ -38,5 +38,7 @@ urlpatterns = [
     path('profile', auth.profile_handler),
 
     path('reset-credentials', api.reset_credentials_handler),
-    path('toggle-storage', api.toggle_storage_handler)
+    path('toggle-storage', api.toggle_storage_handler),
+
+    path("trace", views.trace_hander),
 ]
