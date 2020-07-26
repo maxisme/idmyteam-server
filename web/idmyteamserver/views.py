@@ -3,6 +3,8 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
+from opentelemetry.ext import jaeger
+from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.trace import TracerProvider
 
 from idmyteamserver.helpers import render
@@ -34,6 +36,15 @@ def tutorials_handler(request):
 
 def trace_hander(request):
     tracer = trace.get_tracer(__name__)
+
+    # jaeger tracer
+    jaeger_exporter = jaeger.JaegerSpanExporter(
+        service_name='ID My Team',
+        collector_host_name='jaeger-collector',
+        collector_port=14268
+    )
+    trace.get_tracer_provider().add_span_processor(BatchExportSpanProcessor(jaeger_exporter))
+
     with tracer.start_as_current_span('hey ho hit the trace'):
         pass
 
