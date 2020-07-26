@@ -32,10 +32,14 @@ def tutorials_handler(request):
 def trace_hander(request):
     tracer = trace.get_tracer(__name__)
 
+    print(trace.get_current_span().get_context().trace_id)
     with tracer.start_as_current_span("hey ho hit the trace"):
-        pass
+        print(trace.get_current_span().get_context().span_id)
 
-    return HttpResponse(request.headers.items())
+    return HttpResponse(
+        str(request.headers.items())
+        + str(trace.get_current_span().get_context().trace_id)
+    )
 
 
 def tutorial_hander(request, slug):
