@@ -7,6 +7,7 @@ from opentelemetry.ext.django import DjangoInstrumentor
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
+    os.environ.setdefault("OPENTELEMETRY_PYTHON_DJANGO_INSTRUMENT", True)
     DjangoInstrumentor().instrument()
     try:
         from django.core.management import execute_from_command_line
