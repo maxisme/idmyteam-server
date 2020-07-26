@@ -237,6 +237,7 @@ def logout_handler(request):
     logout(request)
     return redirect("/")
 
+
 # def _screen(self):
 #     context["title"] = "Sign Up"
 #     self.render("forms/form.html", **context)
