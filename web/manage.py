@@ -6,8 +6,8 @@ from opentelemetry.ext.django import DjangoInstrumentor
 
 
 def main():
-    DjangoInstrumentor().instrument()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
+    DjangoInstrumentor().instrument()
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

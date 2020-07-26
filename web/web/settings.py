@@ -146,23 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = "/static/"
-
-################
-# open tracing #
-################
-OPENTRACING_TRACE_ALL = True
-
-# defaults to []
-# only valid if OPENTRACING_TRACE_ALL == True
-# OPENTRACING_TRACED_ATTRIBUTES = ['arg1', 'arg2']
-
-# Callable that returns an `opentracing.Tracer` implementation.
-OPENTRACING_TRACER_CALLABLE = 'opentracing.Tracer'
-
-# Parameters for the callable (Depending on the tracer implementation chosen)
-# OPENTRACING_TRACER_PARAMETERS = {
-#     'example-parameter-host': 'collector',
-# }
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # project stuff
 DEFAULT_NUM_TRAINING_IMGS_PER_HOUR = 60

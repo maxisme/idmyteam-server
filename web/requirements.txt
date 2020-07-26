@@ -1,10 +1,10 @@
 Django
+gunicorn
 django-captcha
 django-ranged-response
 django-recaptcha
 django-simple-email-confirmation
 python-dotenv
-argon2-cffi
 bcrypt
 psycopg2-binary
 opentelemetry-sdk
