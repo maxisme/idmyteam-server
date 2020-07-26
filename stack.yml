@@ -15,7 +15,7 @@ services:
         - "traefik.http.services.idmyteam.loadbalancer.server.port=8000"
         - "traefik.http.routers.idmyteam.middlewares=404"
     volumes:
-      - static_volume:/usr/src/app/static
+      - static_volume:/usr/src/app/static/
     networks:
       - traefik
       - db
@@ -44,5 +44,6 @@ networks:
     external: true
   tracing:
     external: true
+
 volumes:
   static_volume:
