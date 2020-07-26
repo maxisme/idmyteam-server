@@ -11,7 +11,7 @@ from web.settings import DEBUG
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
-    os.environ.setdefault("OPENTELEMETRY_PYTHON_DJANGO_INSTRUMENT", True)
+    os.environ.setdefault("OPENTELEMETRY_PYTHON_DJANGO_INSTRUMENT", "True")
 
     trace.set_tracer_provider(TracerProvider())
     tracer = trace.get_tracer(__name__)
@@ -31,7 +31,7 @@ def main():
         trace.get_tracer_provider().add_span_processor(BatchExportSpanProcessor(jaeger_exporter))
 
     with tracer.start_as_current_span('started ID My Team'):
-        print('Started!')
+        pass
 
     DjangoInstrumentor().instrument()
     try:
