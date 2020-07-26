@@ -16,7 +16,6 @@ def main():
     trace.set_tracer_provider(TracerProvider())
     tracer = trace.get_tracer(__name__)
 
-    propagators.extract()
     if DEBUG:
         # print tracer
         trace.get_tracer_provider().add_span_processor(
