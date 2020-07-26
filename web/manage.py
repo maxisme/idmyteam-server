@@ -13,16 +13,14 @@ from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
 )
 
-from web.settings import DEBUG
-
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
     os.environ.setdefault("OPENTELEMETRY_PYTHON_DJANGO_INSTRUMENT", "True")
-
+    jaeger_collector_host_name = os.environ.get("JAEGER_COLLECTOR_HOST_NAME", False)
     trace.set_tracer_provider(TracerProvider())
 
-    if DEBUG:
+    if not jaeger_collector_host_name:
         # print tracer
         trace.get_tracer_provider().add_span_processor(
             SimpleExportSpanProcessor(ConsoleSpanExporter())
@@ -30,8 +28,8 @@ def main():
     else:
         # jaeger tracer
         jaeger_exporter = jaeger.JaegerSpanExporter(
-            service_name="ID My Team",
-            collector_host_name="jaeger-collector",
+            service_name="traefik",
+            collector_host_name=jaeger_collector_host_name,
             collector_port=14268,
         )
         trace.get_tracer_provider().add_span_processor(

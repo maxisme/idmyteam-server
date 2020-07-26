@@ -20,6 +20,7 @@ services:
       DATABASE_PASS: idmyteam
       DATABASE_NAME: idmyteam
       DATABASE_HOST: db
+      JAEGER_COLLECTOR_HOST_NAME: jaeger
     depends_on:
       - db
 
@@ -38,3 +39,9 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
     entrypoint: redis-server --appendonly yes
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "127.0.0.1:16686:16686"
+      - "127.0.0.1:14268:14268"
