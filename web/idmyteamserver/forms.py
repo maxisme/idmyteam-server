@@ -1,7 +1,8 @@
+from captcha.fields import ReCaptchaField
 from django import forms
 from django.forms import ModelForm
+
 from idmyteamserver.models import Account
-from captcha.fields import ReCaptchaField
 
 
 class RecaptchaForm(forms.Form):
@@ -37,7 +38,14 @@ class SignUpForm(RecaptchaForm, ModelForm):
 
     class Meta:
         model = Account
-        fields = ["username", "password", "confirm", "email", "allow_image_storage", "terms"]
+        fields = [
+            "username",
+            "password",
+            "confirm",
+            "email",
+            "allow_image_storage",
+            "terms",
+        ]
 
     def clean(self):
         cleaned_data = super(SignUpForm, self).clean()
@@ -49,9 +57,7 @@ class SignUpForm(RecaptchaForm, ModelForm):
 
 
 class LoginForm(RecaptchaForm):
-    username = forms.CharField(
-        required=True, label="Username",
-    )
+    username = forms.CharField(required=True, label="Username", )
     password = forms.CharField(
         min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
     )
@@ -75,6 +81,7 @@ class ResetForm(RecaptchaForm):
         required=True,
         label="Confirm Password",
     )
+
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):
 #         args = self.SimpleMultiDict(*args)

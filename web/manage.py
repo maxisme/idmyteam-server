@@ -2,12 +2,19 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-from opentelemetry.ext.django import DjangoInstrumentor
+
+from opentelemetry import trace
 from opentelemetry.ext import jaeger
-from opentelemetry import trace, propagators
+from opentelemetry.ext.django import DjangoInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (BatchExportSpanProcessor, SimpleExportSpanProcessor, ConsoleSpanExporter)
+from opentelemetry.sdk.trace.export import (
+    BatchExportSpanProcessor,
+    SimpleExportSpanProcessor,
+    ConsoleSpanExporter,
+)
+
 from web.settings import DEBUG
+
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
@@ -23,14 +30,16 @@ def main():
     else:
         # jaeger tracer
         jaeger_exporter = jaeger.JaegerSpanExporter(
-            service_name='ID My Team',
-            collector_host_name='jaeger-collector',
-            collector_port=14268
+            service_name="ID My Team",
+            collector_host_name="jaeger-collector",
+            collector_port=14268,
         )
-        trace.get_tracer_provider().add_span_processor(BatchExportSpanProcessor(jaeger_exporter))
+        trace.get_tracer_provider().add_span_processor(
+            BatchExportSpanProcessor(jaeger_exporter)
+        )
 
     tracer = trace.get_tracer(__name__)
-    with tracer.start_as_current_span('started ID My Team'):
+    with tracer.start_as_current_span("started ID My Team"):
         pass
 
     DjangoInstrumentor().instrument()

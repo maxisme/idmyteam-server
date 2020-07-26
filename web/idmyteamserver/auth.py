@@ -3,11 +3,17 @@ import logging
 from django.contrib.auth import authenticate, logout, login
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 
+from idmyteamserver import forms
 from idmyteamserver.email import send_confirm, send_reset
-from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, is_valid_email, redirect, ERROR_COOKIE_KEY, random_str
+from idmyteamserver.helpers import (
+    SUCCESS_COOKIE_KEY,
+    is_valid_email,
+    redirect,
+    ERROR_COOKIE_KEY,
+    random_str,
+)
 from idmyteamserver.models import Account
 from idmyteamserver.views import render
-from idmyteamserver import forms
 from web.settings import PASS_RESET_TOKEN_LEN
 
 clients = {}
@@ -44,18 +50,23 @@ clients = {}
 #             self.clear_cookie("username")
 #     return self.redirect("/login")
 
+
 def profile_handler(request):
     user: Account = request.user
     if user.is_authenticated:
-        return render(request, "profile.html", context={
-            "local_ip": user.local_ip,
-            "root_password": random_str(30),
-            "username": user.username,
-            "credentials": user.credentials,
-            "allow_image_storage": bool(user.allow_image_storage),
-            "max_class_num": user.max_class_num,
-            "num_classifications": user.num_classifications or 0,
-        })  # TODO maybe just pass whole user
+        return render(
+            request,
+            "profile.html",
+            context={
+                "local_ip": user.local_ip,
+                "root_password": random_str(30),
+                "username": user.username,
+                "credentials": user.credentials,
+                "allow_image_storage": bool(user.allow_image_storage),
+                "max_class_num": user.max_class_num,
+                "num_classifications": user.num_classifications or 0,
+            },
+        )  # TODO maybe just pass whole user
     return redirect("/login")
 
 
@@ -80,12 +91,9 @@ def login_handler(request):
     if request.method == "POST":
         form = forms.LoginForm(request.POST)
         if form.is_valid():
-            username = request.POST['username']
-            password = request.POST['password']
-            user: Account = authenticate(
-                username=username,
-                password=password
-            )
+            username = request.POST["username"]
+            password = request.POST["password"]
+            user: Account = authenticate(username=username, password=password)
             if user:
                 if user.is_confirmed:
                     login(request, user)
@@ -101,7 +109,10 @@ def login_handler(request):
         form = forms.LoginForm()
 
     return render(
-        request, "forms/login.html", {"title": "Login", "form": form}, error_message=error_message
+        request,
+        "forms/login.html",
+        {"title": "Login", "form": form},
+        error_message=error_message,
     )
 
 
@@ -117,21 +128,26 @@ def signup_handler(request):
             user = Account.objects.create_user(**post_data)
             if user:
                 # send confirmation email
-                send_confirm(request, to=form.cleaned_data.get("email"), key=user.confirmation_key)
+                send_confirm(
+                    request,
+                    to=form.cleaned_data.get("email"),
+                    key=user.confirmation_key,
+                )
 
-                return redirect("/", cookies={
-                    SUCCESS_COOKIE_KEY: "Welcome! Please confirm your email to complete signup!"
-                })
+                return redirect(
+                    "/",
+                    cookies={
+                        SUCCESS_COOKIE_KEY: "Welcome! Please confirm your email to complete signup!"
+                    },
+                )
     else:
         form = forms.SignUpForm()
 
-    return render(
-        request, "forms/signup.html", {"title": "Sign Up", "form": form}
-    )
+    return render(request, "forms/signup.html", {"title": "Sign Up", "form": form})
 
 
 def confirm_handler(request, key):
-    user_email = request.GET.get('email', None)
+    user_email = request.GET.get("email", None)
     if is_valid_email(user_email):
         user = Account.objects.get(email=user_email)
         if user:
@@ -142,35 +158,41 @@ def confirm_handler(request, key):
                 logging.error(e)
 
             if email:
-                return redirect("/", cookies={
-                    SUCCESS_COOKIE_KEY: f"Confirmed! Welcome to the Team {user.username}!"
-                })
-    return redirect("/", cookies={
-        ERROR_COOKIE_KEY: "Problem confirming your account! Please try again."
-    })
+                return redirect(
+                    "/",
+                    cookies={
+                        SUCCESS_COOKIE_KEY: f"Confirmed! Welcome to the Team {user.username}!"
+                    },
+                )
+    return redirect(
+        "/",
+        cookies={
+            ERROR_COOKIE_KEY: "Problem confirming your account! Please try again."
+        },
+    )
 
 
 def reset_handler(request):
     if request.method == "GET":
-        key = request.GET.get('key', '')
+        key = request.GET.get("key", "")
         if len(key) == PASS_RESET_TOKEN_LEN:
-            form = forms.ResetForm(initial={
-                'reset_key': key
-            })
+            form = forms.ResetForm(initial={"reset_key": key})
         else:
             return HttpResponseNotFound()
     else:
         form = forms.ResetForm(request.POST)
         if form.is_valid():
-            user = Account.objects.get(password_reset_token=form.cleaned_data.get("reset_key"))
+            user = Account.objects.get(
+                password_reset_token=form.cleaned_data.get("reset_key")
+            )
             if user:
                 user.password_reset_token = ""
                 user.set_password(form.cleaned_data.get("password"))
                 user.save()
 
-                return redirect("/", cookies={
-                    SUCCESS_COOKIE_KEY: "Successfully reset password!"
-                })
+                return redirect(
+                    "/", cookies={SUCCESS_COOKIE_KEY: "Successfully reset password!"}
+                )
 
     return render(
         request, "forms/reset.html", {"title": "Reset Password", "form": form}
@@ -196,9 +218,12 @@ def forgot_handler(request):
                 # send reset key
                 send_reset(request, user.email, key)
 
-        return redirect("/", cookies={
-            SUCCESS_COOKIE_KEY: "If the username or email exists you will receive a password reset to your email!"
-        })
+        return redirect(
+            "/",
+            cookies={
+                SUCCESS_COOKIE_KEY: "If the username or email exists you will receive a password reset to your email!"
+            },
+        )
 
     else:
         form = forms.ForgotForm()
@@ -210,7 +235,7 @@ def forgot_handler(request):
 
 def logout_handler(request):
     logout(request)
-    return redirect('/')
+    return redirect("/")
 
 # def _screen(self):
 #     context["title"] = "Sign Up"

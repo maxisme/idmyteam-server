@@ -21,13 +21,13 @@ def redirect(path, cookies={}):
 
 
 def render(
-        request,
-        template_name=None,
-        context={},
-        content_type=None,
-        status=None,
-        using=None,
-        **kwargs
+    request,
+    template_name=None,
+    context={},
+    content_type=None,
+    status=None,
+    using=None,
+    **kwargs
 ):
     """
     Return a HttpResponse whose content is filled with the result of calling
@@ -42,7 +42,7 @@ def render(
         },
         "logged_in": request.user.is_authenticated,
         **request.COOKIES,
-        **kwargs
+        **kwargs,
     }
 
     content = loader.render_to_string(
@@ -61,9 +61,11 @@ def render(
 def is_valid_email(email) -> bool:
     if len(email) <= 3:
         return False
-    email_regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    email_regex = "^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$"
     return bool(re.search(email_regex, email))
 
 
 def random_str(length):
-    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+    return "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(length)
+    )

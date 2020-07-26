@@ -16,7 +16,6 @@ Including another URLconf
 from django.urls import path
 
 from idmyteamserver import views, auth, api
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("", views.welcome_handler),
@@ -26,19 +25,14 @@ urlpatterns = [
     path("storage", views.storage_handler),
     path("tutorials", views.tutorials_handler),
     path("tutorials/<slug:slug>", views.tutorial_hander),
-
     path("signup", auth.signup_handler),
     path("login", auth.login_handler),
     path("logout", auth.logout_handler),
-
     path("forgot", auth.forgot_handler),
     path("reset", auth.reset_handler),
-
-    path('confirm/<key>', auth.confirm_handler),
-    path('profile', auth.profile_handler),
-
-    path('reset-credentials', api.reset_credentials_handler),
-    path('toggle-storage', api.toggle_storage_handler),
-
+    path("confirm/<key>", auth.confirm_handler),
+    path("profile", auth.profile_handler),
+    path("reset-credentials", api.reset_credentials_handler),
+    path("toggle-storage", api.toggle_storage_handler),
     path("trace", views.trace_hander),
 ]

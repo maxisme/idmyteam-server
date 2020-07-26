@@ -32,7 +32,7 @@ def tutorials_handler(request):
 def trace_hander(request):
     tracer = trace.get_tracer(__name__)
 
-    with tracer.start_as_current_span('hey ho hit the trace'):
+    with tracer.start_as_current_span("hey ho hit the trace"):
         pass
 
     return HttpResponse(request.headers.items())
