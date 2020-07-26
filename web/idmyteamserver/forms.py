@@ -57,7 +57,7 @@ class SignUpForm(RecaptchaForm, ModelForm):
 
 
 class LoginForm(RecaptchaForm):
-    username = forms.CharField(required=True, label="Username", )
+    username = forms.CharField(required=True, label="Username",)
     password = forms.CharField(
         min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
     )
@@ -81,6 +81,7 @@ class ResetForm(RecaptchaForm):
         required=True,
         label="Confirm Password",
     )
+
 
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):
