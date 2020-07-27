@@ -32,7 +32,6 @@ def tutorials_handler(request):
 def trace_hander(request):
     tracer = trace.get_tracer(__name__)
 
-    print(trace.get_current_span().get_context().trace_id)
     with tracer.start_as_current_span("hey ho hit the trace"):
         print(trace.get_current_span().get_context().span_id)
 

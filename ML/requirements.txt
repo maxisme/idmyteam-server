@@ -10,3 +10,5 @@ pyyaml
 pycrypto
 itsdangerous
 websocket-client
+chainer
+chainercv
