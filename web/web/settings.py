@@ -45,14 +45,12 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 CREDENTIAL_LEN = 150
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DEBUG", False))
 
 ALLOWED_HOSTS = ["idmy.team", "127.0.0.1", "localhost"]
 
 AUTH_USER_MODEL = "idmyteamserver.Account"
 
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.auth",
