@@ -1,9 +1,9 @@
 import io
-import logging
-import time
-import os
 import json
+import logging
 import math
+import os
+import time
 from random import randint
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # reduce tensorflow logging
@@ -33,10 +33,10 @@ classifier_q = Queue("low", connection=redis_conn)
 
 class Detecter:
     def __init__(self):
-        logger.info("Started loading ML models...")
+        logger.info("Started loading recognition models...")
         self.face_localiser = self.FaceLocalisation()
         self.feaure_extractor = self.FeatureExtractor()
-        logger.info("Finished loading ML models!")
+        logger.info("Finished loading recognition models!")
 
     class FeatureExtractor:
         model = import_module("train.resnet_v1_50")
@@ -168,7 +168,7 @@ class Detecter:
             store_image_features=True,
     ):
         """
-        :type classifier: ML.Classifier
+        :type classifier: recognition.Classifier
         :param img:
         :param file_name:
         :param hashed_username:
@@ -187,7 +187,7 @@ class Detecter:
         start_time = time.time()
         try:
             original_image = Image.open(io.BytesIO(img))
-            # convert to ML readable image
+            # convert to recognition readable image
             img = original_image.convert("RGB")
             img = np.asarray(img, dtype=np.float32)
             img = img.transpose((2, 0, 1))

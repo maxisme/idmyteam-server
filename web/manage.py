@@ -28,17 +28,13 @@ def main():
     else:
         # jaeger tracer
         jaeger_exporter = jaeger.JaegerSpanExporter(
-            service_name="traefik",
+            service_name="ID My Team",
             collector_host_name=jaeger_collector_host_name,
             collector_port=14268,
         )
         trace.get_tracer_provider().add_span_processor(
             BatchExportSpanProcessor(jaeger_exporter)
         )
-
-    tracer = trace.get_tracer(__name__)
-    with tracer.start_as_current_span("started ID My Team"):
-        pass
 
     DjangoInstrumentor().instrument()
     try:

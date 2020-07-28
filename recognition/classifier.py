@@ -1,15 +1,13 @@
+import ast
 import json
+import logging
 import os
 import sys
 import time
 
-import MySQLdb
-import ast
-import numpy as np
-import logging
-
-from sklearn.model_selection import ShuffleSplit, cross_val_score
 import joblib
+import numpy as np
+from sklearn.model_selection import ShuffleSplit, cross_val_score
 from sklearn.svm import SVC
 
 from utils import functions, config, db
@@ -108,7 +106,7 @@ class Classifier(object):
                 {
                     "type": "error",
                     "mess": "You must train with at least %d members!"
-                    % (config.MIN_CLASSIFIER_TRAINING_IMAGES,),
+                            % (config.MIN_CLASSIFIER_TRAINING_IMAGES,),
                 },
             )
 
@@ -128,7 +126,9 @@ class Classifier(object):
         num_outputs = np.nonzero(unique_outputs)[0]
         cnt_uni = list(zip(num_outputs, unique_outputs[num_outputs]))
 
-        logger.info(f"fitted {len(training_input)} features from {len(set(training_output))} classes")
+        logger.info(
+            f"fitted {len(training_input)} features from {len(set(training_output))} classes"
+        )
 
         # send message to client with who has been trained
         functions.send_to_client(
@@ -141,7 +141,7 @@ class Classifier(object):
         )
 
         if not self.exists(self.hashed_username) or self._should_update_model(
-            clf, training_input, training_output, conn
+                clf, training_input, training_output, conn
         ):
             model_path = self.get_model_path(self.hashed_username, True)
             joblib.dump(clf, model_path)  # save model
@@ -152,7 +152,7 @@ class Classifier(object):
         # mark all features as not new
         cur = conn.cursor()
         cur.execute(
-            "UPDATE `Features` SET `new` = '0' WHERE username = %s",
+            """UPDATE recognition_features SET trained = true where account_id = %s""",
             (self.hashed_username,),
         )
         conn.commit()
@@ -190,7 +190,9 @@ class Classifier(object):
         logger.info(f"{scores.mean()} -- +/- {scores.std()}")
 
         mb_size = sys.getsizeof(clf) * 1e6
-        logger.info(f"{mb_size}MB {self.hashed_username}", mb_size, self.hashed_username)
+        logger.info(
+            f"{mb_size}MB {self.hashed_username}", mb_size, self.hashed_username
+        )
 
         if mb_size < config.MAX_CLASSIFIER_SIZE_MB:
             # check if this mean score is better than the last within margin
@@ -200,7 +202,7 @@ class Classifier(object):
                         FROM `Logs` 
                         WHERE `method` = 'Mean Accuracy' 
                         AND username= %s 
-                        ORDER BY `id` 
+                        ORDER BY `id`
                         DESC LIMIT 1
                         """,
                 (self.hashed_username,),
@@ -240,10 +242,8 @@ class Classifier(object):
         """
         cur = conn.cursor(MySQLdb.cursors.DictCursor)
         cur.execute(
-            """SELECT `features`, `class`, `type`, `new` 
-                    FROM `Features`
-                    WHERE username = %s
-                    OR username = 'init'""",
+            """SELECT `features`, `class`, `type`, `new` FROM `Features`
+                WHERE username = %s OR username = 'init'""",
             (self.hashed_username,),
         )
 
