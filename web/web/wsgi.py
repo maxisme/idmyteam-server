@@ -28,9 +28,8 @@ jaeger_collector_host_name = os.environ.get("JAEGER_COLLECTOR_HOST_NAME", False)
 
 if jaeger_collector_host_name:
     hostname = socket.gethostname()
-    _, _, ips = socket.gethostbyaddr(hostname)
     trace.set_tracer_provider(
-        TracerProvider(resource=Resource({"hostname": hostname, "hostname_ip": str(ips)}))
+        TracerProvider(resource=Resource({"hostname": hostname, "hostname_ip": socket.gethostbyname(hostname)}))
     )
     propagators.set_global_httptextformat(B3Format())
 
