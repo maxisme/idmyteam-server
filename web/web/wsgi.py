@@ -33,6 +33,7 @@ if jaeger_collector_host_name:
     labels = {"hostname": hostname}
     for i, ip in enumerate(ips):
         labels[f"hostname-ip-{i+1}"] = ip
+    labels["traefik-server-ip"] = ips[-1]  # I think it always the last ip...
 
     trace.set_tracer_provider(
         TracerProvider(resource=Resource(labels))
