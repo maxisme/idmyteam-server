@@ -35,8 +35,8 @@ propagators.set_global_httptextformat(B3Format())
 
 # jaeger tracer
 jaeger_exporter = jaeger.JaegerSpanExporter(
-    service_name="traefik",
-    collector_host_name=jaeger_collector_host_name,
+    service_name="ID My Team",
+    collector_host_name="jaeger",
     collector_port=14268,
 )
 trace.get_tracer_provider().add_span_processor(
