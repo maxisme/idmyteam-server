@@ -21,6 +21,14 @@ services:
       - db
       - tracing
 
+  migrations:
+    image: maxisme/idmyteam-server
+    env_file:
+      - "web/.env"
+    command: python manage.py makemigrations && python manage.py migrate
+    depends_on:
+      - db
+
   static:
     image: nginx
     volumes:
