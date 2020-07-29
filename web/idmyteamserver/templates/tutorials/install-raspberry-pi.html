@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="chat-text row">
+        <h3>Positioning the Raspberry Pi</h3>
+        <p>
+            You want to position your camera close to a power source and near an ethernet port (unless you plan to use
+            wifi).
+        </p>
+        <p>
+            The camera should be placed in a position where people are likely to be looking roughly towards the camera when
+            entering a team space.
+        </p>
+        <p>
+            The area the camera watches should be well lit and have as higher contrast with people as possible.
+        </p>
+        <p>
+            The camera should be completely horizontal with the cable either vertically up or down.
+        </p>
+
+{#        <p>#}
+{#            There are two main techniques to connecting your system to the internet:#}
+{#        </p>#}
+{##}
+{#        <ol>#}
+{#            <li>Setting up with wifi - easier to position but <strong>slower reaction speeds</strong> and harder to#}
+{#                setup.#}
+{#            </li>#}
+{#            <li>Setting up with Ethernet - harder to position.</li>#}
+{#        </ol>#}
+
+{#        <h3>Using WIFI</h3>#}
+{#        <p>#}
+{#            Once you have powered on and positioned the Raspberry Pi you should see a wifi network - <strong>ID My#}
+{#            Team</strong>.<br>#}
+{##}
+{#            Once connected, visit <a href="http://idmyteam.wifi.panel/">idmyteam.wifi.panel</a> (if not already) and fill in#}
+{#            the wifi name and password of your network to connect your pi to the internet.<br>#}
+{##}
+{#            After successfully connecting to your wifi network, disconnect (if not already) from the#}
+{#            <storng>ID My Team</storng>#}
+{#            Access Point and visit the <a href="/ip">IP Panel</a> where your local IP should become visible - <strong>when#}
+{#            you are in the same network.</strong>#}
+{#        </p>#}
+
+        <h3>Using Ethernet</h3>
+        <p>
+            Once you have powered on and positioned the Raspberry Pi you should connect an ethernet cable from your network
+            into the Raspberry Pi. After doing that log into your <a href="/profile">profile</a> where your local Web Panel IP
+            should become visible (<strong>when you are in the same network</strong>).<br>
+        </p>
+    </div>
+{% endblock %}

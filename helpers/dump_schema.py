@@ -1,6 +1,6 @@
 import re
 
-from settings import functions, config
+from utils import functions, config
 
 conn = functions.DB.conn(config.DB["username"], config.DB["password"], config.DB["db"])
 

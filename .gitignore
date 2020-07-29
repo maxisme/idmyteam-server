@@ -1,5 +1,10 @@
 conf/secret.conf
-ML/helpers
+recognition/helpers
 *remote.conf
 models
 !.empty
+*.pyc
+.env
+*.sassc
+*.scssc
+/venv/

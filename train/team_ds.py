@@ -4,7 +4,7 @@ import chainer
 from chainercv.utils import read_image
 import numpy as np
 
-from settings import functions
+from utils import functions
 
 # class design replicates https://github.com/chainer/chainercv/blob/master/chainercv/datasets/voc/voc_bbox_dataset.py
 class TeamParser(chainer.dataset.DatasetMixin):

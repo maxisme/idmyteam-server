@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="chat-text row">
+        <div class="col s12">
+            It is very important that the camera extracts movement properly by using the background extractor. It is what
+            tells the system to upload an image to be recognised. In this tutorial we will be going through a method to make
+            sure the background extractor is working to its full potential.
+        </div>
+
+        <hr>
+        <div class="col s12">
+            First thing to do is to turn on the <strong>Mask</strong> in your web panel settings (<span
+                class="material-icons">photo_camera</span>), so that the live stream shows you extracted movement:
+        </div>
+        <div align="center" class="col s12 m6">
+            <img src="{% static 'images/tutorials/mask_settings.gif' %}"/>
+        </div>
+
+        <div class="col s12">
+            There are two edge cases you need to check when analysing the live stream. The first is when no one is in front
+            of the camera the live stream page on your web panel <strong>only shows the background in full colour</strong>
+            with no noise (as indicated by the number value at the top left being 0).
+        </div>
+
+        <div class="col s12">
+            The second is that when a member walks in front of the camera there is a <strong>white area that masks the area
+            of movement</strong> and there is little noise surrounding them and that a white border encompasses the
+            movement.
+        </div>
+
+        <div class="col s12">
+            What you <strong>do not</strong> want is a noisy image like this when the background is not populated:
+        </div>
+
+        <div align="center" class="col s12 m6">
+            <img src="{% static 'images/tutorials/noisy_mask.gif' %}"/>
+        </div>
+
+        <div class="col s12">
+            To reduce the noise increase the <strong>Mask Threshold</strong> in increments until there is no noise and you
+            see your background in full colour when no one is in front - although you do not want to increase this too much
+            otherwise the camera won't extract the entire area of interest.
+        </div>
+
+        <div align="center" class="col s12 m6">
+            <img src="{% static 'images/tutorials/mask_settings_thresh.gif' %}"/>
+        </div>
+
+        <div class="col s12">
+            Now check the two edge cases aforementioned to check your threshold is working properly.
+        </div>
+
+        <div class="col s12">
+            Another thing to note is that the system will retrain the background if there is movement for too long a period
+            as this might be caused by a light being switched on or a box being put by your door and the background should
+            be retrained to account for this.
+        </div>
+    </div>
+{% endblock %}

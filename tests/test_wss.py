@@ -1,9 +1,6 @@
 # emulates connection from web panel
 
 import mock
-from tornado.httpclient import HTTPRequest
-from tornado.websocket import websocket_connect
-from tornado import gen
 
 from test_web import TeamGenerator
 from web_helpers import WebTest
@@ -46,8 +43,8 @@ class TestSocketClient(object):
 @mock.patch("smtplib.SMTP")
 @mock.patch("rq.queue.Queue.enqueue_job")
 @mock.patch("authed.LoginHandler._is_valid_captcha", return_value=True)
-@mock.patch("settings.functions.Email.template")
-@mock.patch("settings.functions.AESCipher._mock_me")
+@mock.patch("utils.functions.Email.template")
+@mock.patch("utils.functions.AESCipher._mock_me")
 class WSSTest(WebTest):
     def test_initial_team_connection(self, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
@@ -78,7 +75,7 @@ class WSSTest(WebTest):
         except:
             assert not ws.failure
 
-    @mock.patch("ML.classifier.Classifier.get_model_path", return_value=True)
+    @mock.patch("recognition.classifier.Classifier.get_model_path", return_value=True)
     def test_team_with_model_connection(self, _, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):
@@ -134,7 +131,7 @@ class WSSTest(WebTest):
         except:
             assert not ws.failure
 
-    @mock.patch("ML.classifier.Classifier.get_model_path", return_value=True)
+    @mock.patch("recognition.classifier.Classifier.get_model_path", return_value=True)
     def test_team_with_invalid_ip(self, _, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):

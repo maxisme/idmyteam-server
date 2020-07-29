@@ -1,0 +1,16 @@
+numpy
+sklearn
+rq
+psycopg2-binary
+sqlalchemy
+tensorflow
+opencv-python
+Pillow
+pyyaml
+pycrypto
+itsdangerous
+websocket-client
+chainer
+chainercv
+elasticsearch
+sentry-sdk

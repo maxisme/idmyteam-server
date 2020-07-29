@@ -1,0 +1,27 @@
+{% extends 'form.html' %}
+{% load materializecss %}
+{% block form %}
+    <div class="row">
+        Enter your new password
+    </div>
+
+    {% for hidden_field in form.hidden_fields %}
+        {{ hidden_field }}
+    {% endfor %}
+
+    <div class="row">
+        {{ form.password|materializecss:'s12 m6' }}
+        {{ form.confirm|materializecss:'s12 m6' }}
+    </div>
+
+    <div align="center" class="row">
+        {{ form.captcha|materializecss }}
+    </div>
+
+    <script>
+        {# remove key from url#}
+        (function () {
+            window.history.replaceState({}, document.title, "/" + "reset");
+        })();
+    </script>
+{% endblock %}

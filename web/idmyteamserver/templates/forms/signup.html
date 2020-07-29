@@ -1,0 +1,29 @@
+{% extends 'form.html' %}
+{% load materializecss %}
+
+{% block form %}
+    <div class="row">
+        {{ form.username|materializecss }}
+    </div>
+
+    <div class="row">
+        {{ form.email|materializecss }}
+    </div>
+
+    <div class="row">
+        {{ form.password|materializecss:'s12 m6' }}
+        {{ form.confirm|materializecss:'s12 m6' }}
+    </div>
+
+    <div class="row">
+        {{ form.allow_image_storage|materializecss }}
+    </div>
+
+    <div class="row">
+        {{ form.terms|materializecss }}
+    </div>
+
+    <div align="center" class="row">
+        {{ form.captcha|materializecss }}
+    </div>
+{% endblock %}

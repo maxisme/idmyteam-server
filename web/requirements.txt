@@ -1,0 +1,13 @@
+Django
+gunicorn
+django-captcha
+django-ranged-response
+django-recaptcha
+django-simple-email-confirmation
+python-dotenv
+bcrypt
+psycopg2-binary
+opentelemetry-sdk
+opentelemetry-ext-django
+opentelemetry-ext-jaeger
+sentry-sdk

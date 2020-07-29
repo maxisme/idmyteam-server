@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h3>Account</h3>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">
+                        <span class="material-icons">show_chart</span> Statistics
+                    </span>
+                    <p>
+                        <span class="material-icons">face</span> {{ num_recognitions }} recognitions have been made.
+                    </p>
+                    <p>
+                        <span class="material-icons">people_outline</span> Trained {{ num_classifications }} out of a maximum of
+                        {{ max_class_num }} members. <!-- TODO add option to buy more one day-->
+                    </p>
+                    {% if allow_storage %}
+                        <p>
+                            <span class="material-icons">storage</span> Stored <a
+                                href="/profile/stored-images">{{ num_images }} team images</a> for training.
+                            {% if num_images > 0 %}
+                                <a href="#" class="red btn material-icons" id="delete-storage">delete</a>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">
+                        <span class="material-icons">tune</span> Preferences
+                    </span>
+                    <p>
+                        <input {% if allow_image_storage %}checked{% endif %} name="imagestore" type="checkbox"
+                               id="imagestore"/>
+                        <label for="imagestore">Allow us to <a target="_blank" href="/storage">store images</a> for
+                            improved
+                            recognition.</label>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Delete Team Model</span>
+                    <a {% if not has_model %}disabled="disabled"{% else %}href="#" id="delete-model"{% endif %}
+                       class="btn-floating halfway-fab red">
+                        <i class="material-icons {% if not has_model %}disabled{% endif %}">delete</i>
+                    </a>
+                    <p>Deleting your model is irreversible and you will need to train your team again.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Delete Account</span>
+                    <a href="#" id="delete-account" class="btn-floating halfway-fab red">
+                        <i class="material-icons {% if not has_model %}disabled{% endif %}">delete</i>
+                    </a>
+                    <p>
+                        All your data will be permanently deleted.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p>&nbsp;</p>
+
+    <h3>Web Panel login details</h3>
+    <p>
+        Visit the web panel hosted on your Raspberry Pi by clicking on the IP address below. Then login using the
+        temporary Name and Password below. After login please create a new account and delete the root user.
+    </p>
+    <div class="flex row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">
+                        {% if local_ip %}
+                            <span class="material-icons">location_on</span>
+                        {% else %}
+                            <span class="material-icons">sync_disabled</span>
+                        {% endif %}
+                        Web Panel (Local IP)
+                    </span>
+                    <p>
+                        {% if local_ip %}
+                            <a target="_blank" href='http://{{ local_ip }}:8080'>{{ local_ip }}</a>
+                        {% else %}
+                            <div class="error">
+                                Raspberry Pi not connected to the internet.
+                            </div>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex row">
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title"><span class="material-icons">face</span> Temporary Name</span>
+                    <p>root<br>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title"><span class="material-icons">vpn_key</span> Temporary Password</span>
+                    <p class="break-all">{{ root_password }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Server Credentials</h3>
+    <p>
+        Private server connection credentials for recognising your team (<b>do not share!</b>).
+    </p>
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">
+                        <span class="material-icons">face</span> Username
+                    </span>
+                    <p>
+                        {{ username }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">
+                        <span class="material-icons">vpn_key</span> Credentials
+                    </span>
+                    <a href="#" id="reset-credentials" class="btn-floating halfway-fab red">
+                        <i class="material-icons">autorenew</i>
+                    </a>
+                    <p style="word-wrap: break-word">
+                        {{ credentials }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $("#imagestore").change(function () {
+                window.location = "/toggle-storage";
+            });
+
+            $("#delete-model").click(function () {
+                if (confirm('Are you sure?')) {
+                    $.post("/delete-model", {
+                        '_xsrf': '{{ xsrf_token }}'
+                    });
+                }
+            });
+
+            $("#delete-account").click(function () {
+                if (confirm('Are you sure? This is irreversible!')) {
+                    $.post("/delete-account", {
+                        '_xsrf': '{{ xsrf_token }}'
+                    });
+                    location.reload();
+                }
+            });
+
+            $("#delete-storage").click(function () {
+                $.post("/delete-storage", {
+                    '_xsrf': '{{ xsrf_token }}'
+                });
+                location.reload();
+            });
+
+            $("#reset-credentials").click(function () {
+                if (confirm('Reset your credentials? You will need to update them on the client.')) {
+                    window.location = "/reset-credentials";
+                }
+            });
+        });
+    </script>
+{% endblock %}
