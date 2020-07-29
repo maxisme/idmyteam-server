@@ -8,6 +8,9 @@ $ chmod +x .githooks/*
 ```
 
 ## Local setup
+### .env
+1. https://djecrety.ir/ add to SECRET_KEY
+2. DEBUG=True
 ### Web
 1. `docker-compose up -d db`
 2. `cd web`

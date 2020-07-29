@@ -1,6 +1,4 @@
 FROM tensorflow/tensorflow:devel-gpu
-#RUN apt-get update
-#RUN apt-get install -y libmysqlclient-dev
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /code
 WORKDIR /code

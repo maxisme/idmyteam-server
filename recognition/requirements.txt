@@ -1,7 +1,7 @@
 numpy
 sklearn
 rq
-mysqlclient
+psycopg2-binary
 sqlalchemy
 tensorflow
 opencv-python
@@ -12,3 +12,5 @@ itsdangerous
 websocket-client
 chainer
 chainercv
+elasticsearch
+sentry-sdk

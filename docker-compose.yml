@@ -1,11 +1,13 @@
 version: '3.2'
 
 services:
-  recognition-worker:
-    build:
-      context: "./ML/"
-    depends_on:
-      - redis
+  #  recognition:
+  #    build:
+  #      context: "recognition/"
+  #    depends_on:
+  #      - redis
+  #      - db
+  #      - elasticsearch
 
   web:
     build:
@@ -15,14 +17,37 @@ services:
       - "127.0.0.1:8000:8000"
     env_file:
       - "./web/.env"
+    volumes:
+      #      - ./web:/usr/src/app
+      - static_volume:/usr/src/app/static
     environment:
-      DATABASE_USER: idmyteam
-      DATABASE_PASS: idmyteam
-      DATABASE_NAME: idmyteam
-      DATABASE_HOST: db
-      JAEGER_COLLECTOR_HOST_NAME: jaeger
+      DEBUG: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.idmyteam.rule=Host(`localhost`)"
+      - "traefik.http.routers.idmyteam.entrypoints=web"
+      - "traefik.http.services.idmyteam.loadbalancer.server.port=8000"
     depends_on:
       - db
+
+  init-web:
+    build:
+      context: "./web/"
+    env_file:
+      - "./web/.env"
+    command: python manage.py migrate
+    depends_on:
+      - db
+
+  static:
+    image: nginx
+    volumes:
+      - static_volume:/usr/share/nginx/html/static:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.idmyteam-static.rule=Host(`localhost`) && PathPrefix(`/static/`)"
+      - "traefik.http.routers.idmyteam-static.entrypoints=web"
+      - "traefik.http.services.idmyteam-static.loadbalancer.server.port=80"
 
   db:
     image: postgres
@@ -45,3 +70,39 @@ services:
     ports:
       - "127.0.0.1:16686:16686"
       - "127.0.0.1:14268:14268"
+    environment:
+      JAEGER_REPORTER_LOG_SPANS: "true"
+    command:
+      - "--log-level=debug"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.8.1
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+      - "127.0.0.1:9200:9200"
+
+  traefik:
+    image: "traefik:v2.2"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--tracing=true"
+      - "--tracing.serviceName=traefik"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.collector.endpoint=http://jaeger:14268/api/traces?format=zipkin.thrift"
+      - "--tracing.jaeger.gen128Bit"
+      - "--tracing.jaeger.propagation=b3"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    depends_on:
+      - jaeger
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+volumes:
+  static_volume:

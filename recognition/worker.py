@@ -1,23 +1,28 @@
+import os
+from threading import Thread
+
+import Elasticsearch as Elasticsearch
+import redis
+import sentry_sdk
 from classifier import Classifier
 from detecter import Detecter
-from utils import config, functions, db
-
-import os
-import redis
-from threading import Thread
-from rq import Worker, Queue, Connection
-from rq.contrib.sentry import register_sentry
 from raven import Client
 from raven.transport.http import HTTPTransport
-import sentry_sdk
+from rq import Worker, Queue, Connection
+from rq.contrib.sentry import register_sentry
 
+from utils import config, functions, db
 from utils.logs import logger
 
 sentry_sdk.init(os.getenv(config.SENTRY_URL))
 
+# redis
 listen = ["high", "medium", "low"]
 redis_url = os.getenv("REDISTOGO_URL", "redis://localhost:6379")
 rq_conn = redis.from_url(redis_url)
+
+# elasticsearch
+es = Elasticsearch()
 
 classifiers = {}
 no_classifier_jobs = {}
