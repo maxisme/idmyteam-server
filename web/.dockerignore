@@ -3,3 +3,4 @@
 *.sassc
 *.scssc
 /venv/
+test-user.json

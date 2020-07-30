@@ -12,6 +12,7 @@ import socket
 from django.core.wsgi import get_wsgi_application
 from opentelemetry import trace, propagators
 from opentelemetry.ext import jaeger
+from opentelemetry.ext.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.ext.wsgi import OpenTelemetryMiddleware
 from opentelemetry.sdk.trace import (
     TracerProvider,
@@ -55,5 +56,6 @@ def get_default_span_name(environ):
     return "{} {}".format(environ.get("REQUEST_METHOD", ""), environ.get("PATH_INFO", "")).strip()
 
 
+Psycopg2Instrumentor().instrument()
 application = get_wsgi_application()
 application = OpenTelemetryMiddleware(application, get_default_span_name)

@@ -10,4 +10,5 @@ psycopg2-binary
 opentelemetry-sdk
 opentelemetry-ext-django
 opentelemetry-ext-jaeger
+opentelemetry-ext-psycopg2
 sentry-sdk
