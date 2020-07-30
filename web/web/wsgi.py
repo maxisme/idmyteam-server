@@ -35,6 +35,7 @@ if jaeger_collector_host_name:
     for i, ip in enumerate(ips):
         labels[f"hostname-ip-{i+1}"] = ip
     labels["traefik-server-ip"] = ips[-1]  # I think it always the last ip...
+    labels["commit-hash"] = os.getenv("COMMIT_HASH")
 
     trace.set_tracer_provider(
         TracerProvider(resource=Resource(labels))

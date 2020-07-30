@@ -1,4 +1,8 @@
 FROM python:3.8-slim
+
+ARG COMMIT_HASH
+ENV COMMIT_HASH=$COMMIT_HASH
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 ADD requirements.txt .
