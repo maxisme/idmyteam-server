@@ -53,7 +53,17 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           tag_with_ref: true
           tag_with_sha: true
-      - name: Update Swarm
+      - name: Update Swarm idmyteam_migrations
+        if: github.ref == 'refs/heads/master'
+        run: |
+          export sha="${{ github.sha }}"
+          curl -f -X POST ${{ secrets.SWARM_HOOK }} \
+          -H 'Content-Type: application/x-www-form-urlencoded' \
+          -d 'service=idmyteam_migrations' \
+          -d "image=${{ github.repository }}" \
+          -d "tag=sha-${sha:0:7}" \
+          -d "token=${{ secrets.HOOK_TOKEN }}"
+      - name: Update Swarm idmyteam_web
         if: github.ref == 'refs/heads/master'
         run: |
           export sha="${{ github.sha }}"
