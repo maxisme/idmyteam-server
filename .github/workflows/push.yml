@@ -64,7 +64,7 @@ jobs:
           -d "tag=sha-${sha:0:7}" \
           -d "token=${{ secrets.HOOK_TOKEN }}"
       - name: Update Swarm idmyteam_web
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && always()
         run: |
           export sha="${{ github.sha }}"
           curl -f -X POST ${{ secrets.SWARM_HOOK }} \
