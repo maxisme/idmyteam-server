@@ -20,6 +20,7 @@ services:
       - traefik
       - db
       - tracing
+      - logging
 
   migrations:
     image: maxisme/idmyteam-server
@@ -51,6 +52,8 @@ networks:
   db:
     external: true
   tracing:
+    external: true
+  logging:
     external: true
 
 volumes:
