@@ -10,8 +10,6 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.idmyteam.rule=Host(`idmy.team`)"
-        - "traefik.http.routers.idmyteam.entrypoints=web-secure"
-        - "traefik.http.routers.idmyteam.tls.certresolver=letsencrypt"
         - "traefik.http.services.idmyteam.loadbalancer.server.port=8000"
         - "traefik.http.routers.idmyteam.middlewares=404"
     volumes:
