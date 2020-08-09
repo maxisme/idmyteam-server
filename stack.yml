@@ -37,8 +37,6 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.idmyteam-static.rule=Host(`idmy.team`) && PathPrefix(`/static/`)"
-        - "traefik.http.routers.idmyteam-static.entrypoints=web-secure"
-        - "traefik.http.routers.idmyteam-static.tls.certresolver=letsencrypt"
         - "traefik.http.services.idmyteam-static.loadbalancer.server.port=80"
         - "traefik.http.routers.idmyteam-static.middlewares=404"
     networks:
