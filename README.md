@@ -9,8 +9,9 @@ $ chmod +x .githooks/*
 
 ## Local setup
 ### .env
-1. https://djecrety.ir/ add to SECRET_KEY
-2. DEBUG=True
+1. `$ cd web; cp .env.example .env`
+2. https://djecrety.ir/ add to SECRET_KEY
+3. DEBUG=True
 ### Web
 1. `docker-compose up -d db`
 2. `cd web`
