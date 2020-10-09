@@ -18,7 +18,6 @@ services:
     env_file:
       - "./web/.env"
     volumes:
-      #      - ./web:/usr/src/app
       - static_volume:/usr/src/app/static
     environment:
       DEBUG: 1

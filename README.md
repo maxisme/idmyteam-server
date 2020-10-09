@@ -12,11 +12,20 @@ $ chmod +x .githooks/*
 1. `$ cd web; cp .env.example .env`
 2. https://djecrety.ir/ add to SECRET_KEY
 3. DEBUG=True
+
+### Full
+Make sure the .env contains `DATABASE_HOST=db`
+`$ docker-compose up`
+
 ### Web
-1. `docker-compose up -d db`
-2. `cd web`
-3. `$ python manage.py migrate`
-4. `$ python manage.py loaddata test-user.json`
+Make sure the .env contains `DATABASE_HOST=127.0.0.1`
+```
+$ docker-compose up -d db
+$ cd web
+$ python3 manage.py migrate
+$ python3 manage.py loaddata test-user.json
+$ python3 manage.py runserver
+```
 You can then login with the credentials `testuser`:`testuser`
 
 ____
