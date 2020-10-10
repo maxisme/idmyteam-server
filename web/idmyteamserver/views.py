@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
+from django.db import connection
 
 from idmyteamserver.helpers import render
 
@@ -36,6 +37,13 @@ def trace_hander(request):
         pass
 
     return HttpResponse(str(request.headers.items()))
+
+
+def health_handler(request):
+    connection.connect()
+    if not connection.is_usable():
+        return HttpResponse(status=500)
+    return HttpResponse(status=200)
 
 
 def tutorial_hander(request, slug):

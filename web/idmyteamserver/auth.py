@@ -93,7 +93,7 @@ def login_handler(request):
         if form.is_valid():
             username = request.POST["username"]
             password = request.POST["password"]
-            user: Account = authenticate(username=username, password=password)
+            user: Account = authenticate(request, username=username, password=password)
             if user:
                 if user.is_confirmed:
                     login(request, user)

@@ -1,4 +1,5 @@
 from captcha.fields import ReCaptchaField
+from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.forms import ModelForm
 
@@ -7,6 +8,8 @@ from idmyteamserver.models import Account
 
 class RecaptchaForm(forms.Form):
     class CustomCaptcha(ReCaptchaField):
+        widget = ReCaptchaV2Invisible
+
         def validate(self, value):
             # only validate if there is a private_key
             if self.private_key:
@@ -57,7 +60,7 @@ class SignUpForm(RecaptchaForm, ModelForm):
 
 
 class LoginForm(RecaptchaForm):
-    username = forms.CharField(required=True, label="Username",)
+    username = forms.CharField(required=True, label="Username", )
     password = forms.CharField(
         min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
     )
@@ -81,7 +84,6 @@ class ResetForm(RecaptchaForm):
         required=True,
         label="Confirm Password",
     )
-
 
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):
