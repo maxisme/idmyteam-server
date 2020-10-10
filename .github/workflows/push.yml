@@ -53,6 +53,7 @@ jobs:
           tag_with_ref: true
           tag_with_sha: true
           build_args: COMMIT_HASH=${{ github.sha }}
+
       - name: Update Swarm idmyteam_migrations
         if: github.ref == 'refs/heads/master'
         run: |
@@ -63,6 +64,7 @@ jobs:
           -d "image=${{ github.repository }}" \
           -d "tag=sha-${sha:0:7}" \
           -d "token=${{ secrets.HOOK_TOKEN }}"
+
       - name: Update Swarm idmyteam_web
         if: github.ref == 'refs/heads/master' && always()
         run: |

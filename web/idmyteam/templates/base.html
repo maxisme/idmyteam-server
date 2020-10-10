@@ -4,12 +4,9 @@
 <head>
     <!-- custom meta -->
     <title>{{ title }}</title>
-    <meta property="og:title" content="{{ title }}"/>
-    <meta property="og:description" content="{{ meta.description }}"/>
-    <meta property="og:image" content="{% static 'images/og_logo.png' %}"/>
     <meta name="keywords" content="{{ meta.keywords }}">
     <meta name="description" content="{{ meta.description }}">
-    <link rel="shortcut icon" href="{% static 'images/icon.ico' %}">
+    <link rel="shortcut icon" href="{% static 'images/icon_red.svg' %}">
 
     {% block scripts %}{% endblock %}
 
