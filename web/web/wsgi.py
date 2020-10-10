@@ -42,7 +42,7 @@ if jaeger_collector_host_name:
     trace.set_tracer_provider(
         TracerProvider(resource=Resource(labels))
     )
-    propagators.set_global_httptextformat(B3Format())
+    propagators.set_global_textmap(B3Format())
 
     # jaeger tracer
     jaeger_exporter = jaeger.JaegerSpanExporter(

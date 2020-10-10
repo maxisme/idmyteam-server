@@ -14,8 +14,11 @@ $ chmod +x .githooks/*
 3. DEBUG=True
 
 ### Full
-Make sure the .env contains `DATABASE_HOST=db`
-`$ docker-compose up`
+Make sure the `.env` contains `DATABASE_HOST=db`
+```
+$ docker-compose up
+```
+Then access at `http://localhost/`.
 
 ### Web
 Make sure the .env contains `DATABASE_HOST=127.0.0.1`
