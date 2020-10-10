@@ -43,7 +43,7 @@
 <body>
 <nav class="z-depth-0">
     <div class="nav-wrapper">
-        <a href="/" class="brand-logo"><img class="svg" src="{% static 'images/icon.svg' %}"/></a>
+        <a href="/" class="brand-logo">{% include_file 'idmyteam/static/images/icon.svg' %}</a>
         <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
         <ul class="right hide-on-med-and-down">
             {{ menu_bar_content|safe }}
