@@ -59,7 +59,7 @@ def profile_handler(request):
             "profile.html",
             context={
                 "local_ip": user.local_ip,
-                "root_password": random_str(30),
+                "root_password": random_str(30),  # TODO
                 "username": user.username,
                 "credentials": user.credentials,
                 "allow_image_storage": bool(user.allow_image_storage),
