@@ -17,21 +17,22 @@ from django.urls import path
 
 from idmyteamserver import views, auth, api
 
+# REMEMBER: update sitemap.py
 urlpatterns = [
-    path("", views.welcome_handler),
-    path("about", views.about_handler),
-    path("contact", views.contact_handler),
-    path("terms", views.terms_handler),
-    path("storage", views.storage_handler),
-    path("tutorials", views.tutorials_handler),
+    path("", views.welcome_handler, name='main'),
+    path("about", views.about_handler, name='about'),
+    path("contact", views.contact_handler, name='contact'),
+    path("terms", views.terms_handler, name='terms'),
+    path("storage", views.storage_handler, name='storage_terms'),
+    path("tutorials", views.tutorials_handler, name='tutorials'),
     path("tutorials/<slug:slug>", views.tutorial_hander),
-    path("signup", auth.signup_handler),
-    path("login", auth.login_handler),
+    path("signup", auth.signup_handler, name='signup'),
+    path("login", auth.login_handler, name='login'),
+    path("profile", auth.profile_handler, name='profile'),
     path("logout", auth.logout_handler),
     path("forgot", auth.forgot_handler),
     path("reset", auth.reset_handler),
     path("confirm/<key>", auth.confirm_handler),
-    path("profile", auth.profile_handler),
     path("reset-credentials", api.reset_credentials_handler),
     path("toggle-storage", api.toggle_storage_handler),
     path("trace", views.trace_hander),

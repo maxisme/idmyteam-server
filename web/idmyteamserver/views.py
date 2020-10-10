@@ -42,9 +42,11 @@ def trace_hander(request):
 
 
 def health_handler(request):
+    # check db
     connection.connect()
     if not connection.is_usable():
         return HttpResponse(status=500)
+
     return HttpResponse(status=200)
 
 
