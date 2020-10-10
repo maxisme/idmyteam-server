@@ -1,3 +1,5 @@
+import os
+
 from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
@@ -44,6 +46,10 @@ def health_handler(request):
     if not connection.is_usable():
         return HttpResponse(status=500)
     return HttpResponse(status=200)
+
+
+def commit_hash_handler(request):
+    return HttpResponse(os.getenv("COMMIT_HASH"))
 
 
 def tutorial_hander(request, slug):

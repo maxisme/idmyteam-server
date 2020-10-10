@@ -36,4 +36,5 @@ urlpatterns = [
     path("toggle-storage", api.toggle_storage_handler),
     path("trace", views.trace_hander),
     path("health", views.health_handler),
+    path("commit-hash", views.commit_hash_handler),
 ]
