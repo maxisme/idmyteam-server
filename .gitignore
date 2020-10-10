@@ -8,3 +8,4 @@ models
 *.sassc
 *.scssc
 /venv/
+.idea
