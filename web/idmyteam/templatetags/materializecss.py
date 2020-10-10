@@ -10,30 +10,35 @@ register = template.Library()
 @register.filter
 def materializecss(element, options={}):
     # Set default values if none of them are set
-    label_cols = 's12'
-    icon = ''
+    label_cols = "s12"
+    icon = ""
 
     if options:
         # Split options string into a list of arguments
-        arguments = [arg.strip() for arg in options.split(',')]
+        arguments = [arg.strip() for arg in options.split(",")]
 
         # Check the first argument to see if it's of form argument=value
-        if '=' not in arguments[0]:
+        if "=" not in arguments[0]:
             # If not, it's a custom size, so use that
             label_cols = arguments[0]
             # Remove this from the arguments list
             arguments.pop(0)
 
         # Join the remaining arguments into a querystring for easy parsing
-        options = '&'.join(arguments)
+        options = "&".join(arguments)
         qs = QueryDict(options)
         # Check to see if a custom size was passed in this fashion and if so prefer it
-        if qs.get('custom_size'):
-            label_cols = qs.get('custom_size')
+        if qs.get("custom_size"):
+            label_cols = qs.get("custom_size")
         # Get icon if it's been set
-        icon = qs.get('icon', default='')
+        icon = qs.get("icon", default="")
 
-    markup_classes = {'label': label_cols, 'value': '', 'single_value': '', 'icon': icon}
+    markup_classes = {
+        "label": label_cols,
+        "value": "",
+        "single_value": "",
+        "icon": icon,
+    }
     return render(element, markup_classes)
 
 
@@ -41,11 +46,15 @@ def _add_input_classes_widget(widget, field_errors):
     if _is_multi_widget(widget):
         for subwidget in widget.widgets:
             _add_input_classes_widget(subwidget, field_errors)
-    elif not _is_checkbox_widget(widget) and not _is_multiple_checkbox_widget(widget) \
-            and not _is_radio_widget(widget) and not _is_file_widget(widget):
-        classes = widget.attrs.get('class', '')
-        classes += ' validate'
-        widget.attrs['class'] = classes
+    elif (
+        not _is_checkbox_widget(widget)
+        and not _is_multiple_checkbox_widget(widget)
+        and not _is_radio_widget(widget)
+        and not _is_file_widget(widget)
+    ):
+        classes = widget.attrs.get("class", "")
+        classes += " validate"
+        widget.attrs["class"] = classes
 
 
 def add_input_classes(field):
@@ -56,27 +65,31 @@ def render(element, markup_classes):
     element_type = element.__class__.__name__.lower()
 
     # Get the icon set setting
-    icon_set = 'default'
+    icon_set = "default"
 
-    if element_type == 'boundfield':
+    if element_type == "boundfield":
         add_input_classes(element)
         template = get_template("materializecssform/field.html")
-        context = {'field': element, 'classes': markup_classes, 'icon_set': icon_set}
+        context = {"field": element, "classes": markup_classes, "icon_set": icon_set}
     else:
-        has_management = getattr(element, 'management_form', None)
+        has_management = getattr(element, "management_form", None)
         if has_management:
             for form in element.forms:
                 for field in form.visible_fields():
                     add_input_classes(field)
 
             template = get_template("materializecssform/formset.html")
-            context = {'formset': element, 'classes': markup_classes, 'icon_set': icon_set}
+            context = {
+                "formset": element,
+                "classes": markup_classes,
+                "icon_set": icon_set,
+            }
         else:
             for field in element.visible_fields():
                 add_input_classes(field)
 
             template = get_template("materializecssform/form.html")
-            context = {'form': element, 'classes': markup_classes, 'icon_set': icon_set}
+            context = {"form": element, "classes": markup_classes, "icon_set": icon_set}
 
     return template.render(context)
 
@@ -144,6 +157,7 @@ def is_select(field):
 @register.filter
 def is_select_multiple(field):
     return isinstance(field.field.widget, forms.SelectMultiple)
+
 
 @register.filter
 def is_captcha(field):

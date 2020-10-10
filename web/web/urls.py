@@ -13,14 +13,25 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.contrib.sitemaps.views import sitemap
+from django.views.generic import RedirectView
+
 from .sitemap import StaticViewSitemap
+
+favicon_view = RedirectView.as_view(url="/static/images/icon_red.svg", permanent=True)
 
 urlpatterns = [
     path("", include("idmyteamserver.urls")),
-
-    path('sitemap.xml', sitemap, {'sitemaps': {
-        'static': StaticViewSitemap,
-    }}, name='django.contrib.sitemaps.views.sitemap'),
+    re_path(r"^favicon\.ico$", favicon_view),
+    path(
+        "sitemap.xml",
+        sitemap,
+        {
+            "sitemaps": {
+                "static": StaticViewSitemap,
+            }
+        },
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
 ]

@@ -39,9 +39,7 @@ if jaeger_collector_host_name:
             labels["traefik-server-ip"] = ip
     labels["commit-hash"] = os.getenv("COMMIT_HASH")
 
-    trace.set_tracer_provider(
-        TracerProvider(resource=Resource(labels))
-    )
+    trace.set_tracer_provider(TracerProvider(resource=Resource(labels)))
     propagators.set_global_httptextformat(B3Format())
 
     # jaeger tracer
@@ -56,7 +54,9 @@ if jaeger_collector_host_name:
 
 
 def get_default_span_name(environ):
-    return "{} {}".format(environ.get("REQUEST_METHOD", ""), environ.get("PATH_INFO", "")).strip()
+    return "{} {}".format(
+        environ.get("REQUEST_METHOD", ""), environ.get("PATH_INFO", "")
+    ).strip()
 
 
 Psycopg2Instrumentor().instrument()

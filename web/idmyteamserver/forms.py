@@ -20,7 +20,10 @@ class RecaptchaForm(forms.Form):
 
 class SignUpForm(RecaptchaForm, ModelForm):
     password = forms.CharField(
-        min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
+        min_length=8,
+        widget=forms.PasswordInput(),
+        required=True,
+        label="Password",
     )
     confirm = forms.CharField(
         min_length=8,
@@ -60,9 +63,15 @@ class SignUpForm(RecaptchaForm, ModelForm):
 
 
 class LoginForm(RecaptchaForm):
-    username = forms.CharField(required=True, label="Username", )
+    username = forms.CharField(
+        required=True,
+        label="Username",
+    )
     password = forms.CharField(
-        min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
+        min_length=8,
+        widget=forms.PasswordInput(),
+        required=True,
+        label="Password",
     )
 
     class Meta:
@@ -76,7 +85,10 @@ class ForgotForm(RecaptchaForm):
 class ResetForm(RecaptchaForm):
     reset_key = forms.CharField(widget=forms.HiddenInput())
     password = forms.CharField(
-        min_length=8, widget=forms.PasswordInput(), required=True, label="Password",
+        min_length=8,
+        widget=forms.PasswordInput(),
+        required=True,
+        label="Password",
     )
     confirm = forms.CharField(
         min_length=8,
@@ -84,6 +96,7 @@ class ResetForm(RecaptchaForm):
         required=True,
         label="Confirm Password",
     )
+
 
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):
