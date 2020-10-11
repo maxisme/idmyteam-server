@@ -57,7 +57,13 @@ class DB:
 
 # marks a team as training in the database
 def toggle_team_training(conn, hashed_username, training=True):
-    training = training * 1  # convert to int
+    """
+
+    @param conn:
+    @param hashed_username:
+    @type training: bool
+    """
+    training = training * 1  # convert from bool to int
     x = conn.cursor()
     try:
         x.execute(
@@ -97,7 +103,7 @@ def store_feature(
         x.close()
 
 
-# formats message in mannor for client to receive a classification (recognition)
+# formats message for client to receive a classification (recognition-worker)
 def send_classification(
     coords, member_id, recognition_score, file_id, hashed_username, socket
 ):
@@ -462,7 +468,7 @@ class Team:
     @classmethod
     def delete_stored_images(cls, hashed_username, stored_images_dir):
         """
-        Delete directory containing stored recognition images of team members
+        Delete directory containing stored recognition-worker images of team members
         """
         shutil.rmtree(stored_images_dir + "/" + hashed_username)
 

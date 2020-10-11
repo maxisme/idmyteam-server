@@ -37,8 +37,8 @@ def render(
     c = {
         "title": "",
         "meta": {
-            "description": "A recognition system for your team.",
-            "keywords": "detect, recognise, facial, recognition, facial recognition, detection, team, id, recogniser, ID My Team, idmy.team",
+            "description": "A recognition-worker system for your team.",
+            "keywords": "detect, recognise, facial, recognition-worker, facial recognition-worker, detection, team, id, recogniser, ID My Team, idmy.team",
         },
         "logged_in": request.user.is_authenticated,
         **request.COOKIES,

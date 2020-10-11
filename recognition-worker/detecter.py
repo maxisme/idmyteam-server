@@ -33,10 +33,10 @@ classifier_q = Queue("low", connection=redis_conn)
 
 class Detecter:
     def __init__(self):
-        logger.info("Started loading recognition models...")
+        logger.info("Started loading recognition-worker models...")
         self.face_localiser = self.FaceLocalisation()
         self.feaure_extractor = self.FeatureExtractor()
-        logger.info("Finished loading recognition models!")
+        logger.info("Finished loading recognition-worker models!")
 
     class FeatureExtractor:
         model = import_module("train.resnet_v1_50")
@@ -80,6 +80,7 @@ class Detecter:
             c = tf.ConfigProto()
             c.gpu_options.allow_growth = True
             self.sess = tf.Session(config=c)
+
             # TODO convert the below path into one file at config.FEATURE_MODEL_DIR (this path looks at multiple files)
             tf.train.Saver().restore(
                 self.sess, config.ROOT + "/models/checkpoint-407500"
@@ -168,13 +169,13 @@ class Detecter:
             store_image_features=True,
     ):
         """
-        :type classifier: recognition.Classifier
+        :type classifier: recognition-worker.Classifier
         :param img:
         :param file_name:
         :param hashed_username:
         :param classifier:
         :param member_id:
-        :param bool store_image: whether to store the trained image file on ID My Team for increased recognition accuraccy.
+        :param bool store_image: whether to store the trained image file on ID My Team for increased recognition-worker accuraccy.
         :param bool store_image_features: whether to store the predicted images features for constant learning.
         :return:
         """
@@ -187,7 +188,7 @@ class Detecter:
         start_time = time.time()
         try:
             original_image = Image.open(io.BytesIO(img))
-            # convert to recognition readable image
+            # convert to recognition-worker readable image
             img = original_image.convert("RGB")
             img = np.asarray(img, dtype=np.float32)
             img = img.transpose((2, 0, 1))

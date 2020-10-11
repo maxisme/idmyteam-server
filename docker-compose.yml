@@ -1,9 +1,9 @@
 version: '3.2'
 
 services:
-  #  recognition:
+  #  recognition-worker:
   #    build:
-  #      context: "recognition/"
+  #      context: "recognition-worker/"
   #    depends_on:
   #      - redis
   #      - db

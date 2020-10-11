@@ -1,7 +1,7 @@
 conf/secret.conf
-recognition/helpers
+recognition-worker/helpers
 *remote.conf
-models
+recognition-worker/models
 !.empty
 *.pyc
 .env

@@ -1,7 +1,6 @@
 import os
 from threading import Thread
 
-import Elasticsearch as Elasticsearch
 import redis
 import sentry_sdk
 from classifier import Classifier
@@ -11,34 +10,31 @@ from raven.transport.http import HTTPTransport
 from rq import Worker, Queue, Connection
 from rq.contrib.sentry import register_sentry
 
-from utils import config, functions, db
+from utils import functions, db
 from utils.logs import logger
 
-sentry_sdk.init(os.getenv(config.SENTRY_URL))
+# initialise sentry
 
 # redis
 listen = ["high", "medium", "low"]
-redis_url = os.getenv("REDISTOGO_URL", "redis://localhost:6379")
-rq_conn = redis.from_url(redis_url)
-
-# elasticsearch
-es = Elasticsearch()
+# redis_url = os.getenv("REDISTOGO_URL", "redis://localhost:6379")
+# rq_conn = redis.from_url(redis_url)
 
 classifiers = {}
 no_classifier_jobs = {}
 detecter: Detecter = None
+global detecter
+detecter = Detecter()
 
 
-def main():
-    global detecter
-    detecter = Detecter()
+def start_worker(redis_url, sentry_url):
+    rq_conn = redis.from_url(redis_url)
 
     with Connection(rq_conn):
-        worker = MainWorker(list(map(Queue, listen)))  # TODO this replaces queue
+        worker = MainWorker(list(map(Queue, listen)))
 
         # add sentry logging to worker
-        client = Client(config.SENTRY_URL, transport=HTTPTransport)
-        register_sentry(client, worker)
+        register_sentry(Client(sentry_url, transport=HTTPTransport), worker)
 
         # start worker
         worker.work()
@@ -73,9 +69,9 @@ class MainWorker(Worker):
                         f"{hashed_username} has no classifier to run detector with. Reconnect websocket."
                     )
 
-                    # TODO force reconnect all sockets
+                    # TODO force a reconnect of client
 
-                    # add to failed classification jobs
+                    # add to failed classification jobs # TODO put back on redis
                     if hashed_username in no_classifier_jobs:
                         no_classifier_jobs[hashed_username].append((job, queue))
                     else:
@@ -105,4 +101,15 @@ class MainWorker(Worker):
 
 
 if __name__ == "__main__":
-    main()
+    sentry_url = os.getenv("SENTRY_URL", False)
+    if not sentry_url:
+        print("Missing SENTRY_URL environment variable")
+        quit(1)
+    sentry_sdk.init(sentry_url)
+
+    redis_url = os.getenv("REDIS_URL", False)
+    if not redis_url:
+        print("Missing REDIS_URL environment variable")
+        quit(1)
+
+    start_worker(redis_url, sentry_url)

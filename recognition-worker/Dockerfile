@@ -1,8 +1,6 @@
 FROM tensorflow/tensorflow:devel-gpu
 ENV PYTHONUNBUFFERED 1
-RUN mkdir /code
-WORKDIR /code
-COPY requirements.txt /code/
+COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY . /code/
+COPY . .
 CMD [ "python", "worker.py" ]

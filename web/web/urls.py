@@ -19,7 +19,7 @@ from django.views.generic import RedirectView
 
 from .sitemap import StaticViewSitemap
 
-favicon_view = RedirectView.as_view(url="/static/images/icon_red.svg", permanent=True)
+favicon_view = RedirectView.as_view(url="/static/images/favicon.ico", permanent=True)
 
 urlpatterns = [
     path("", include("idmyteamserver.urls")),
