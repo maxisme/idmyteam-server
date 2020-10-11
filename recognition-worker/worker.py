@@ -10,8 +10,6 @@ from raven.transport.http import HTTPTransport
 from rq import Worker, Queue, Connection
 from rq.contrib.sentry import register_sentry
 
-from utils import functions, db
-from utils.logs import logger
 
 # initialise sentry
 
@@ -22,9 +20,6 @@ listen = ["high", "medium", "low"]
 
 classifiers = {}
 no_classifier_jobs = {}
-detecter: Detecter = None
-global detecter
-detecter = Detecter()
 
 
 def start_worker(redis_url, sentry_url):
@@ -111,5 +106,9 @@ if __name__ == "__main__":
     if not redis_url:
         print("Missing REDIS_URL environment variable")
         quit(1)
+
+    # start detector
+    global detecter
+    detecter = Detecter()
 
     start_worker(redis_url, sentry_url)

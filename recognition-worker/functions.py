@@ -1,80 +1,80 @@
-# common functions used in multiple scripts
-import base64
-import json
-import logging
-import os
-import random
-import shutil
-import string
-import time
-import MySQLdb
-import cv2
-from PIL import Image
-import yaml
-import zlib
-import socket
-import numpy as np
-from Crypto import Random
-from Crypto.Cipher import AES
-import bcrypt
-import hashlib
-from itsdangerous import URLSafeTimedSerializer
-
+# # common functions used in multiple scripts
+# import base64
+# import json
+# import logging
+# import os
+# import random
+# import shutil
+# import string
+# import time
+# import MySQLdb
+# import cv2
+# from PIL import Image
+# import yaml
+# import zlib
+# import socket
+# import numpy as np
+# from Crypto import Random
+# from Crypto.Cipher import AES
+# import bcrypt
+# import hashlib
+# from itsdangerous import URLSafeTimedSerializer
+#
 from websocket import create_connection
-
-from utils.logs import logger
-
-
-def get_YAML(file):
-    with open(file, "r") as f:
-        content = yaml.load(f)
-    return content
-
-
-# connects to db using credentials
-class DB:
-    @classmethod
-    def conn(cls, u, p, db):
-        return MySQLdb.connect(host="127.0.0.1", user=u, passwd=p, db=db)
-
-    @classmethod
-    def execute_sql_in_file(cls, conn, file):
-        x = conn.cursor()
-        if not os.path.isfile(file):
-            raise Exception("No such file %s", file)
-        sql = open(file, "r").read()
-        try:
-            x.execute(sql)
-        except Exception as e:
-            print(sql)
-        finally:
-            x.close()
-
-
-# marks a team as training in the database
-def toggle_team_training(conn, hashed_username, training=True):
-    """
-
-    @param conn:
-    @param hashed_username:
-    @type training: bool
-    """
-    training = training * 1  # convert from bool to int
-    x = conn.cursor()
-    try:
-        x.execute(
-            "UPDATE `Accounts` SET `is_training` = %s WHERE `username` = %s",
-            (training, hashed_username),
-        )
-        conn.commit()
-    except Exception as e:
-        logger.critical(f"didn't mark as finished training {e}")
-        conn.rollback()
-    finally:
-        x.close()
-
-
-# stores features from the feature extractor model in the database
+#
+# from utils.logs import logger
+#
+#
+# def get_YAML(file):
+#     with open(file, "r") as f:
+#         content = yaml.load(f)
+#     return content
+#
+#
+# # connects to db using credentials
+# class DB:
+#     @classmethod
+#     def conn(cls, u, p, db):
+#         return MySQLdb.connect(host="127.0.0.1", user=u, passwd=p, db=db)
+#
+#     @classmethod
+#     def execute_sql_in_file(cls, conn, file):
+#         x = conn.cursor()
+#         if not os.path.isfile(file):
+#             raise Exception("No such file %s", file)
+#         sql = open(file, "r").read()
+#         try:
+#             x.execute(sql)
+#         except Exception as e:
+#             print(sql)
+#         finally:
+#             x.close()
+#
+#
+# # marks a team as training in the database
+# def toggle_team_training(conn, hashed_username, training=True):
+#     """
+#
+#     @param conn:
+#     @param hashed_username:
+#     @type training: bool
+#     """
+#     training = training * 1  # convert from bool to int
+#     x = conn.cursor()
+#     try:
+#         x.execute(
+#             "UPDATE `Accounts` SET `is_training` = %s WHERE `username` = %s",
+#             (training, hashed_username),
+#         )
+#         conn.commit()
+#     except Exception as e:
+#         logger.critical(f"didn't mark as finished training {e}")
+#         conn.rollback()
+#     finally:
+#         x.close()
+#
+#
+# # stores features from the feature extractor model in the database
 def store_feature(
     conn, hashed_team_username, member_id, features, manual=True, score=0.0
 ):
@@ -97,9 +97,14 @@ def store_feature(
         conn.rollback()
     finally:
         x.close()
-
-
+#
+#
 # formats message for client to receive a classification (recognition-worker)
+import json
+
+import numpy as np
+
+
 def send_classification(
     coords, member_id, recognition_score, file_id, hashed_username, socket
 ):
@@ -122,46 +127,46 @@ def send_classification(
             "file_id": file_id,
         },
     )
-
-
-# writes data log to database as can be seen in idmy.team/stats
-def log_data(conn, name, type, method, val, user="system", yaxis="Seconds"):
-    x = conn.cursor()
-    try:
-        x.execute(
-            "INSERT INTO `Logs` (`type`, `name`, `method`, `value`, username, `yaxis`) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
-            (type, name, method, str(val), user, yaxis),
-        )
-        conn.commit()
-    except MySQLdb.Error as e:
-        logging.error("didnt write feature: %s", e)
-        conn.rollback()
-    finally:
-        x.close()
-
-
-# deletes data log
-def purge_log(conn, name, type, method, user):
-    x = conn.cursor()
-    try:
-        x.execute(
-            "DELETE FROM `Logs` WHERE username = %s AND `type` = %s AND `method` = %s AND `name` = %s",
-            (user, type, method, name),
-        )
-        conn.commit()
-    except:
-        conn.rollback()
-    finally:
-        x.close()
-
-
-# Pre process a cropped image of the face for the feature extractor model.
+#
+#
+# # writes data log to database as can be seen in idmy.team/stats
+# def log_data(conn, name, type, method, val, user="system", yaxis="Seconds"):
+#     x = conn.cursor()
+#     try:
+#         x.execute(
+#             "INSERT INTO `Logs` (`type`, `name`, `method`, `value`, username, `yaxis`) "
+#             "VALUES (%s, %s, %s, %s, %s, %s)",
+#             (type, name, method, str(val), user, yaxis),
+#         )
+#         conn.commit()
+#     except MySQLdb.Error as e:
+#         logging.error("didnt write feature: %s", e)
+#         conn.rollback()
+#     finally:
+#         x.close()
+#
+#
+# # deletes data log
+# def purge_log(conn, name, type, method, user):
+#     x = conn.cursor()
+#     try:
+#         x.execute(
+#             "DELETE FROM `Logs` WHERE username = %s AND `type` = %s AND `method` = %s AND `name` = %s",
+#             (user, type, method, name),
+#         )
+#         conn.commit()
+#     except:
+#         conn.rollback()
+#     finally:
+#         x.close()
+#
+#
+# # Pre process a cropped image of the face for the feature extractor model.
 def pre_process_img(img, size):
     return cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
-
-
-# adds some `padding` to bbox
+#
+#
+# # adds some `padding` to bbox
 def add_coord_padding(img, padding, x, y, w, h):
     if padding:
         min_x = 0
@@ -189,16 +194,16 @@ def add_coord_padding(img, padding, x, y, w, h):
         if y + h > max_y:
             h = max_y - y
     return int(x), int(y), int(w), int(h)  # TODO this REDUCES ACCURACY
-
-
+#
+#
 def crop_img(img, x, y, w, h):
     img = np.array(img)
     img = img[:, y : y + h, x : x + w]
     img = np.moveaxis(img, 0, -1)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
-
-
+#
+#
 ROT = 10.0
 CONT_MIN = 0.85
 CONT_MAX = 1.15
@@ -230,8 +235,8 @@ def img_augmentation(img):
     #     img = scipy.misc.imrotate(img, angle, "bicubic")
 
     return img
-
-
+#
+#
 class Team:
     @classmethod
     def get(cls, conn, **search):
@@ -254,59 +259,6 @@ class Team:
             raise Exception("You can only have one WHERE clause")
         column = list(search.keys())[0]
         return "{}=%s".format(column), search[column]
-
-    @classmethod
-    def sign_up(cls, conn, username, password, email, allow_storage, key):
-        hashed_username = hash(username)
-        password = hash_pw(password)
-        credentials = AESCipher(key).encrypt(random_str(50))
-
-        x = conn.cursor()
-        try:
-            x.execute(
-                "INSERT INTO `Accounts` (email, username, password, credentials, allow_storage) "
-                "VALUES (%s, %s, %s, %s, %s);",
-                (email, hashed_username, password, credentials, allow_storage),
-            )
-            conn.commit()
-        except MySQLdb.Error as e:
-            logging.critical("Couldn't sign up: " + str(e))
-            conn.rollback()
-            return False
-        finally:
-            x.close()
-        return True
-
-    @classmethod
-    def reset_password(cls, conn, password, **search):
-        WHERE, val = cls._get_where(search)
-        password = hash_pw(password)
-
-        x = conn.cursor()
-        try:
-            x.execute(
-                "UPDATE `Accounts` SET password=%s WHERE {}".format(WHERE),
-                (password, val),
-            )
-            conn.commit()
-        except MySQLdb.Error as e:
-            logging.critical("Couldn't reset password: " + str(e))
-            conn.rollback()
-            return False
-        finally:
-            x.close()
-        return True
-
-    @classmethod
-    def email_to_username(cls, conn, email):
-        x = conn.cursor()
-        try:
-            x.execute("SELECT username FROM `Accounts` WHERE email=%s", (email,))
-            return x.fetchall()[0][0]
-        except IndexError:
-            return None
-        finally:
-            x.close()
 
     @classmethod
     def valid_credentials(cls, conn, hashed_username, credentials, key):
@@ -615,12 +567,12 @@ class Team:
             )
             conn.commit()
             x.close()
-
-
+#
+#
 def create_local_socket(url):
     return create_connection(url + "/local")
-
-
+#
+#
 def send_to_client(socket, hashed_username, dic):
     """
     Sends a json dic to client connected web socket
@@ -631,153 +583,153 @@ def send_to_client(socket, hashed_username, dic):
     """
     dic["hashed_username"] = hashed_username
     socket.send(json.dumps(dic, default=json_helper))
-
-
-def random_str(length):
-    return "".join(
-        random.choice(string.ascii_letters + string.digits) for _ in range(length)
-    )
-
-
-class AESCipher:
-    def __init__(self, key, byte_size=32):
-        self.key = base64.b64decode(key)
-        self.bs = byte_size
-
-    def encrypt(self, raw):
-        raw = self._pad(raw)
-        iv = Random.new().read(AES.block_size)
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        return base64.b64encode(iv + cipher.encrypt(raw))
-
-    def decrypt(self, enc):
-        enc = base64.b64decode(enc)
-        iv = enc[:16]
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        decrypted = self._unpad(cipher.decrypt(enc[16:])).decode("utf8")
-        self._mock_me(decrypted)
-        return decrypted
-
-    def _pad(self, s):
-        return bytes(
-            s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs), "utf-8"
-        )
-
-    def _unpad(self, s):
-        return s[0 : -ord(s[-1:])]
-
-    def _mock_me(self, val):
-        """
-        Used in pytest to gather the decrypted value
-        TODO surely there is a better way to do this?!
-        :param val:
-        :return:
-        """
-        return val
-
-
-def hash_pw(s):
-    return bcrypt.hashpw(str.encode(s), bcrypt.gensalt()).decode("utf-8")
-
-
-def check_pw_hash(s, h):
-    """
-    :param s: string to compare with a hash
-    :param h: a hash
-    :return: matching
-    """
-    return str.encode(h) == bcrypt.hashpw(str.encode(s), str.encode(h))
-
-
+#
+#
+# def random_str(length):
+#     return "".join(
+#         random.choice(string.ascii_letters + string.digits) for _ in range(length)
+#     )
+#
+#
+# class AESCipher:
+#     def __init__(self, key, byte_size=32):
+#         self.key = base64.b64decode(key)
+#         self.bs = byte_size
+#
+#     def encrypt(self, raw):
+#         raw = self._pad(raw)
+#         iv = Random.new().read(AES.block_size)
+#         cipher = AES.new(self.key, AES.MODE_CBC, iv)
+#         return base64.b64encode(iv + cipher.encrypt(raw))
+#
+#     def decrypt(self, enc):
+#         enc = base64.b64decode(enc)
+#         iv = enc[:16]
+#         cipher = AES.new(self.key, AES.MODE_CBC, iv)
+#         decrypted = self._unpad(cipher.decrypt(enc[16:])).decode("utf8")
+#         self._mock_me(decrypted)
+#         return decrypted
+#
+#     def _pad(self, s):
+#         return bytes(
+#             s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs), "utf-8"
+#         )
+#
+#     def _unpad(self, s):
+#         return s[0 : -ord(s[-1:])]
+#
+#     def _mock_me(self, val):
+#         """
+#         Used in pytest to gather the decrypted value
+#         TODO surely there is a better way to do this?!
+#         :param val:
+#         :return:
+#         """
+#         return val
+#
+#
+# def hash_pw(s):
+#     return bcrypt.hashpw(str.encode(s), bcrypt.gensalt()).decode("utf-8")
+#
+#
+# def check_pw_hash(s, h):
+#     """
+#     :param s: string to compare with a hash
+#     :param h: a hash
+#     :return: matching
+#     """
+#     return str.encode(h) == bcrypt.hashpw(str.encode(s), str.encode(h))
+#
+#
 def hash(s):
     return hashlib.sha256(str.encode(s)).hexdigest()
-
-
+#
+#
 def compress_string(s):
     string = s.replace(" ", "")
     string = zlib.compress(str.encode(string))
     string = base64.encodebytes(string)
     return string
-
-
-def decompress_string(s):
-    string = base64.decodebytes(s)
-    string = zlib.decompress(string)
-    return string.decode("utf-8")
-
-
-def is_valid_ip(ip):
-    try:
-        socket.inet_aton(str(ip))  # legal
-        return True
-    except socket.error:  # Not legal
-        return False
-
-
-def bytes_to_kb(bytes):
-    return bytes / 1024
-
-
+#
+#
+# def decompress_string(s):
+#     string = base64.decodebytes(s)
+#     string = zlib.decompress(string)
+#     return string.decode("utf-8")
+#
+#
+# def is_valid_ip(ip):
+#     try:
+#         socket.inet_aton(str(ip))  # legal
+#         return True
+#     except socket.error:  # Not legal
+#         return False
+#
+#
+# def bytes_to_kb(bytes):
+#     return bytes / 1024
+#
+#
 def json_helper(o):
     if isinstance(o, np.int64):
         return int(o)
     if isinstance(o, bytes):
         return o.decode("utf-8")
     raise TypeError
-
-
-def crop_arr(arr, num):
-    if num <= 0:
-        return {}
-
-    new_arr = {}
-    each, rem = divmod(num, len(arr))
-    for i, key in enumerate(arr):
-        if i < rem:
-            new_arr[key] = arr[key][: each + 1]
-        else:
-            new_arr[key] = arr[key][:each]
-    return new_arr
-
-
-class Token:
-    MAX_AGE = 3600
-
-    @classmethod
-    def generate(cls, obj, token_key):
-        serializer = URLSafeTimedSerializer(token_key)
-        return serializer.dumps(obj)
-
-    @classmethod
-    def validate(cls, token, obj, token_key):
-        serializer = URLSafeTimedSerializer(token_key)
-        return serializer.loads(token, max_age=cls.MAX_AGE) == obj
-
-
-# class Email:
-#     @classmethod
-#     def send(cls, email_config, email, subject, html):
-#         # generate email content
-#         msg = MIMEMultipart("alternative")
-#         msg["From"] = email_config["email"]
-#         msg["To"] = email
-#         msg["Subject"] = subject
-#         msg.attach(html)
 #
-#         # send email
-#         with smtplib.SMTP(
-#             email_config["smtp"], port=email_config["smtp_port"]
-#         ) as smtp_server:
-#             smtp_server.ehlo()
-#             smtp_server.starttls()
-#             smtp_server.ehlo()
-#             smtp_server.login(email_config["email"], email_config["password"])
-#             smtp_server.send_message(msg)
+#
+# def crop_arr(arr, num):
+#     if num <= 0:
+#         return {}
+#
+#     new_arr = {}
+#     each, rem = divmod(num, len(arr))
+#     for i, key in enumerate(arr):
+#         if i < rem:
+#             new_arr[key] = arr[key][: each + 1]
+#         else:
+#             new_arr[key] = arr[key][:each]
+#     return new_arr
+#
+#
+# class Token:
+#     MAX_AGE = 3600
 #
 #     @classmethod
-#     def template(cls, root, file, **kwargs):
-#         loader = template.Loader(root + "/web/")
-#         email_html = (
-#             loader.load("templates/emails/inline/" + file).generate(**kwargs).decode()
-#         )
-#         return MIMEText(email_html, "html")
+#     def generate(cls, obj, token_key):
+#         serializer = URLSafeTimedSerializer(token_key)
+#         return serializer.dumps(obj)
+#
+#     @classmethod
+#     def validate(cls, token, obj, token_key):
+#         serializer = URLSafeTimedSerializer(token_key)
+#         return serializer.loads(token, max_age=cls.MAX_AGE) == obj
+#
+#
+# # class Email:
+# #     @classmethod
+# #     def send(cls, email_config, email, subject, html):
+# #         # generate email content
+# #         msg = MIMEMultipart("alternative")
+# #         msg["From"] = email_config["email"]
+# #         msg["To"] = email
+# #         msg["Subject"] = subject
+# #         msg.attach(html)
+# #
+# #         # send email
+# #         with smtplib.SMTP(
+# #             email_config["smtp"], port=email_config["smtp_port"]
+# #         ) as smtp_server:
+# #             smtp_server.ehlo()
+# #             smtp_server.starttls()
+# #             smtp_server.ehlo()
+# #             smtp_server.login(email_config["email"], email_config["password"])
+# #             smtp_server.send_message(msg)
+# #
+# #     @classmethod
+# #     def template(cls, root, file, **kwargs):
+# #         loader = template.Loader(root + "/web/")
+# #         email_html = (
+# #             loader.load("templates/emails/inline/" + file).generate(**kwargs).decode()
+# #         )
+# #         return MIMEText(email_html, "html")
