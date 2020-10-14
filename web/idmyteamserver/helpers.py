@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import random
@@ -8,15 +7,13 @@ import inspect
 from enum import Enum
 from functools import lru_cache
 from zipfile import ZipFile, ZipInfo
-from typing import NamedTuple
 
 import bcrypt
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from rq import Queue
 
-from web import settings
-from web.settings import CREDENTIAL_LEN, SECRET_KEY
+from web.settings import CREDENTIAL_LEN
 
 SUCCESS_COOKIE_KEY = "success_message"
 ERROR_COOKIE_KEY = "error_message"
