@@ -28,13 +28,13 @@ def redirect(path, cookies={}):
 
 
 def render(
-        request,
-        template_name=None,
-        context={},
-        content_type=None,
-        status=None,
-        using=None,
-        **kwargs,
+    request,
+    template_name=None,
+    context={},
+    content_type=None,
+    status=None,
+    using=None,
+    **kwargs,
 ):
     """
     Return a HttpResponse whose content is filled with the result of calling
@@ -78,13 +78,13 @@ def random_str(length):
     )
 
 
-def create_credentials():
-    return bcrypt.hashpw(bytes(random_str(CREDENTIAL_LEN)), bcrypt.gensalt())
+def create_credentials() -> (str, str):
+    # return bcrypt.hashpw(bytes(random_str(CREDENTIAL_LEN), encoding='utf8'), bcrypt.gensalt()).decode()
+    return random_str(CREDENTIAL_LEN)
 
 
 def kb_to_b(kb: int) -> int:
     return kb * 1024
-
 
 
 class TeamTrainingImages:
@@ -150,9 +150,5 @@ class TeamTrainingImages:
 
         # tell model to now train
         queue.enqueue_call(
-            func=".",
-            kwargs={
-                "type": "train",
-                "team_username": team_username,
-            },
+            func=".", kwargs={"type": "train", "team_username": team_username}
         )

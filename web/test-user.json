@@ -1,69 +1,5 @@
 [
   {
-    "model": "contenttypes.contenttype",
-    "pk": 1,
-    "fields": {
-      "app_label": "auth",
-      "model": "permission"
-    }
-  },
-  {
-    "model": "contenttypes.contenttype",
-    "pk": 2,
-    "fields": {
-      "app_label": "auth",
-      "model": "group"
-    }
-  },
-  {
-    "model": "contenttypes.contenttype",
-    "pk": 3,
-    "fields": {
-      "app_label": "contenttypes",
-      "model": "contenttype"
-    }
-  },
-  {
-    "model": "contenttypes.contenttype",
-    "pk": 4,
-    "fields": {
-      "app_label": "sessions",
-      "model": "session"
-    }
-  },
-  {
-    "model": "contenttypes.contenttype",
-    "pk": 5,
-    "fields": {
-      "app_label": "idmyteamserver",
-      "model": "account"
-    }
-  },
-  {
-    "model": "contenttypes.contenttype",
-    "pk": 6,
-    "fields": {
-      "app_label": "simple_email_confirmation",
-      "model": "emailaddress"
-    }
-  },
-  {
-    "model": "sessions.session",
-    "pk": "45n3pwy6z7tuuv813fv5k4rfkks5esus",
-    "fields": {
-      "session_data": "ZDg5ZGMwODdlZTZjNDc0YzFmNDAyZDM3YzYzNzg3YWQ2OGI0YzEwYTp7Il9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiJmOTM4MTRmNjc1OGZmZmNmMjFiM2M5NjFlNWE4MDdjMmY0OTdmMzNmIn0=",
-      "expire_date": "2020-07-31T10:51:13.434Z"
-    }
-  },
-  {
-    "model": "sessions.session",
-    "pk": "le15vfmwdnuvu6v2gfma7p6zeeyjwwc6",
-    "fields": {
-      "session_data": "ZDg5ZGMwODdlZTZjNDc0YzFmNDAyZDM3YzYzNzg3YWQ2OGI0YzEwYTp7Il9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiJmOTM4MTRmNjc1OGZmZmNmMjFiM2M5NjFlNWE4MDdjMmY0OTdmMzNmIn0=",
-      "expire_date": "2020-07-31T09:25:05.901Z"
-    }
-  },
-  {
     "model": "auth.permission",
     "pk": 1,
     "fields": {
@@ -213,7 +149,7 @@
     "fields": {
       "name": "Can add user",
       "content_type": 5,
-      "codename": "add_account"
+      "codename": "add_team"
     }
   },
   {
@@ -222,7 +158,7 @@
     "fields": {
       "name": "Can change user",
       "content_type": 5,
-      "codename": "change_account"
+      "codename": "change_team"
     }
   },
   {
@@ -231,7 +167,7 @@
     "fields": {
       "name": "Can delete user",
       "content_type": 5,
-      "codename": "delete_account"
+      "codename": "delete_team"
     }
   },
   {
@@ -240,61 +176,153 @@
     "fields": {
       "name": "Can view user",
       "content_type": 5,
-      "codename": "view_account"
+      "codename": "view_team"
     }
   },
   {
     "model": "auth.permission",
     "pk": 21,
     "fields": {
-      "name": "Can add email address",
+      "name": "Can add feature",
       "content_type": 6,
-      "codename": "add_emailaddress"
+      "codename": "add_feature"
     }
   },
   {
     "model": "auth.permission",
     "pk": 22,
     "fields": {
-      "name": "Can change email address",
+      "name": "Can change feature",
       "content_type": 6,
-      "codename": "change_emailaddress"
+      "codename": "change_feature"
     }
   },
   {
     "model": "auth.permission",
     "pk": 23,
     "fields": {
-      "name": "Can delete email address",
+      "name": "Can delete feature",
       "content_type": 6,
-      "codename": "delete_emailaddress"
+      "codename": "delete_feature"
     }
   },
   {
     "model": "auth.permission",
     "pk": 24,
     "fields": {
-      "name": "Can view email address",
+      "name": "Can view feature",
       "content_type": 6,
+      "codename": "view_feature"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+      "name": "Can add email address",
+      "content_type": 7,
+      "codename": "add_emailaddress"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+      "name": "Can change email address",
+      "content_type": 7,
+      "codename": "change_emailaddress"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+      "name": "Can delete email address",
+      "content_type": 7,
+      "codename": "delete_emailaddress"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+      "name": "Can view email address",
+      "content_type": 7,
       "codename": "view_emailaddress"
     }
   },
   {
-    "model": "idmyteamserver.account",
+    "model": "contenttypes.contenttype",
     "pk": 1,
     "fields": {
-      "password": "bcrypt_sha256$$2b$12$1Smy.TGmNQIp2nx3lbz70O98jtzp/Og5PuUWMFuU3XuvSD8oRDQzO",
-      "last_login": "2020-07-17T10:51:13.431Z",
+      "app_label": "auth",
+      "model": "permission"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 2,
+    "fields": {
+      "app_label": "auth",
+      "model": "group"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 3,
+    "fields": {
+      "app_label": "contenttypes",
+      "model": "contenttype"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 4,
+    "fields": {
+      "app_label": "sessions",
+      "model": "session"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 5,
+    "fields": {
+      "app_label": "idmyteamserver",
+      "model": "team"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 6,
+    "fields": {
+      "app_label": "idmyteamserver",
+      "model": "feature"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "pk": 7,
+    "fields": {
+      "app_label": "simple_email_confirmation",
+      "model": "emailaddress"
+    }
+  },
+  {
+    "model": "idmyteamserver.team",
+    "pk": 1,
+    "fields": {
+      "password": "bcrypt_sha256$$2b$12$zUzCwbiRVzjnpwPGoTpZSe2mNwympApyVPxb30YzXboksQdd6Qe/i",
+      "last_login": null,
       "is_superuser": false,
       "username": "testuser",
       "first_name": "",
       "last_name": "",
       "is_staff": false,
       "is_active": true,
-      "date_joined": "2020-07-17T09:21:03.636Z",
+      "date_joined": "2020-10-15T19:10:50.068Z",
       "email": "test@test.com",
       "password_reset_token": "",
-      "credentials": "PexFz3zBe3PzdE5dqwy85W0lAAyEDN3JdLNIPnnL0ER6E077SKogjRjc04tNj3IgHdVfyMM8G1VCMwCgKOgFrJQLJ3LKzxO78haED9KjzLskO9Qr4Fo23BVpoMfFL954KVvakh6hfkm9dgYg6eSq4P",
+      "credentials": "$2b$12$7aY3f5U3hXcaascGZeIXVOwLM816OlNTRbAqpxTHjDX78hQ9stY3m",
       "num_classifications": 0,
       "max_train_imgs_per_hr": 60,
       "max_class_num": 5,
@@ -302,7 +330,9 @@
       "local_ip": null,
       "last_upload": null,
       "allow_image_storage": true,
-      "is_training": false,
+      "is_training_dttm": null,
+      "model_path": null,
+      "update_dttm": "2020-10-15T19:10:50.259Z",
       "groups": [],
       "user_permissions": []
     }
@@ -313,9 +343,9 @@
     "fields": {
       "user": 1,
       "email": "test@test.com",
-      "key": "gMAoDyKGR10XbRSnY4wYfAbmpmgskg95i0E7JjUq",
-      "set_at": "2020-07-17T09:21:03.827Z",
-      "confirmed_at": "2020-07-17T10:21:18Z"
+      "key": "VNvI6vo0b3oryYcNB8ctv4CdCZ02BoAOd9LwjYXu",
+      "set_at": "2020-10-15T19:10:50.261Z",
+      "confirmed_at": "2020-10-15T20:11:49.342Z"
     }
   }
 ]

@@ -1,4 +1,5 @@
 import os
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
 
@@ -42,7 +43,7 @@ INSTALLED_APPS = [
     "captcha",
     "simple_email_confirmation",
     "channels",
-    "ws"
+    "ws",
 ]
 
 MIDDLEWARE = [
@@ -72,9 +73,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ],
+            ]
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = "web.wsgi.application"
@@ -87,25 +88,17 @@ DATABASES = {
         "PASSWORD": os.environ.get("DATABASE_PASS", "idmyteam"),
         "HOST": os.environ.get("DATABASE_HOST", "127.0.0.1"),
         "PORT": os.environ.get("DATABASE_PORT", "5432"),
-        "TEST": {
-            "NAME": os.environ.get("DATABASE_NAME", "idmyteam") + "_test",
-        },
+        "TEST": {"NAME": os.environ.get("DATABASE_NAME", "idmyteam") + "_test"},
     }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 PASSWORD_HASHERS = [
@@ -118,14 +111,12 @@ PASSWORD_HASHERS = [
 # Channels
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
-ASGI_APPLICATION = 'idmyteamserver.routing.application'
+ASGI_APPLICATION = "idmyteamserver.routing.application"
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [(REDIS_HOST, REDIS_PORT)],
-        },
-    },
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [(REDIS_HOST, REDIS_PORT)]},
+    }
 }
 
 LANGUAGE_CODE = "en-us"

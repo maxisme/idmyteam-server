@@ -15,13 +15,8 @@ from opentelemetry.ext.asgi import OpenTelemetryMiddleware
 from opentelemetry import trace, propagators
 from opentelemetry.ext import jaeger
 from opentelemetry.ext.psycopg2 import Psycopg2Instrumentor
-from opentelemetry.sdk.trace import (
-    TracerProvider,
-    Resource,
-)
-from opentelemetry.sdk.trace.export import (
-    BatchExportSpanProcessor,
-)
+from opentelemetry.sdk.trace import TracerProvider, Resource
+from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.trace.propagation.b3_format import B3Format
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")

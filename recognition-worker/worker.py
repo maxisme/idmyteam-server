@@ -28,23 +28,22 @@ class CustomJob(Job):
     def _execute(self):
         job_type = JobStruct.Type(self.kwargs["type"])
 
-        self.team: Team = Team.objects.filter(self.kwargs["team_username"])
+        self.team: Team = Team.objects.get(username=self.kwargs["team_username"])
         if not self.team:
             raise Exception(
                 f"No such team with the username: {self.kwargs['team_username']}"
             )
 
-        if job_type == JobStruct.JobType.DETECT:
+        if job_type == JobStruct.Type.DETECT:
             return self._detect_image(DetectJob(**self.kwargs))
-        elif job_type == JobStruct.JobType.STORE_IMG:
+        elif job_type == JobStruct.Type.STORE_IMG:
             return self._store_image(StoreImageJob(**self.kwargs))
-        elif job_type == JobStruct.JobType.TRAIN:
+        elif job_type == JobStruct.Type.TRAIN:
             return self._train_team(TrainJob(**self.kwargs))
-        elif job_type == JobStruct.JobType.LOAD_CLASSIFIER:
+        elif job_type == JobStruct.Type.LOAD_CLASSIFIER:
             return self._load_team_classifier(LoadClassifierJob(**self.kwargs))
-        elif job_type == JobStruct.JobType.UNLOAD_CLASSIFIER:
+        elif job_type == JobStruct.Type.UNLOAD_CLASSIFIER:
             return self._unload_team_classifier(UnloadClassifierJob(**self.kwargs))
-
         return Exception("Not a valid job")
 
     def _store_image(self, job: StoreImageJob):

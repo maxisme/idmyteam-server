@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import bcrypt
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -30,10 +31,9 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     last_upload = models.TimeField(null=True)
 
     allow_image_storage = models.BooleanField(default=False)
-    is_training_dttm = models.DateTimeField(default=None)
+    is_training_dttm = models.DateTimeField(default=None, null=True)
 
     model_path = models.CharField(max_length=255, default=None, null=True)
-    create_dttm = models.DateTimeField(auto_now_add=True)
     update_dttm = models.DateTimeField(auto_now=True)
 
     def num_features_added_last_hr(self) -> int:
@@ -41,6 +41,10 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
             feature__manual=False,
             feature__create_dttm__gt=datetime.now() - timedelta(hours=1),
         ).count()
+
+    def validate_credentials(self, credentials: bytes) -> bool:
+        # return bcrypt.checkpw(credentials, self.credentials.encode())
+        return credentials == self.credentials.encode()
 
 
 class Feature(models.Model):

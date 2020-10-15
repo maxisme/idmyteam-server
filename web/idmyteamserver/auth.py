@@ -169,7 +169,7 @@ def forgot_handler(request):
         if form.is_valid():
             username_email = form.cleaned_data.get("username_email")
             if is_valid_email(
-                    username_email
+                username_email
             ):  # TODO prevent username being a valid email
                 team = Team.objects.get(email=username_email)
             else:

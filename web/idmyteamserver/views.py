@@ -1,5 +1,7 @@
 import os
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
@@ -9,6 +11,11 @@ from idmyteamserver.helpers import render
 
 
 def welcome_handler(request):
+    # channel_layer = get_channel_layer()
+    # async_to_sync(channel_layer.group_send)("testuser", {
+    #     'type': 'chat_message',
+    #     'message': "wahooo"
+    # })
     return render(request, "welcome.html")
 
 

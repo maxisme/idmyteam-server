@@ -9,7 +9,8 @@ from redis import Redis
 from rq import Queue
 
 from idmyteamserver.forms import UploadFileForm
-from idmyteamserver.helpers import TeamTrainingImages, DetectJob
+from idmyteamserver.helpers import TeamTrainingImages
+from idmyteamserver.structs import DetectJob
 from idmyteamserver.models import Team
 from web import settings
 
@@ -31,7 +32,7 @@ def upload_handler(request):
         return HttpResponseBadRequest(form.errors)
 
     team = Team.objects.get(username=form.username)
-    if not bcrypt.checkpw(form.credentials, team.credentials):
+    if not team.validate_credentials(form.credentials):
         return HttpResponseForbidden()  # TODO prevent brute force
 
     if PREDICT_FILE_FIELD in request.FILES:
@@ -42,6 +43,7 @@ def upload_handler(request):
                     img=request.FILES[PREDICT_FILE_FIELD].read(),
                     file_name=request.FILES[PREDICT_FILE_FIELD].name,
                     team_username=team.username,
+                    store_image_features=form.store_image_features,
                 ).val(),
             )
         else:
@@ -58,7 +60,7 @@ def upload_handler(request):
 
             # get the number of images the team can train
             num_images_to_train = (
-                    team.max_train_imgs_per_hr - num_features_added_last_hr
+                team.max_train_imgs_per_hr - num_features_added_last_hr
             )
             if num_images_to_train <= 0:
                 return HttpResponseBadRequest(
@@ -67,18 +69,18 @@ def upload_handler(request):
 
             # parse the images from the zip file
             try:
-                imgs = TeamTrainingImages(z, settings.MAX_IMG_UPLOAD_SIZE_KB)
+                training_images = TeamTrainingImages(z, settings.MAX_IMG_UPLOAD_SIZE_KB)
             except Exception as e:
                 return HttpResponseBadRequest(str(e))
-            imgs.crop(num_images_to_train)
+            training_images.crop(num_images_to_train)
 
-            if len(imgs) < 2 and not team.model_path:
+            if len(training_images) < 2 and not team.model_path:
                 # if the team has no model yet they have to initially train at least 2 team members
                 return HttpResponseBadRequest(
                     "You must train with at least 2 team members."
                 )
 
             # enqueue images for training
-            imgs.train(LOW_Q, team.username, form.store_image_features)
+            training_images.train(LOW_Q, team.username, form.store_image_features)
         else:
             return HttpResponseBadRequest("Invalid ZIP file")
