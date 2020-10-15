@@ -1,10 +1,9 @@
 import authed
 import events
 import forms
-import server
 import mock
+import server
 from faker import Factory
-
 from web_helpers import WebTest
 
 
@@ -24,7 +23,14 @@ class TeamGenerator(object):
 @mock.patch("utils.functions.AESCipher._mock_me")
 @mock.patch("utils.functions.Email.template")
 class TestWeb(WebTest):
-    protected_urls = ["/socket", "/local", "/upload", "/profile", "/reset", "/profile/stored-images"]
+    protected_urls = [
+        "/socket",
+        "/local",
+        "/upload",
+        "/profile",
+        "/reset",
+        "/profile/stored-images",
+    ]
 
     def test_urls(self, *args):
         for url in server.web_urls.www_urls:

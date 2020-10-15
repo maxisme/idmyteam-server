@@ -75,7 +75,9 @@ class WSSTest(WebTest):
         except:
             assert not ws.failure
 
-    @mock.patch("recognition-worker.classifier.Classifier.get_model_path", return_value=True)
+    @mock.patch(
+        "recognition-worker.classifier.Classifier.get_model_path", return_value=True
+    )
     def test_team_with_model_connection(self, _, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):
@@ -131,7 +133,9 @@ class WSSTest(WebTest):
         except:
             assert not ws.failure
 
-    @mock.patch("recognition-worker.classifier.Classifier.get_model_path", return_value=True)
+    @mock.patch(
+        "recognition-worker.classifier.Classifier.get_model_path", return_value=True
+    )
     def test_team_with_invalid_ip(self, _, _mock_me, template, *args):
         class TestWSS(TestSocketClient):
             def _asserts(self, msg):

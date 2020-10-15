@@ -1,25 +1,24 @@
 # common functions used in multiple scripts
 import base64
+import hashlib
 import json
 import logging
 import os
 import random
 import shutil
+import socket
 import string
 import time
-import MySQLdb
-import cv2
-from PIL import Image
-import yaml
 import zlib
-import socket
+
+import MySQLdb
+import bcrypt
+import cv2
 import numpy as np
+import yaml
 from Crypto import Random
 from Crypto.Cipher import AES
-import bcrypt
-import hashlib
 from itsdangerous import URLSafeTimedSerializer
-
 from websocket import create_connection
 
 from utils.logs import logger
@@ -125,40 +124,40 @@ def send_classification(
 
 
 # writes data log to database as can be seen in idmy.team/stats
-def log_data(conn, name, type, method, val, user="system", yaxis="Seconds"):
-    x = conn.cursor()
-    try:
-        x.execute(
-            "INSERT INTO `Logs` (`type`, `name`, `method`, `value`, username, `yaxis`) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
-            (type, name, method, str(val), user, yaxis),
-        )
-        conn.commit()
-    except MySQLdb.Error as e:
-        logging.error("didnt write feature: %s", e)
-        conn.rollback()
-    finally:
-        x.close()
+# def log_data(conn, name, type, method, val, user="system", yaxis="Seconds"):
+#     x = conn.cursor()
+#     try:
+#         x.execute(
+#             "INSERT INTO `Logs` (`type`, `name`, `method`, `value`, username, `yaxis`) "
+#             "VALUES (%s, %s, %s, %s, %s, %s)",
+#             (type, name, method, str(val), user, yaxis),
+#         )
+#         conn.commit()
+#     except MySQLdb.Error as e:
+#         logging.error("didnt write feature: %s", e)
+#         conn.rollback()
+#     finally:
+#         x.close()
 
 
 # deletes data log
-def purge_log(conn, name, type, method, user):
-    x = conn.cursor()
-    try:
-        x.execute(
-            "DELETE FROM `Logs` WHERE username = %s AND `type` = %s AND `method` = %s AND `name` = %s",
-            (user, type, method, name),
-        )
-        conn.commit()
-    except:
-        conn.rollback()
-    finally:
-        x.close()
+# def purge_log(conn, name, type, method, user):
+#     x = conn.cursor()
+#     try:
+#         x.execute(
+#             "DELETE FROM `Logs` WHERE username = %s AND `type` = %s AND `method` = %s AND `name` = %s",
+#             (user, type, method, name),
+#         )
+#         conn.commit()
+#     except:
+#         conn.rollback()
+#     finally:
+#         x.close()
 
 
 # Pre process a cropped image of the face for the feature extractor model.
-def pre_process_img(img, size):
-    return cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
+# def pre_process_img(img, size):
+#     return cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
 
 
 # adds some `padding` to bbox
@@ -384,25 +383,6 @@ class Team:
             return x.fetchall()[0][0]
         except Exception as e:
             logging.error(f"get_num_trained_last_hr {e}")
-            return False
-
-    @classmethod
-    def increase_num_classifications(cls, conn, hashed_username):
-        x = conn.cursor()
-        try:
-            x.execute(
-                """
-            UPDATE Accounts
-            SET num_classifications = num_classifications + 1
-            WHERE username = %s
-            """,
-                (hashed_username,),
-            )
-            conn.commit()
-            return True
-        except MySQLdb.Error as e:
-            logger.critical(f"Couldn't increment num_classifications: {e}")
-            conn.rollback()
             return False
 
     @classmethod

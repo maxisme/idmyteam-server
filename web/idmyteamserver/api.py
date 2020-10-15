@@ -1,32 +1,31 @@
 from idmyteamserver import helpers
 from idmyteamserver.helpers import redirect
-from idmyteamserver.models import Account
-from web.settings import CREDENTIAL_LEN
+from idmyteamserver.models import Team
 
 
 def delete_model_handler(request):
-    user: Account = request.user
-    if user.is_authenticated:
+    team: Team = request.user
+    if team.is_authenticated:
         pass  # TODO
 
 
-def delete_account_handler(request):
-    user: Account = request.user
-    if user.is_authenticated:
+def delete_team_handler(request):
+    team: Team = request.user
+    if team.is_authenticated:
         pass  # TODO
 
 
 def toggle_storage_handler(request):
-    user: Account = request.user
-    if user.is_authenticated:
-        user.allow_image_storage = False if user.allow_image_storage else True
-        user.save()
+    team: Team = request.user
+    if team.is_authenticated:
+        team.allow_image_storage = False if team.allow_image_storage else True
+        team.save()
     return redirect("/profile")
 
 
 def reset_credentials_handler(request):
-    user: Account = request.user
-    if user.is_authenticated:
-        user.credentials = helpers.random_str(CREDENTIAL_LEN)
-        user.save()
+    team: Team = request.user
+    if team.is_authenticated:
+        team.credentials = helpers.create_credentials()
+        team.save()
     return redirect("/profile")

@@ -23,7 +23,7 @@ Then access at `http://localhost/`.
 ### Web
 Make sure the .env contains `DATABASE_HOST=127.0.0.1`
 ```
-$ docker-compose up -d db
+$ docker-compose up -d db redis
 $ cd web
 $ python3 manage.py migrate
 $ python3 manage.py loaddata test-user.json
@@ -35,7 +35,7 @@ ____
 
 ### Helpers
 When editing the models files run:
- - `python manage.py makemigrations idmyteam`
+ - `python manage.py makemigrations`
 
 
 #### sass

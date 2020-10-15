@@ -20,105 +20,22 @@
 # import hashlib
 # from itsdangerous import URLSafeTimedSerializer
 #
-from websocket import create_connection
-#
-# from utils.logs import logger
-#
-#
-# def get_YAML(file):
-#     with open(file, "r") as f:
-#         content = yaml.load(f)
-#     return content
-#
-#
-# # connects to db using credentials
-# class DB:
-#     @classmethod
-#     def conn(cls, u, p, db):
-#         return MySQLdb.connect(host="127.0.0.1", user=u, passwd=p, db=db)
-#
-#     @classmethod
-#     def execute_sql_in_file(cls, conn, file):
-#         x = conn.cursor()
-#         if not os.path.isfile(file):
-#             raise Exception("No such file %s", file)
-#         sql = open(file, "r").read()
-#         try:
-#             x.execute(sql)
-#         except Exception as e:
-#             print(sql)
-#         finally:
-#             x.close()
-#
-#
-# # marks a team as training in the database
-# def toggle_team_training(conn, hashed_username, training=True):
-#     """
-#
-#     @param conn:
-#     @param hashed_username:
-#     @type training: bool
-#     """
-#     training = training * 1  # convert from bool to int
-#     x = conn.cursor()
-#     try:
-#         x.execute(
-#             "UPDATE `Accounts` SET `is_training` = %s WHERE `username` = %s",
-#             (training, hashed_username),
-#         )
-#         conn.commit()
-#     except Exception as e:
-#         logger.critical(f"didn't mark as finished training {e}")
-#         conn.rollback()
-#     finally:
-#         x.close()
-#
-#
-# # stores features from the feature extractor model in the database
-def store_feature(
-    conn, hashed_team_username, member_id, features, manual=True, score=0.0
-):
-    # compress features for storage
-    features = compress_string(str(features))
-
-    type = "MANUAL" if manual else "MODEL"
-
-    # store feature in db
-    x = conn.cursor()
-    try:
-        x.execute(
-            """INSERT INTO `Features` (username, `class`, `type`, `features`, `score`)
-                  VALUES (%s, %s, %s, %s, %s)""",
-            (hashed_team_username, member_id, type, features, score),
-        )
-        conn.commit()
-    except MySQLdb.Error as e:
-        logger.critical(f"Couldn't write feature: {e}")
-        conn.rollback()
-    finally:
-        x.close()
 #
 #
 # formats message for client to receive a classification (recognition-worker)
 import json
 
+import cv2
 import numpy as np
+from websocket import create_connection
 
 
 def send_classification(
-    coords, member_id, recognition_score, file_id, hashed_username, socket
+        coords, member_id, recognition_score, file_id, team_username, socket
 ):
-    """
-    :param coords:
-    :param member_id: predicted member
-    :param recognition_score:
-    :param file_id:
-    :param hashed_username:
-    :return:
-    """
     send_to_client(
         socket,
-        hashed_username,
+        team_username,
         {
             "type": "classification",
             "coords": coords,
@@ -127,6 +44,8 @@ def send_classification(
             "file_id": file_id,
         },
     )
+
+
 #
 #
 # # writes data log to database as can be seen in idmy.team/stats
@@ -164,6 +83,8 @@ def send_classification(
 # # Pre process a cropped image of the face for the feature extractor model.
 def pre_process_img(img, size):
     return cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
+
+
 #
 #
 # # adds some `padding` to bbox
@@ -194,14 +115,27 @@ def add_coord_padding(img, padding, x, y, w, h):
         if y + h > max_y:
             h = max_y - y
     return int(x), int(y), int(w), int(h)  # TODO this REDUCES ACCURACY
+
+
 #
 #
-def crop_img(img, x, y, w, h):
-    img = np.array(img)
-    img = img[:, y : y + h, x : x + w]
+def crop_img(img: np.array, face_coords: FaceCoordinates, padding: int):
+    x, y, w, h = add_coord_padding(
+        img,
+        padding,
+        face_coords["x"],
+        face_coords["y"],
+        face_coords["width"],
+        face_coords["height"],
+    )
+
+    # img = np.array(img)
+    img = img[:, y: y + h, x: x + w]
     img = np.moveaxis(img, 0, -1)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
+
+
 #
 #
 ROT = 10.0
@@ -235,6 +169,8 @@ def img_augmentation(img):
     #     img = scipy.misc.imrotate(img, angle, "bicubic")
 
     return img
+
+
 #
 #
 class Team:
@@ -567,22 +503,21 @@ class Team:
             )
             conn.commit()
             x.close()
+
+
 #
 #
 def create_local_socket(url):
     return create_connection(url + "/local")
+
+
 #
 #
-def send_to_client(socket, hashed_username, dic):
-    """
-    Sends a json dic to client connected web socket
-    :type dic: dict
-    :param hashed_username:
-    :param dic:
-    :return:
-    """
-    dic["hashed_username"] = hashed_username
+def send_to_client(socket, team_username, dic):
+    dic["team_username"] = team_username
     socket.send(json.dumps(dic, default=json_helper))
+
+
 #
 #
 # def random_str(length):
@@ -643,6 +578,8 @@ def send_to_client(socket, hashed_username, dic):
 #
 def hash(s):
     return hashlib.sha256(str.encode(s)).hexdigest()
+
+
 #
 #
 def compress_string(s):
@@ -650,6 +587,8 @@ def compress_string(s):
     string = zlib.compress(str.encode(string))
     string = base64.encodebytes(string)
     return string
+
+
 #
 #
 # def decompress_string(s):
@@ -676,6 +615,7 @@ def json_helper(o):
     if isinstance(o, bytes):
         return o.decode("utf-8")
     raise TypeError
+
 #
 #
 # def crop_arr(arr, num):

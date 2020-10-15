@@ -3,7 +3,8 @@ from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.forms import ModelForm
 
-from idmyteamserver.models import Account
+from idmyteamserver.models import Team
+from web import settings
 
 
 class RecaptchaForm(forms.Form):
@@ -43,7 +44,7 @@ class SignUpForm(RecaptchaForm, ModelForm):
     )
 
     class Meta:
-        model = Account
+        model = Team
         fields = [
             "username",
             "password",
@@ -79,7 +80,7 @@ class LoginForm(RecaptchaForm):
 
 
 class ForgotForm(RecaptchaForm):
-    usernameemail = forms.CharField(label="Username or Email")
+    username_email = forms.CharField(label="Username or Email")
 
 
 class ResetForm(RecaptchaForm):
@@ -97,6 +98,24 @@ class ResetForm(RecaptchaForm):
         label="Confirm Password",
     )
 
+
+class UploadFileForm(forms.Form):
+    username = forms.CharField(
+        required=True,
+        label="Username",
+    )
+    credentials = forms.CharField(
+        min_length=settings.CREDENTIAL_LEN,
+        max_length=settings.CREDENTIAL_LEN,
+        widget=forms.PasswordInput(),
+        required=True,
+        label="Credentials",
+    )
+    store_image_features = forms.BooleanField()
+    file = forms.FileField(max_length=settings.MAX_UPLOAD_SIZE, allow_empty_file=False)
+
+    class Meta:
+        model = Team
 
 # class CustomForm(Form):
 #     def __init__(self, *args, **kwargs):

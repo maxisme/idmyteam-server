@@ -3,8 +3,6 @@ import os
 import random
 import re
 import string
-import inspect
-from enum import Enum
 from functools import lru_cache
 from zipfile import ZipFile, ZipInfo
 
@@ -36,7 +34,7 @@ def render(
         content_type=None,
         status=None,
         using=None,
-        **kwargs
+        **kwargs,
 ):
     """
     Return a HttpResponse whose content is filled with the result of calling
@@ -88,53 +86,6 @@ def kb_to_b(kb: int) -> int:
     return kb * 1024
 
 
-class JobStruct:
-    account_username: str
-    type: int
-
-    class Type(int, Enum):
-        DETECT = 1
-        STORE_IMG = 2  # store image to be used for training
-        TRAIN = 3  # use all store images to train
-        LOAD_CLASSIFIER = 4
-
-    def val(self):
-        values = {}
-        for i, v in inspect.getmembers(self):
-            if not inspect.ismethod(v) and not inspect.isclass(v) and "__" not in i:
-                values[i] = self.__getattribute__(i)
-        return values
-
-
-class TrainJob(JobStruct):
-    type = JobStruct.Type.TRAIN
-
-    def __init__(self, account_username: str):
-        self.account_username = account_username
-
-
-class LoadClassifierJob(TrainJob):
-    type = JobStruct.Type.LOAD_CLASSIFIER
-
-
-class DetectJob(JobStruct):
-    type = JobStruct.Type.DETECT
-
-    def __init__(self, account_username: str, img: bytes, file_name: str):
-        self.account_username = account_username
-        self.img = img
-        self.file_name = file_name
-
-
-class StoreImageJob(JobStruct):
-    type = JobStruct.Type.STORE_IMG
-
-    def __init__(self, account_username: str, img: bytes, file_name: str, member_id: int):
-        self.account_username = account_username
-        self.img = img
-        self.file_name = file_name
-        self.member_id = member_id
-
 
 class TeamTrainingImages:
     _images = {}
@@ -181,7 +132,7 @@ class TeamTrainingImages:
                 cropped_images[member] = self._images[member][:each]
         self._images = cropped_images
 
-    def train(self, queue: Queue, account_username: str, store_image_features: bool):
+    def train(self, queue: Queue, team_username: str, store_image_features: bool):
         for member in self._images:
             for file in self._images[member]:
                 img: bytes = self.z.read(file)
@@ -191,8 +142,9 @@ class TeamTrainingImages:
                     kwargs=StoreImageJob(
                         img=img,
                         file_name=file.filename,
-                        account_username=account_username,
+                        team_username=team_username,
                         member_id=member,
+                        store_image_features=store_image_features,
                     ).val(),
                 )
 
@@ -201,6 +153,6 @@ class TeamTrainingImages:
             func=".",
             kwargs={
                 "type": "train",
-                "account_username": account_username,
+                "team_username": team_username,
             },
         )

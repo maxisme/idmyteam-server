@@ -1,5 +1,4 @@
 import os
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
 
@@ -15,9 +14,6 @@ load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
-RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
-
 EMAIL_CONFIRMATION_PERIOD_DAYS = 7
 SIMPLE_EMAIL_CONFIRMATION_PERIOD = timedelta(days=EMAIL_CONFIRMATION_PERIOD_DAYS)
 SIMPLE_EMAIL_CONFIRMATION_KEY_LENGTH = 40
@@ -28,13 +24,11 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-CREDENTIAL_LEN = 150
-
 DEBUG = bool(os.environ.get("DEBUG", False))
 
 ALLOWED_HOSTS = ["idmy.team", "127.0.0.1", "localhost"]
 
-AUTH_USER_MODEL = "idmyteamserver.Account"
+AUTH_USER_MODEL = "idmyteamserver.Team"
 
 INSTALLED_APPS = [
     "django.contrib.auth",
@@ -47,6 +41,8 @@ INSTALLED_APPS = [
     "idmyteamserver.apps.IdmyteamserverConfig",
     "captcha",
     "simple_email_confirmation",
+    "channels",
+    "ws"
 ]
 
 MIDDLEWARE = [
@@ -119,6 +115,19 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
 ]
 
+# Channels
+REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
+ASGI_APPLICATION = 'idmyteamserver.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
+        },
+    },
+}
+
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -146,3 +155,8 @@ DEFAULT_NUM_TRAINING_IMGS_PER_HOUR = 60
 DEFAULT_NUM_CLASSES = 5
 DEFAULT_UPLOAD_RETRY_LIMIT = 0.5
 PASS_RESET_TOKEN_LEN = 200
+MAX_IMG_UPLOAD_SIZE_KB = 1000
+CREDENTIAL_LEN = 150
+MAX_UPLOAD_SIZE = 104857600
+RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
+RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
