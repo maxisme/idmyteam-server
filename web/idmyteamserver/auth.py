@@ -25,11 +25,9 @@ def profile_handler(request):
     team: Team = request.user
     if team.is_authenticated:
         context = model_to_dict(team)
-        context['root_password'] = random_str(30)
+        context["root_password"] = random_str(30)
         return render(
-            request,
-            "profile.html",
-            context=context,
+            request, "profile.html", context=context
         )  # TODO maybe just pass whole user
     return redirect("/login")
 

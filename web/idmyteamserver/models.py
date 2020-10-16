@@ -29,7 +29,9 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     max_train_imgs_per_hr = models.IntegerField(
         default=settings.DEFAULT_NUM_TRAINING_IMGS_PER_HOUR
     )
-    max_team_members = models.IntegerField(default=settings.DEFAULT_MAX_NUM_TEAM_MEMBERS)
+    max_team_members = models.IntegerField(
+        default=settings.DEFAULT_MAX_NUM_TEAM_MEMBERS
+    )
 
     last_upload = models.TimeField(null=True)
 

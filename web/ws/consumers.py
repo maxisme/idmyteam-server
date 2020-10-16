@@ -4,7 +4,12 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from idmyteamserver.models import Team
-from idmyteamserver.structs import LoadClassifierJob, NoModelWSStruct, HasModelWSStruct, UnloadClassifierJob
+from idmyteamserver.structs import (
+    LoadClassifierJob,
+    NoModelWSStruct,
+    HasModelWSStruct,
+    UnloadClassifierJob,
+)
 from web.settings import REDIS_HIGH_Q
 
 
@@ -22,14 +27,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         if bool(self.team.classifier_model_path):
-            await self.send(HasModelWSStruct("").dict()['message'])
+            await self.send(HasModelWSStruct("").dict()["message"])
         else:
-            await self.send(NoModelWSStruct("").dict()['message'])
+            await self.send(NoModelWSStruct("").dict()["message"])
 
     async def disconnect(self, close_code):
         # ask redis to unload teams classifier ML model
         REDIS_HIGH_Q.enqueue_call(
-            func=".", kwargs=UnloadClassifierJob(team_username=self.team.username).dict()
+            func=".",
+            kwargs=UnloadClassifierJob(team_username=self.team.username).dict(),
         )
 
         # remove socket channel
@@ -62,7 +68,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 break
 
         if not username or not credentials or not ip:
-            raise Exception("No username or credentials or local-ip header on connection")
+            raise Exception(
+                "No username or credentials or local-ip header on connection"
+            )
 
         team = Team.objects.get(username=username)
         if not team or not team.validate_credentials(credentials):
