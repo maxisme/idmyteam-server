@@ -2,16 +2,13 @@ import io
 import logging
 import zipfile
 
-import bcrypt
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
-from redis import Redis
-from rq import Queue
 
 from idmyteamserver.forms import UploadFileForm
 from idmyteamserver.helpers import TeamTrainingImages
-from idmyteamserver.structs import DetectJob
 from idmyteamserver.models import Team
+from idmyteamserver.structs import DetectJob
 from web import settings
 from web.settings import REDIS_MED_Q, REDIS_LOW_Q
 
