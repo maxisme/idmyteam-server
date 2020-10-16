@@ -10,3 +10,4 @@ recognition-worker/models
 /venv/
 .idea
 /venv*
+.pytest*

@@ -1,14 +1,73 @@
 import inspect
+import json
 from enum import Enum
 
 
 class Struct:
-    def val(self):
+    def dict(self) -> dict:
         values = {}
         for i, v in inspect.getmembers(self):
-            if not inspect.ismethod(v) and not inspect.isclass(v) and "__" not in i:
+            if (
+                    not inspect.ismethod(v)
+                    and not inspect.isclass(v)
+                    and not i.startswith("_")
+            ):
                 values[i] = self.__getattribute__(i)
         return values
+
+
+class WSStruct(Struct):
+    class Type(int, Enum):
+        ERROR = 1
+        TRAINED = 2
+        DELETE_IMAGE = 3
+        CLASSIFICATION = 4
+        NO_MODEL = 5
+        HAS_MODEL = 6
+
+    type = "chat_message"
+    _type: Type
+
+    def __init__(self, message: str):
+        self.message = json.dumps({"type": self._type, "message": message})
+
+
+class ErrorWSStruct(WSStruct):
+    _type = WSStruct.Type.ERROR
+
+
+class TrainedWSStruct(WSStruct):
+    _type = WSStruct.Type.TRAINED
+
+
+class DeleteImageWSStruct(WSStruct):
+    _type = WSStruct.Type.DELETE_IMAGE
+
+
+class NoModelWSStruct(WSStruct):
+    _type = WSStruct.Type.NO_MODEL
+
+
+class HasModelWSStruct(WSStruct):
+    _type = WSStruct.Type.HAS_MODEL
+
+
+class ClassificationWSStruct(WSStruct):
+    _type = WSStruct.Type.CLASSIFICATION
+
+    def __init__(
+            self, coords: dict, member_id: int, recognition_score: float, file_name: str
+    ):
+        super().__init__(
+            json.dumps(
+                {
+                    "coords": json.dumps(coords),
+                    "member_id": member_id,
+                    "recognition_score": recognition_score,
+                    "file_name": file_name,
+                }
+            )
+        )
 
 
 class JobStruct(Struct):
@@ -42,14 +101,13 @@ class DetectJob(JobStruct):
     type = JobStruct.Type.DETECT
 
     def __init__(
-        self, team_username: str, img: bytes, file_name: str, store_image_features: bool
+            self, team_username: str, img: bytes, file_name: str, store_image_features: bool
     ):
         self.team_username = team_username
         self.img = img
         self.file_name = file_name
-        self.store_image_features = (
-            store_image_features
-        )  # whether to store image features for online ML training
+        # whether to store image features for online ML training
+        self.store_image_features = store_image_features
 
 
 class StoreImageJob(JobStruct):

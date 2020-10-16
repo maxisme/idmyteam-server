@@ -16,8 +16,7 @@ from idmyteamserver.structs import (
     LoadClassifierJob,
     UnloadClassifierJob,
 )
-
-listen = ["high", "medium", "low"]
+from web.settings import REDIS_QS
 
 team_classifiers = {}
 
@@ -108,5 +107,5 @@ if __name__ == "__main__":
     # start worker
     rq_conn = redis.from_url(redis_url)
     with Connection(rq_conn):
-        worker = Worker(list(map(CustomQueue, listen)))
+        worker = Worker(list(map(CustomQueue, REDIS_QS)))
         worker.work()

@@ -1,21 +1,54 @@
-import json
-
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from idmyteamserver.models import Team
+from idmyteamserver.structs import LoadClassifierJob, NoModelWSStruct, HasModelWSStruct
+from web.settings import REDIS_HIGH_Q
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     team: Team
 
-    @sync_to_async
-    def get_team(self, username: str) -> Team:
-        return Team.objects.get(username=username)
-
     async def connect(self):
+        self.team = await self._verify_credentials(self.scope["headers"])
+
+        # ask redis to load classifier model for recognition
+        REDIS_HIGH_Q.enqueue_call(
+            func=".",
+            kwargs=LoadClassifierJob(
+                team_username=self.team.username,
+            ).dict(),
+        )
+
+        if Classifier.exists(self.team.username):  # TODO has to be gRPC call
+            self.team.send_ws_message(HasModelWSStruct(""))
+        else:
+            self.team.send_ws_message(NoModelWSStruct(""))
+
+        # store socket channel in team
+        await self._save_channel_to_team(self.channel_name)
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # remove socket channel
+        await self._save_channel_to_team(None)
+
+    async def receive(self, text_data=None, bytes_data=None):
+        await self.send(text_data=self.team.username)
+
+    async def chat_message(self, event):
+        # message from group
+        await self.send(text_data=event["message"])
+
+    @sync_to_async
+    def _verify_credentials(self, headers: [(bytes, bytes)]) -> Team:
+        """
+        Extracts the username and credential header fields and verifys them
+        returns Team object if successful
+        """
         username, credentials = None, None
-        for key, val in self.scope["headers"]:
+        for key, val in headers:
             if key == b"username":
                 username = val.decode("utf-8")
             elif key == b"credentials":
@@ -27,35 +60,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not username or not credentials:
             raise Exception("No username or credentials header on connection")
 
-        self.team = await self.get_team(username)
-        if not self.team or not self.team.validate_credentials(credentials):
+        team = Team.objects.get(username=username)
+        if not team or not team.validate_credentials(credentials):
             # TODO prevent brute force
             raise Exception("Invalid credentials")
+        return team
 
-        print(self.channel_name)
-        # Join room group
-        await self.channel_layer.group_add(self.team.username, self.channel_name)
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        self.channel_layer.group_discard(self.team.username, self.channel_name)
-
-    async def receive(self, text_data=None, bytes_data=None):
-        # Send message to room group
-        print(self.team.username)
-        await self.channel_layer.group_send(
-            str(self.team.username),
-            {
-                'type': 'chat_message',
-                'message': self.team.username
-            }
-        )
-        await self.send(text_data=self.team.username)
-
-    async def chat_message(self, event):
-        # message from group
-        message = event["message"]
-
-        # forward message from group to client
-        await self.send(text_data=json.dumps({"message": message}))
+    @sync_to_async
+    def _save_channel_to_team(self, channel_name):
+        self.team.socket_channel = channel_name
+        self.team.save()

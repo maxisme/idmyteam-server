@@ -1,6 +1,15 @@
 name: ID My Team Server
 on: [push]
 jobs:
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Run Black
+        run: |
+          pip install black
+          black --check .
+
 #  test:
 #    runs-on: ubuntu-latest
 #    strategy:
@@ -22,7 +31,7 @@ jobs:
 
   publish:
     name: Publish Docker image
-#    needs: test
+    needs: black
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master

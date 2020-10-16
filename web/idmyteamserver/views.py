@@ -8,14 +8,13 @@ from opentelemetry import trace
 from django.db import connection
 
 from idmyteamserver.helpers import render
+from idmyteamserver.models import Team
+from idmyteamserver.structs import WSStruct
 
 
 def welcome_handler(request):
-    # channel_layer = get_channel_layer()
-    # async_to_sync(channel_layer.group_send)("testuser", {
-    #     'type': 'chat_message',
-    #     'message': "wahooo"
-    # })
+    team: Team = Team.objects.get(username="testuser")
+    team.send_ws_message(WSStruct("hello"))
     return render(request, "welcome.html")
 
 

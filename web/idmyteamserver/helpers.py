@@ -7,10 +7,14 @@ from functools import lru_cache
 from zipfile import ZipFile, ZipInfo
 
 import bcrypt
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from rq import Queue
 
+from idmyteamserver.models import Team
+from idmyteamserver.structs import StoreImageJob
 from web.settings import CREDENTIAL_LEN
 
 SUCCESS_COOKIE_KEY = "success_message"
@@ -132,7 +136,7 @@ class TeamTrainingImages:
                 cropped_images[member] = self._images[member][:each]
         self._images = cropped_images
 
-    def train(self, queue: Queue, team_username: str, store_image_features: bool):
+    def train(self, queue: Queue, team_username: str):
         for member in self._images:
             for file in self._images[member]:
                 img: bytes = self.z.read(file)
@@ -144,8 +148,7 @@ class TeamTrainingImages:
                         file_name=file.filename,
                         team_username=team_username,
                         member_id=member,
-                        store_image_features=store_image_features,
-                    ).val(),
+                    ).dict(),
                 )
 
         # tell model to now train

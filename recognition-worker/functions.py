@@ -23,27 +23,14 @@
 #
 #
 # formats message for client to receive a classification (recognition-worker)
+import base64
+import hashlib
 import json
+import zlib
 
 import cv2
 import numpy as np
 from websocket import create_connection
-
-
-def send_classification(
-        coords, member_id, recognition_score, file_id, team_username, socket
-):
-    send_to_client(
-        socket,
-        team_username,
-        {
-            "type": "classification",
-            "coords": coords,
-            "member_id": member_id,
-            "recognition_score": recognition_score,
-            "file_id": file_id,
-        },
-    )
 
 
 #
@@ -451,7 +438,7 @@ class Team:
     class ConfirmEmail:
         @classmethod
         def send_confirmation(
-            cls, conn, email, username, email_config, root, token_key
+                cls, conn, email, username, email_config, root, token_key
         ):
             team = Team.get(conn, username=hash(username))
             if team and not team["confirmed_email"]:
@@ -507,15 +494,6 @@ class Team:
 
 #
 #
-def create_local_socket(url):
-    return create_connection(url + "/local")
-
-
-#
-#
-def send_to_client(socket, team_username, dic):
-    dic["team_username"] = team_username
-    socket.send(json.dumps(dic, default=json_helper))
 
 
 #
@@ -591,10 +569,20 @@ def compress_string(s):
 
 #
 #
-# def decompress_string(s):
-#     string = base64.decodebytes(s)
-#     string = zlib.decompress(string)
-#     return string.decode("utf-8")
+def decompress_string(s):
+    string = base64.decodebytes(s)
+    string = zlib.decompress(string)
+    return string.decode("utf-8")
+
+
+def json_helper(o):
+    if isinstance(o, np.int64):
+        return int(o)
+    if isinstance(o, bytes):
+        return o.decode("utf-8")
+    raise TypeError
+
+
 #
 #
 # def is_valid_ip(ip):

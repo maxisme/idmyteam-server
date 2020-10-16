@@ -13,16 +13,10 @@ from idmyteamserver.helpers import TeamTrainingImages
 from idmyteamserver.structs import DetectJob
 from idmyteamserver.models import Team
 from web import settings
+from web.settings import REDIS_MED_Q, REDIS_LOW_Q
 
 PREDICT_FILE_FIELD = "predict_file"
 TRAIN_FILE_FIELD = "train_file"
-TRAIN_Q_TIMEOUT = 600
-
-redis_conn = Redis()
-
-HIGH_Q = Queue("high", connection=redis_conn, default_timeout=60)
-MED_Q = Queue("medium", connection=redis_conn, default_timeout=60)
-LOW_Q = Queue("low", connection=redis_conn, default_timeout=TRAIN_Q_TIMEOUT)
 
 
 @require_http_methods(["POST"])
@@ -37,14 +31,14 @@ def upload_handler(request):
 
     if PREDICT_FILE_FIELD in request.FILES:
         if team.model_path:
-            MED_Q.enqueue_call(
+            REDIS_MED_Q.enqueue_call(
                 func=".",
                 kwargs=DetectJob(
                     img=request.FILES[PREDICT_FILE_FIELD].read(),
                     file_name=request.FILES[PREDICT_FILE_FIELD].name,
                     team_username=team.username,
                     store_image_features=form.store_image_features,
-                ).val(),
+                ).dict(),
             )
         else:
             logging.error(f"Prediction request before trained model! {team.username}")
@@ -81,6 +75,6 @@ def upload_handler(request):
                 )
 
             # enqueue images for training
-            training_images.train(LOW_Q, team.username, form.store_image_features)
+            training_images.train(REDIS_LOW_Q, team.username)
         else:
             return HttpResponseBadRequest("Invalid ZIP file")

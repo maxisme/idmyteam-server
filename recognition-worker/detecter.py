@@ -19,6 +19,7 @@ import config
 import functions
 from classifier import Classifier
 from idmyteamserver.models import Team, Feature
+from idmyteamserver.structs import DeleteImageWSStruct, ClassificationWSStruct
 
 chainer.config.train = False  # tells chainer to not be in training mode
 
@@ -32,7 +33,7 @@ class Detecter:
     def __init__(self):
         logging.info("Started loading recognition-worker models...")
         self.face_localiser = self.FaceLocalisation()
-        self.feaure_extractor = self.FeatureExtractor()
+        self.feature_extractor = self.FeatureExtractor()
         logging.info("Finished loading recognition-worker models!")
 
     class FeatureExtractor:
@@ -156,21 +157,18 @@ class Detecter:
                     )
 
                     # extract features from image
-                    features = self.feaure_extractor.predict(img)
+                    features = self.feature_extractor.predict(img)
 
                     # predict the member based on features
                     member_id, max_prob = classifier.predict(features)
 
                     # send member classification back to user
-                    socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
-                    functions.send_classification(
-                        json.dumps(face_coords),
-                        member_id,
-                        max_prob,
-                        file_name,
-                        team.username,
-                        socket,
-                    )
+                    team.send_ws_message(ClassificationWSStruct(
+                        coords=face_coords,
+                        member_id=member_id,
+                        recognition_score=max_prob,
+                        file_name=file_name
+                    ))
 
                     if member_id > 0:
                         # increase number of successful classifications
@@ -205,14 +203,12 @@ class Detecter:
                 f"Training image does not have valid facial coordinates: {e}"
             )
 
-        socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
-
         # crop image to coords of face + config.CROP_PADDING
         img = functions.crop_img(img, face_coords, config.CROP_PADDING)
         img = functions.pre_process_img(img, config.FEATURE_EXTRACTOR_IMG_SIZE)
 
         # extract features from image
-        features = self.feaure_extractor.predict(img)
+        features = self.feature_extractor.predict(img)
 
         # insert features into db for training later
         Feature.objects.create(team=team, member=member_id, features=features)
@@ -222,18 +218,14 @@ class Detecter:
             # augment image
             aug_img = functions.img_augmentation(img)
             # extract new features from augmented image
-            features = self.feaure_extractor.predict(aug_img)
+            features = self.feature_extractor.predict(aug_img)
             # save features
             Feature.objects.create(
                 team=team, member=member_id, features=features, manual=False
             )
 
-        # tell the client they can now delete the training image locally
-        functions.send_to_client(
-            socket,
-            team.username,
-            {"type": "delete_trained_image", "img_path": file_name},
-        )
+        # tell the client they can now delete the training image
+        team.send_ws_message(DeleteImageWSStruct(file_name))
 
         if team.allow_image_storage:
             # - permission granted by team to store image for further training

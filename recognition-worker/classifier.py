@@ -9,10 +9,12 @@ import numpy as np
 from django.db.models import Q
 from sklearn.svm import SVC
 
+import functions
 from idmyteamserver.models import Team, Feature
-from idmyteamserver.upload import TRAIN_Q_TIMEOUT
-from utils import functions, config
+from idmyteamserver.structs import ErrorWSStruct, TrainedWSStruct
+from utils import config
 from utils.logs import logger
+from web.settings import TRAIN_Q_TIMEOUT
 
 
 class Classifier(object):
@@ -48,8 +50,6 @@ class Classifier(object):
         team.is_training_dttm = datetime.datetime.now()
         team.save()
 
-        socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
-
         logger.info(f"Creating new model for {self.team_username}")
 
         # create a new model using ALL the team training data
@@ -58,24 +58,12 @@ class Classifier(object):
         if training_input is not None:
             # make sure there are more than 1 classes to train model
             if len(np.unique(training_output)) <= 1:
-                return functions.send_to_client(
-                    socket,
-                    self.team_username,
-                    {
-                        "type": "error",
-                        "mess": "You must train with more than one team member!",
-                    },
-                )
+                return team.send_ws_message(ErrorWSStruct("You must train with more than one team member!"))
             else:
                 clf = SVC(probability=True)
         else:
-            return functions.send_to_client(
-                socket,
-                self.team_username,
-                {
-                    "type": "error",
-                    "mess": f"You must train with at least {config.MIN_CLASSIFIER_TRAINING_IMAGES} members!",
-                },
+            return team.send_ws_message(
+                ErrorWSStruct(f"You must train with at least {config.MIN_CLASSIFIER_TRAINING_IMAGES} members!")
             )
 
         clf.fit(training_input, training_output, sample_weight=sample_weight)
@@ -94,20 +82,15 @@ class Classifier(object):
         self.clf = clf  # reload the new model
 
         # mark all features as not new
-        Feature.objects.filter(team__username=self.team_username).update(processed=True)
+        Feature.objects.get(team__username=self.team_username).update(processed=True)
 
         # mark team as finished training
         team.is_training_dttm = None
         team.save()
 
         # send message to client with who has been trained
-        functions.send_to_client(
-            socket,
-            self.team_username,
-            {
-                "type": "trained",
-                "trained_members": json.dumps(cnt_uni, default=functions.json_helper),
-            },
+        return team.send_ws_message(
+            TrainedWSStruct(json.dumps(cnt_uni, default=functions.json_helper))
         )
 
     def _load_model(self, team_username: str):
@@ -115,57 +98,6 @@ class Classifier(object):
         if model_path:
             return joblib.load(model_path)
         return None
-
-    # def _should_update_model(self, clf, x, y, conn):
-    #     cv = ShuffleSplit(n_splits=30)
-    #     scores = cross_val_score(clf, x, y, cv=cv)
-    #     logger.info(f"{scores.mean()} -- +/- {scores.std()}")
-    #
-    #     mb_size = sys.getsizeof(clf) * 1e6
-    #     logger.info(
-    #         f"{mb_size}MB {self.hashed_username}", mb_size, self.hashed_username
-    #     )
-    #
-    #     if mb_size < config.MAX_CLASSIFIER_SIZE_MB:
-    #         # check if this mean score is better than the last within margin
-    #         cur = conn.cursor(MySQLdb.cursors.DictCursor)
-    #         cur.execute(
-    #             """SELECT `value`
-    #                     FROM `Logs`
-    #                     WHERE `method` = 'Mean Accuracy'
-    #                     AND username= %s
-    #                     ORDER BY `id`
-    #                     DESC LIMIT 1
-    #                     """,
-    #             (self.hashed_username,),
-    #         )
-    #
-    #         last_mean = 0
-    #         for row in cur.fetchall():
-    #             last_mean = row["value"]
-    #
-    #         # log scores
-    #         functions.log_data(
-    #             conn,
-    #             "Classifier",
-    #             "Model",
-    #             "Mean Accuracy",
-    #             str(scores.mean()),
-    #             self.hashed_username,
-    #         )
-    #         functions.log_data(
-    #             conn,
-    #             "Classifier",
-    #             "Model",
-    #             "Std Accuracy",
-    #             str(scores.std()),
-    #             self.hashed_username,
-    #         )
-    #         cur.close()
-    #
-    #         if last_mean == 0 or float(last_mean - 0.1) < float(scores.mean()):
-    #             return True
-    #     return True
 
     def _get_training_data(self):
         training_input, training_output, weight = [], [], []
@@ -213,12 +145,12 @@ class Classifier(object):
         return path if expected_path else None
 
     @classmethod
-    def exists(cls, hashed_username):
-        return bool(cls.get_model_path(hashed_username))
+    def exists(cls, team_username: str) -> bool:
+        return bool(cls.get_model_path(team_username))
 
     @classmethod
-    def delete(cls, hashed_username):
-        model_path = cls.get_model_path(hashed_username)
+    def delete(cls, team_username) -> bool:
+        model_path = cls.get_model_path(team_username)
         if model_path:
-            return os.remove(model_path)
+            return bool(os.remove(model_path))
         return False

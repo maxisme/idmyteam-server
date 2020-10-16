@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Date: Sat, 01 Dec 2018 20:04:31 GMT
-Content-Length: 3
-Etag: "c35a9fc52bb556c79f8fa540df587a2bf465b940"
-Content-Type: text/html; charset=UTF-8
-Server: TornadoServer/4.5.3
-

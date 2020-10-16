@@ -1,11 +1,16 @@
+import logging
 from datetime import datetime, timedelta
+from typing import Type
 
 import bcrypt
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
+from idmyteamserver.structs import WSStruct
 from web import settings
 
 
@@ -33,6 +38,8 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     allow_image_storage = models.BooleanField(default=False)
     is_training_dttm = models.DateTimeField(default=None, null=True)
 
+    socket_channel = models.CharField(max_length=255, default=None, null=True)
+
     model_path = models.CharField(max_length=255, default=None, null=True)
     update_dttm = models.DateTimeField(auto_now=True)
 
@@ -45,6 +52,16 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     def validate_credentials(self, credentials: bytes) -> bool:
         # return bcrypt.checkpw(credentials, self.credentials.encode())
         return credentials == self.credentials.encode()
+
+    def send_ws_message(self, message: WSStruct) -> bool:
+        channel_layer = get_channel_layer()
+        if not self.socket_channel:
+            logging.error(f"{self.username} is not connected to a socket")
+            # store message in redis
+            return False
+
+        async_to_sync(channel_layer.send)(self.socket_channel, message.dict())
+        return True
 
 
 class Feature(models.Model):
