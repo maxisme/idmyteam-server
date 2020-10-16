@@ -3,9 +3,10 @@
 [Client Code](https://github.com/maxisme/idmyteam-server)
 
 ## utils
+### setup pre-commit
 ```
-$ git config core.hooksPath .git-hooks/
-$ chmod +x .git-hooks/*
+$ pip install pre-commit
+$ pre-commit install
 ```
 
 ## Local setup
