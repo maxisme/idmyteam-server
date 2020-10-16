@@ -8,9 +8,9 @@ class Struct:
         values = {}
         for i, v in inspect.getmembers(self):
             if (
-                    not inspect.ismethod(v)
-                    and not inspect.isclass(v)
-                    and not i.startswith("_")
+                not inspect.ismethod(v)
+                and not inspect.isclass(v)
+                and not i.startswith("_")
             ):
                 values[i] = self.__getattribute__(i)
         return values
@@ -56,7 +56,7 @@ class ClassificationWSStruct(WSStruct):
     _type = WSStruct.Type.CLASSIFICATION
 
     def __init__(
-            self, coords: dict, member_id: int, recognition_score: float, file_name: str
+        self, coords: dict, member_id: int, recognition_score: float, file_name: str
     ):
         super().__init__(
             json.dumps(
@@ -101,7 +101,7 @@ class DetectJob(JobStruct):
     type = JobStruct.Type.DETECT
 
     def __init__(
-            self, team_username: str, img: bytes, file_name: str, store_image_features: bool
+        self, team_username: str, img: bytes, file_name: str, store_image_features: bool
     ):
         self.team_username = team_username
         self.img = img

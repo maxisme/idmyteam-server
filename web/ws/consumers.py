@@ -14,10 +14,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # ask redis to load classifier model for recognition
         REDIS_HIGH_Q.enqueue_call(
-            func=".",
-            kwargs=LoadClassifierJob(
-                team_username=self.team.username,
-            ).dict(),
+            func=".", kwargs=LoadClassifierJob(team_username=self.team.username).dict()
         )
 
         if Classifier.exists(self.team.username):  # TODO has to be gRPC call
