@@ -111,12 +111,12 @@ class Detecter:
             self.predict(img)
 
     def detect(
-            self,
-            img: bytes,
-            file_name: str,
-            store_image_features: bool,
-            classifier: Classifier,
-            team: Team,
+        self,
+        img: bytes,
+        file_name: str,
+        store_image_features: bool,
+        classifier: Classifier,
+        team: Team,
     ):
         """
         Extracts facial area from img
@@ -266,7 +266,7 @@ class Detecter:
                 os.makedirs(dir)
 
             file_path = (
-                    dir + hashed_team_member + "_" + str(randint(0, 1e20)) + config.IMG_TYPE
+                dir + hashed_team_member + "_" + str(randint(0, 1e20)) + config.IMG_TYPE
             )
             if not os.path.isfile(file_path):
                 break
