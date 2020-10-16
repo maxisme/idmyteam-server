@@ -1,0 +1,4 @@
+#!/bin/bash
+
+black .
+autoflake --remove-all-unused-imports * -i -r

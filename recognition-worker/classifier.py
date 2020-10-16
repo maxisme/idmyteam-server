@@ -44,7 +44,10 @@ class Classifier(object):
         timeout_training_dttm = datetime.datetime.now() - datetime.timedelta(
             seconds=TRAIN_Q_TIMEOUT
         )
-        if self.team.is_training_dttm and self.team.is_training_dttm >= timeout_training_dttm:
+        if (
+                self.team.is_training_dttm
+                and self.team.is_training_dttm >= timeout_training_dttm
+        ):
             raise Exception("Already training classifier for team")
 
         # mark team as currently training the classifier

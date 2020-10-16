@@ -63,7 +63,7 @@ class CustomJob(Job):
                 file_name=job.file_name,
                 store_image_features=job.store_image_features,
                 classifier=team_classifiers[job.team_username],
-                team=self.team
+                team=self.team,
             )
         else:
             raise Exception(

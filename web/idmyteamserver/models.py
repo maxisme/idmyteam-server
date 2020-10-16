@@ -1,8 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Type
 
-import bcrypt
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth.models import AbstractUser

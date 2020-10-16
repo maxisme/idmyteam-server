@@ -2,9 +2,10 @@
 
 [Client Code](https://github.com/maxisme/idmyteam-server)
 
+## utils
 ```
-$ git config core.hooksPath .githooks/
-$ chmod +x .githooks/*
+$ git config core.hooksPath .git-hooks/
+$ chmod +x .git-hooks/*
 ```
 
 ## Local setup

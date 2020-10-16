@@ -16,7 +16,11 @@ import config
 import functions
 from classifier import Classifier
 from idmyteamserver.models import Team, Feature
-from idmyteamserver.structs import DeleteImageWSStruct, ClassificationWSStruct, InvalidClassificationWSStruct
+from idmyteamserver.structs import (
+    DeleteImageWSStruct,
+    ClassificationWSStruct,
+    InvalidClassificationWSStruct,
+)
 
 chainer.config.train = False  # tells chainer to not be in training mode
 
@@ -95,7 +99,14 @@ class Detecter:
 
             # Run prediction with a white image.
             # (The first prediction takes longer than all proceeding ones)
-            img = np.zeros([3, config.FEATURE_EXTRACTOR_IMG_SIZE, config.FEATURE_EXTRACTOR_IMG_SIZE], dtype=np.uint8)
+            img = np.zeros(
+                [
+                    3,
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                ],
+                dtype=np.uint8,
+            )
             img[:] = 255
             self.predict(img)
 

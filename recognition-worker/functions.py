@@ -4,6 +4,7 @@ import zlib
 
 import cv2
 import numpy as np
+
 from detecter import FaceCoordinates
 
 

@@ -6,14 +6,10 @@ import string
 from functools import lru_cache
 from zipfile import ZipFile, ZipInfo
 
-import bcrypt
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from rq import Queue
 
-from idmyteamserver.models import Team
 from idmyteamserver.structs import StoreImageJob
 from web.settings import CREDENTIAL_LEN
 

@@ -1,16 +1,12 @@
 import os
 
 import redis
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
+from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
-from django.db import connection
 
 from idmyteamserver.helpers import render
-from idmyteamserver.models import Team
-from idmyteamserver.structs import WSStruct
 from web.settings import REDIS_CONN
 
 

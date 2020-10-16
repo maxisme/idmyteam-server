@@ -9,5 +9,5 @@ recognition-worker/models
 *.scssc
 /venv/
 .idea
-/venv*
+.venv*
 .pytest*
