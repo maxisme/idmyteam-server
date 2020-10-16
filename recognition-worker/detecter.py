@@ -106,12 +106,12 @@ class Detecter:
             self.predict(img)
 
     def detect(
-            self,
-            img: bytes,
-            file_name: str,
-            store_image_features: bool,
-            classifier: Classifier,
-            team: Team,
+        self,
+        img: bytes,
+        file_name: str,
+        store_image_features: bool,
+        classifier: Classifier,
+        team: Team,
     ):
         # parse image bytes to np array
         try:
@@ -163,12 +163,14 @@ class Detecter:
                     member_id, max_prob = classifier.predict(features)
 
                     # send member classification back to user
-                    team.send_ws_message(ClassificationWSStruct(
-                        coords=face_coords,
-                        member_id=member_id,
-                        recognition_score=max_prob,
-                        file_name=file_name
-                    ))
+                    team.send_ws_message(
+                        ClassificationWSStruct(
+                            coords=face_coords,
+                            member_id=member_id,
+                            recognition_score=max_prob,
+                            file_name=file_name,
+                        )
+                    )
 
                     if member_id > 0:
                         # increase number of successful classifications
@@ -255,7 +257,7 @@ class Detecter:
                 os.makedirs(dir)
 
             file_path = (
-                    dir + hashed_team_member + "_" + str(randint(0, 1e20)) + config.IMG_TYPE
+                dir + hashed_team_member + "_" + str(randint(0, 1e20)) + config.IMG_TYPE
             )
             if not os.path.isfile(file_path):
                 break

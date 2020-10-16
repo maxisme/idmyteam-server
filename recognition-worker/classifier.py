@@ -58,12 +58,16 @@ class Classifier(object):
         if training_input is not None:
             # make sure there are more than 1 classes to train model
             if len(np.unique(training_output)) <= 1:
-                return team.send_ws_message(ErrorWSStruct("You must train with more than one team member!"))
+                return team.send_ws_message(
+                    ErrorWSStruct("You must train with more than one team member!")
+                )
             else:
                 clf = SVC(probability=True)
         else:
             return team.send_ws_message(
-                ErrorWSStruct(f"You must train with at least {config.MIN_CLASSIFIER_TRAINING_IMAGES} members!")
+                ErrorWSStruct(
+                    f"You must train with at least {config.MIN_CLASSIFIER_TRAINING_IMAGES} members!"
+                )
             )
 
         clf.fit(training_input, training_output, sample_weight=sample_weight)

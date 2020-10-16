@@ -55,8 +55,8 @@ class CustomJob(Job):
 
     def _detect_image(self, job: DetectJob):
         if (
-                job.team_username in team_classifiers
-                and team_classifiers[job.team_username].has_trained_model()
+            job.team_username in team_classifiers
+            and team_classifiers[job.team_username].has_trained_model()
         ):
             return detecter.detect(
                 job.img,
@@ -73,9 +73,7 @@ class CustomJob(Job):
         if job.team_username in team_classifiers:
             team_classifiers[job.team_username].train(self.team)
         else:
-            raise Exception(
-                f"The team '{job.team_username}' has no classifier loaded."
-            )
+            raise Exception(f"The team '{job.team_username}' has no classifier loaded.")
 
     def _load_team_classifier(self, job: LoadClassifierJob):
         team_classifiers[job.team_username] = Classifier(job.team_username)

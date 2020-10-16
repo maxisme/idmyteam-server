@@ -117,7 +117,7 @@ def crop_img(img: np.array, face_coords: FaceCoordinates, padding: int):
     )
 
     # img = np.array(img)
-    img = img[:, y: y + h, x: x + w]
+    img = img[:, y : y + h, x : x + w]
     img = np.moveaxis(img, 0, -1)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
@@ -438,7 +438,7 @@ class Team:
     class ConfirmEmail:
         @classmethod
         def send_confirmation(
-                cls, conn, email, username, email_config, root, token_key
+            cls, conn, email, username, email_config, root, token_key
         ):
             team = Team.get(conn, username=hash(username))
             if team and not team["confirmed_email"]:
@@ -603,6 +603,7 @@ def json_helper(o):
     if isinstance(o, bytes):
         return o.decode("utf-8")
     raise TypeError
+
 
 #
 #
