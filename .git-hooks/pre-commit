@@ -1,4 +1,8 @@
 #!/bin/bash
 
+pip install black
+pip install autoflake
+pip install pytest
+
 black .
 autoflake --remove-all-unused-imports * -i -r
