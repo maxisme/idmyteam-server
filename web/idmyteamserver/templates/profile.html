@@ -113,6 +113,7 @@
                         -e SERVER_CREDENTIALS={{ credentials }} \<br>
                         -e LD_LIBRARY_PATH=/opt/vc/lib \<br>
                         -v /opt/vc:/opt/vc \<br>
+                        -p 127.0.0.1:80:8080 \<br>
                         maxisme/idmyteam-client
                     </code>
                 </div>
@@ -139,7 +140,7 @@
                     </span>
                     <p>
                         {% if local_ip %}
-                            <a target="_blank" href='http://{{ local_ip }}:8080'>{{ local_ip }}</a>
+                            <a target="_blank" href='http://{{ local_ip }}'>{{ local_ip }}</a>
                         {% else %}
                             <div class="error">
                                 Client not connected to server.
