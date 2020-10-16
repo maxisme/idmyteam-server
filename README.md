@@ -8,6 +8,10 @@
 $ pip install pre-commit
 $ pre-commit install
 ```
+to test:
+```
+$ pre-commit run --all-files
+```
 
 ## Local setup
 ### .env

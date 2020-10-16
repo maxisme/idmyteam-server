@@ -52,7 +52,7 @@ def crop_img(img: np.array, face_coords: FaceCoordinates, padding: int):
     )
 
     # img = np.array(img)
-    img = img[:, y: y + h, x: x + w]
+    img = img[:, y : y + h, x : x + w]
     img = np.moveaxis(img, 0, -1)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
@@ -68,7 +68,7 @@ SP_MAX_AMT = 0.004
 
 
 def img_augmentation(img):
-    angle = np.random.uniform(-ROT, ROT)
+    np.random.uniform(-ROT, ROT)
     contrast = np.random.uniform(CONT_MIN, CONT_MAX)
     bright = np.random.randint(BRIGHT_MIN, BRIGHT_MAX)
     # sp_amt = np.random.uniform(0, SP_MAX_AMT)
