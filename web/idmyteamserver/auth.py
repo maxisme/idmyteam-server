@@ -16,6 +16,7 @@ from idmyteamserver.helpers import (
 from idmyteamserver.models import Team
 from idmyteamserver.views import render
 from web.settings import PASS_RESET_TOKEN_LEN
+from django.forms.models import model_to_dict
 
 clients = {}
 
@@ -23,18 +24,12 @@ clients = {}
 def profile_handler(request):
     team: Team = request.user
     if team.is_authenticated:
+        context = model_to_dict(team)
+        context['root_password'] = random_str(30)
         return render(
             request,
             "profile.html",
-            context={
-                "local_ip": team.local_ip,
-                "root_password": random_str(30),  # TODO
-                "username": team.username,
-                "credentials": team.credentials,
-                "allow_image_storage": bool(team.allow_image_storage),
-                "max_class_num": team.max_class_num,
-                "num_classifications": team.num_classifications or 0,
-            },
+            context=context,
         )  # TODO maybe just pass whole user
     return redirect("/login")
 

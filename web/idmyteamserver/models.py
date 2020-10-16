@@ -18,29 +18,28 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     # overwrite AbstractUser field
     email = models.EmailField(_("email address"), blank=True, unique=True)
 
-    password_reset_token = models.CharField(max_length=settings.PASS_RESET_TOKEN_LEN)
-
+    allow_image_storage = models.BooleanField(default=False)
     credentials = models.CharField(max_length=255)
     CREDENTIALS_FIELD = "credentials"
+
+    password_reset_token = models.CharField(max_length=settings.PASS_RESET_TOKEN_LEN)
 
     num_classifications = models.IntegerField(default=0)
 
     max_train_imgs_per_hr = models.IntegerField(
         default=settings.DEFAULT_NUM_TRAINING_IMGS_PER_HOUR
     )
-    max_class_num = models.IntegerField(default=settings.DEFAULT_NUM_CLASSES)
-    upload_retry_limit = models.FloatField(default=settings.DEFAULT_UPLOAD_RETRY_LIMIT)
-
-    local_ip = models.GenericIPAddressField(null=True)
+    max_team_members = models.IntegerField(default=settings.DEFAULT_MAX_NUM_TEAM_MEMBERS)
 
     last_upload = models.TimeField(null=True)
 
-    allow_image_storage = models.BooleanField(default=False)
     is_training_dttm = models.DateTimeField(default=None, null=True)
 
+    # fields acquired on websocket connection
     socket_channel = models.CharField(max_length=255, default=None, null=True)
+    local_ip = models.GenericIPAddressField(null=True)
 
-    model_path = models.CharField(max_length=255, default=None, null=True)
+    classifier_model_path = models.CharField(max_length=255, default=None, null=True)
     update_dttm = models.DateTimeField(auto_now=True)
 
     def num_features_added_last_hr(self) -> int:
@@ -75,4 +74,4 @@ class Feature(models.Model):
     create_dttm = models.DateTimeField(auto_now_add=True)
     update_dttm = models.DateTimeField(auto_now=True)
 
-    INIT_team_username = "init"
+    INIT_TEAM_USERNAME = "init"

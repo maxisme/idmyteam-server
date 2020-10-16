@@ -311,7 +311,7 @@
     "model": "idmyteamserver.team",
     "pk": 1,
     "fields": {
-      "password": "bcrypt_sha256$$2b$12$zUzCwbiRVzjnpwPGoTpZSe2mNwympApyVPxb30YzXboksQdd6Qe/i",
+      "password": "bcrypt_sha256$$2b$12$Cqi8pvMNnXzgSCu/ohoy7eJL/b/r9jquA7G5ygNr1fLaQiMRCR9i.",
       "last_login": null,
       "is_superuser": false,
       "username": "testuser",
@@ -319,20 +319,20 @@
       "last_name": "",
       "is_staff": false,
       "is_active": true,
-      "date_joined": "2020-10-15T19:10:50.068Z",
+      "date_joined": "2020-10-16T18:49:22.481Z",
       "email": "test@test.com",
+      "allow_image_storage": true,
+      "credentials": "INGor6l0oRAc4h3uOGlxXtxdebdSD1H9DMyJKm0muErw7cpWxwpgHM8xy3owt37zF4auqXbKUES7o3zZnBOCx7EcJ0KSaIeQeyfyL6KaUqAm88Y3Vatf44G3SZ2QT5hBHAANuLo8qBMOPED4y58SYG",
       "password_reset_token": "",
-      "credentials": "$2b$12$7aY3f5U3hXcaascGZeIXVOwLM816OlNTRbAqpxTHjDX78hQ9stY3m",
       "num_classifications": 0,
       "max_train_imgs_per_hr": 60,
-      "max_class_num": 5,
-      "upload_retry_limit": 0.5,
-      "local_ip": null,
+      "max_team_members": 5,
       "last_upload": null,
-      "allow_image_storage": true,
       "is_training_dttm": null,
-      "model_path": null,
-      "update_dttm": "2020-10-15T19:10:50.259Z",
+      "socket_channel": null,
+      "local_ip": null,
+      "classifier_model_path": null,
+      "update_dttm": "2020-10-16T18:49:22.676Z",
       "groups": [],
       "user_permissions": []
     }
@@ -343,9 +343,9 @@
     "fields": {
       "user": 1,
       "email": "test@test.com",
-      "key": "VNvI6vo0b3oryYcNB8ctv4CdCZ02BoAOd9LwjYXu",
-      "set_at": "2020-10-15T19:10:50.261Z",
-      "confirmed_at": "2020-10-15T20:11:49.342Z"
+      "key": "L4dyHFlfxEoLDUGQNBug3xnlm90GdI9Q1SZdbEe8",
+      "set_at": "2020-10-16T18:49:22.678Z",
+      "confirmed_at": "2020-10-16T19:49:31.109Z"
     }
   }
 ]

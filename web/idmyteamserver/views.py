@@ -1,5 +1,6 @@
 import os
 
+import redis
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.http import HttpResponse
@@ -10,11 +11,10 @@ from django.db import connection
 from idmyteamserver.helpers import render
 from idmyteamserver.models import Team
 from idmyteamserver.structs import WSStruct
+from web.settings import REDIS_CONN
 
 
 def welcome_handler(request):
-    team: Team = Team.objects.get(username="testuser")
-    team.send_ws_message(WSStruct("hello"))
     return render(request, "welcome.html")
 
 
@@ -51,7 +51,13 @@ def health_handler(request):
     # check db
     connection.connect()
     if not connection.is_usable():
-        return HttpResponse(status=500)
+        return HttpResponse(content=b'db down', status=500)
+
+    # check redis
+    try:
+        REDIS_CONN.client_list()
+    except redis.ConnectionError:
+        return HttpResponse(content=b'redis down', status=500)
 
     return HttpResponse(status=200)
 

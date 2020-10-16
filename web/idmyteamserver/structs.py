@@ -22,8 +22,9 @@ class WSStruct(Struct):
         TRAINED = 2
         DELETE_IMAGE = 3
         CLASSIFICATION = 4
-        NO_MODEL = 5
-        HAS_MODEL = 6
+        INVALID_CLASSIFICATION = 5
+        NO_MODEL = 6
+        HAS_MODEL = 7
 
     type = "chat_message"
     _type: Type
@@ -50,6 +51,10 @@ class NoModelWSStruct(WSStruct):
 
 class HasModelWSStruct(WSStruct):
     _type = WSStruct.Type.HAS_MODEL
+
+
+class InvalidClassificationWSStruct(WSStruct):
+    _type = WSStruct.Type.INVALID_CLASSIFICATION
 
 
 class ClassificationWSStruct(WSStruct):

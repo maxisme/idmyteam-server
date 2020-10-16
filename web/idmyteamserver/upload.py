@@ -30,7 +30,7 @@ def upload_handler(request):
         return HttpResponseForbidden()  # TODO prevent brute force
 
     if PREDICT_FILE_FIELD in request.FILES:
-        if team.model_path:
+        if team.classifier_model_path:
             REDIS_MED_Q.enqueue_call(
                 func=".",
                 kwargs=DetectJob(
@@ -68,7 +68,7 @@ def upload_handler(request):
                 return HttpResponseBadRequest(str(e))
             training_images.crop(num_images_to_train)
 
-            if len(training_images) < 2 and not team.model_path:
+            if len(training_images) < 2 and not team.classifier_model_path:
                 # if the team has no model yet they have to initially train at least 2 team members
                 return HttpResponseBadRequest(
                     "You must train with at least 2 team members."

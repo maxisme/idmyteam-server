@@ -18,13 +18,15 @@ from web.settings import TRAIN_Q_TIMEOUT
 
 
 class Classifier(object):
-    def __init__(self, team_username: str):
-        self.clf = self._load_model(team_username)
-        self.team_username = team_username
+    team: Team
+
+    def __init__(self, team: Team):
+        self.team = team
+        self.clf = self._load_model()
 
     def predict(self, features: np.array) -> Tuple[int, float]:
         if not self.clf:
-            raise Exception(f"Missing model for: {self.team_username}")
+            raise Exception(f"Missing model for: {self.team.username}")
 
         # predict member id based on face_coords
         member_id = 0
@@ -38,19 +40,19 @@ class Classifier(object):
 
         return member_id, max_prob
 
-    def train(self, team: Team):
+    def train(self):
         timeout_training_dttm = datetime.datetime.now() - datetime.timedelta(
             seconds=TRAIN_Q_TIMEOUT
         )
-        if team.is_training_dttm and team.is_training_dttm >= timeout_training_dttm:
+        if self.team.is_training_dttm and self.team.is_training_dttm >= timeout_training_dttm:
             raise Exception("Already training classifier for team")
 
         # mark team as currently training the classifier
         # TODO defer an is_training False
-        team.is_training_dttm = datetime.datetime.now()
-        team.save()
+        self.team.is_training_dttm = datetime.datetime.now()
+        self.team.save()
 
-        logger.info(f"Creating new model for {self.team_username}")
+        logger.info(f"Creating new model for {self.team.username}")
 
         # create a new model using ALL the team training data
         training_input, training_output, sample_weight = self._get_training_data()
@@ -58,13 +60,13 @@ class Classifier(object):
         if training_input is not None:
             # make sure there are more than 1 classes to train model
             if len(np.unique(training_output)) <= 1:
-                return team.send_ws_message(
+                return self.team.send_ws_message(
                     ErrorWSStruct("You must train with more than one team member!")
                 )
             else:
                 clf = SVC(probability=True)
         else:
-            return team.send_ws_message(
+            return self.team.send_ws_message(
                 ErrorWSStruct(
                     f"You must train with at least {config.MIN_CLASSIFIER_TRAINING_IMAGES} members!"
                 )
@@ -81,24 +83,25 @@ class Classifier(object):
             f"fitted {len(training_input)} features from {len(set(training_output))} classes"
         )
 
-        model_path = self.get_model_path(self.team_username, True)
+        model_path = self.get_model_path(self.team.username, True)
         joblib.dump(clf, model_path)  # save model to
         self.clf = clf  # reload the new model
 
         # mark all features as not new
-        Feature.objects.get(team__username=self.team_username).update(processed=True)
+        Feature.objects.get(team__username=self.team.username).update(processed=True)
 
-        # mark team as finished training
-        team.is_training_dttm = None
-        team.save()
+        # mark team as finished training and the model path
+        self.team.is_training_dttm = None
+        self.team.classifier_model_path = model_path
+        self.team.save()
 
         # send message to client with who has been trained
-        return team.send_ws_message(
+        return self.team.send_ws_message(
             TrainedWSStruct(json.dumps(cnt_uni, default=functions.json_helper))
         )
 
-    def _load_model(self, team_username: str):
-        model_path = self.get_model_path(team_username)
+    def _load_model(self):
+        model_path = self.get_model_path(self.team.username)
         if model_path:
             return joblib.load(model_path)
         return None
@@ -106,8 +109,8 @@ class Classifier(object):
     def _get_training_data(self):
         training_input, training_output, weight = [], [], []
         results = Feature.objects.filter(
-            Q(team__username=self.team_username)
-            | Q(team__username=Feature.INIT_team_username)
+            Q(team__username=self.team.username)
+            | Q(team__username=Feature.INIT_TEAM_USERNAME)
         )
 
         num_new = 0

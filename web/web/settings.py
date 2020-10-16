@@ -114,12 +114,12 @@ PASSWORD_HASHERS = [
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
 
-redis_conn = Redis(host=REDIS_HOST, port=REDIS_PORT)
+REDIS_CONN = Redis(host=REDIS_HOST, port=REDIS_PORT)
 TRAIN_Q_TIMEOUT = 600
 REDIS_QS = ["high", "medium", "low"]
-REDIS_HIGH_Q = Queue("high", connection=redis_conn, default_timeout=60)
-REDIS_MED_Q = Queue("medium", connection=redis_conn, default_timeout=60)
-REDIS_LOW_Q = Queue("low", connection=redis_conn, default_timeout=TRAIN_Q_TIMEOUT)
+REDIS_HIGH_Q = Queue("high", connection=REDIS_CONN, default_timeout=60)
+REDIS_MED_Q = Queue("medium", connection=REDIS_CONN, default_timeout=60)
+REDIS_LOW_Q = Queue("low", connection=REDIS_CONN, default_timeout=TRAIN_Q_TIMEOUT)
 
 # Channels
 ASGI_APPLICATION = "idmyteamserver.routing.application"
@@ -154,7 +154,7 @@ sentry_sdk.init(
 
 # project stuff
 DEFAULT_NUM_TRAINING_IMGS_PER_HOUR = 60
-DEFAULT_NUM_CLASSES = 5
+DEFAULT_MAX_NUM_TEAM_MEMBERS = 5
 DEFAULT_UPLOAD_RETRY_LIMIT = 0.5
 PASS_RESET_TOKEN_LEN = 200
 MAX_IMG_UPLOAD_SIZE_KB = 1000
