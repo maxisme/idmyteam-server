@@ -23,6 +23,6 @@ repos:
       - id: migrations-check
         language: system
         name: Check for uncreated migrations.
-        entry: .venv/bin/python3 ./web/manage.py makemigrations --check --dry-run
+        entry: python3 ./web/manage.py makemigrations --check --dry-run
         types: [ "python" ]
         pass_filenames: false
