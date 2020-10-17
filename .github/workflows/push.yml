@@ -1,37 +1,38 @@
 name: ID My Team Server
 on: [push]
 jobs:
-  black:
+  pre-commit:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.0
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
       - uses: actions/checkout@v1
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: 3.9
-      - name: Run Black
-        run: |
-          pip install black
-          black --check .
+          python-version: ${{ matrix.python-version }}
 
-#  test:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      matrix:
-#        python-version: [3.6, 3.7, 3.8]
-#
-#    steps:
-#    - uses: actions/checkout@v1
-#
-#    - name: Set up Python ${{ matrix.python-version }}
-#      uses: actions/setup-python@v1
-#      with:
-#        python-version: ${{ matrix.python-version }}
-#
-#    - name: Run Black
-#      run: |
-#        pip install black
-#        black --check .
+      - name: Install requirements
+        run: |
+          cd web
+          pip install requirements.txt
+          pip install test_requirements.txt
+
+      - name: Test web
+        env:
+          DJANGO_SETTINGS_MODULE: web.settings
+        run: |
+          pytest .
 
   publish:
     name: Publish Docker image
