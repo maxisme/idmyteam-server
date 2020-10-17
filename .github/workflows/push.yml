@@ -3,6 +3,15 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DATABASE: idmyteam
+          POSTGRES_USER: idmyteam
+          POSTGRES_PASSWORD: idmyteam
+      redis:
+        image: redis
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
