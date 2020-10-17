@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from rq import Queue
 
-from idmyteamserver.structs import StoreImageJob
+from idmyteam.structs import StoreImageJob
 from web.settings import CREDENTIAL_LEN
 
 SUCCESS_COOKIE_KEY = "success_message"

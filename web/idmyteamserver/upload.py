@@ -5,10 +5,10 @@ import zipfile
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 
+from idmyteam.structs import DetectJob
 from idmyteamserver.forms import UploadFileForm
 from idmyteamserver.helpers import TeamTrainingImages
 from idmyteamserver.models import Team
-from idmyteamserver.structs import DetectJob
 from web import settings
 from web.settings import REDIS_MED_Q, REDIS_LOW_Q
 

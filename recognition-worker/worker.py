@@ -7,8 +7,7 @@ from rq.job import Job
 
 from classifier import Classifier
 from detecter import Detecter
-from idmyteamserver.models import Team
-from idmyteamserver.structs import (
+from idmyteam.structs import (
     JobStruct,
     DetectJob,
     StoreImageJob,
@@ -16,6 +15,7 @@ from idmyteamserver.structs import (
     LoadClassifierJob,
     UnloadClassifierJob,
 )
+from idmyteamserver.models import Team
 from web.settings import REDIS_QS
 
 team_classifiers = {}

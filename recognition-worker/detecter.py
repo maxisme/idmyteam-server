@@ -15,12 +15,12 @@ from chainercv.links import FasterRCNNVGG16
 import config
 import functions
 from classifier import Classifier
-from idmyteamserver.models import Team, Feature
-from idmyteamserver.structs import (
+from idmyteam.structs import (
     DeleteImageWSStruct,
     ClassificationWSStruct,
     InvalidClassificationWSStruct,
 )
+from idmyteamserver.models import Team, Feature
 
 chainer.config.train = False  # tells chainer to not be in training mode
 

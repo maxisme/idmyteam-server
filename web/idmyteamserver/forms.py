@@ -71,7 +71,7 @@ class LoginForm(RecaptchaForm):
 
 
 class ForgotForm(RecaptchaForm):
-    username_email = forms.CharField(label="Username or Email")
+    username_email = forms.CharField(label="Username or email")
 
 
 class ResetForm(RecaptchaForm):

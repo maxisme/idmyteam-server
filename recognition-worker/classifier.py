@@ -10,8 +10,8 @@ from django.db.models import Q
 from sklearn.svm import SVC
 
 import functions
+from idmyteam.structs import ErrorWSStruct, TrainedWSStruct
 from idmyteamserver.models import Team, Feature
-from idmyteamserver.structs import ErrorWSStruct, TrainedWSStruct
 from utils import config
 from utils.logs import logger
 from web.settings import TRAIN_Q_TIMEOUT

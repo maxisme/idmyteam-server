@@ -17,6 +17,20 @@ from django.urls import path
 
 from idmyteamserver import views, auth, api
 
+PUBLIC_URL_NAMES = [
+    "main",
+    "about",
+    "contact",
+    "terms",
+    "storage_terms",
+    "tutorials",
+    "signup",
+    "login",
+    "forgot",
+]
+
+AUTH_URL_NAMES = ["profile"]
+
 # REMEMBER: update sitemap.py
 urlpatterns = [
     path("", views.welcome_handler, name="main"),
@@ -30,7 +44,7 @@ urlpatterns = [
     path("login", auth.login_handler, name="login"),
     path("profile", auth.profile_handler, name="profile"),
     path("logout", auth.logout_handler),
-    path("forgot", auth.forgot_handler),
+    path("forgot", auth.forgot_handler, name="forgot"),
     path("reset", auth.reset_handler),
     path("confirm/<key>", auth.confirm_handler),
     path("reset-credentials", api.reset_credentials_handler),
