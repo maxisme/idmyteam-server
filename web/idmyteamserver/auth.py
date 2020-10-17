@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.backends import ModelBackend
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 
-from idmyteamserver import forms, helpers
+from idmyteamserver import forms
 from idmyteamserver.email import send_confirm, send_reset
 from idmyteamserver.helpers import (
     SUCCESS_COOKIE_KEY,
@@ -70,19 +70,19 @@ def login_handler(request):
     )
 
 
-def signup_handler(request):
-    ignored_inputs = ("confirm", "terms", "captcha")
+SUCCESS_SIGNUP_MSG = "Welcome! Please confirm your email to complete signup!"
+IGNORED_INPUTS = ("confirm", "terms", "captcha")
 
+
+def signup_handler(request):
     if request.method == "POST":
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
             post_data = form.cleaned_data
-            for key in ignored_inputs:
+            for key in IGNORED_INPUTS:
                 del post_data[key]
 
-            team = Team.objects.create_user(
-                credentials=helpers.create_credentials(), **post_data
-            )
+            team = Team.objects.create_user(**post_data)
             if team:
                 # send confirmation email
                 send_confirm(
@@ -93,9 +93,7 @@ def signup_handler(request):
 
                 return redirect(
                     "/",
-                    cookies={
-                        SUCCESS_COOKIE_KEY: "Welcome! Please confirm your email to complete signup!"
-                    },
+                    cookies={SUCCESS_COOKIE_KEY: SUCCESS_SIGNUP_MSG},
                 )
     else:
         form = forms.SignUpForm()

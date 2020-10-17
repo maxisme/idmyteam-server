@@ -8,15 +8,15 @@ from web import settings
 
 
 class RecaptchaForm(forms.Form):
-    class CustomCaptcha(ReCaptchaField):
+    class CustomCaptchaField(ReCaptchaField):
         widget = ReCaptchaV2Invisible
 
         def validate(self, value):
             # only validate if there is a private_key
-            if self.private_key:
+            if len(self.private_key) > 0:
                 super().validate(value)
 
-    captcha = CustomCaptcha()
+    captcha = CustomCaptchaField()
 
 
 class SignUpForm(RecaptchaForm, ModelForm):
