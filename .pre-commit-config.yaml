@@ -3,7 +3,7 @@ repos:
     rev: 20.8b1
     hooks:
       - id: black
-  - repo: git@github.com:humitos/mirrors-autoflake.git
+  - repo: https://github.com/humitos/mirrors-autoflake.git
     rev: v1.1
     hooks:
       - id: autoflake
