@@ -10,6 +10,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    needs: pre-commit
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
@@ -37,7 +38,7 @@ jobs:
 
   publish:
     name: Publish Docker image
-    needs: black
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
