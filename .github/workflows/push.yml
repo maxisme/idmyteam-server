@@ -3,6 +3,9 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: a8r(%ir&!=7rc0ycu(=fwks1qc$#lsr34_5p7v+dbif7kh%1pn
+      DJANGO_SETTINGS_MODULE: web.settings
     services:
       postgres:
         image: postgres
@@ -35,12 +38,8 @@ jobs:
           pip install -r test_requirements.txt
 
       - uses: pre-commit/action@v2.0.0
-        env:
-          SECRET_KEY: a8r(%ir&!=7rc0ycu(=fwks1qc$#lsr34_5p7v+dbif7kh%1pn
 
       - name: Test web
-        env:
-          DJANGO_SETTINGS_MODULE: web.settings
         run: |
           cd web
           pytest .
