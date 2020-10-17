@@ -32,6 +32,8 @@ jobs:
 
       - uses: pre-commit/action@v2.0.0
         env:
+          DATABASE_HOST: postgres
+          REDIS_HOST: redis
           SECRET_KEY: a8r(%ir&!=7rc0ycu(=fwks1qc$#lsr34_5p7v+dbif7kh%1pn
 
       - name: Test web
