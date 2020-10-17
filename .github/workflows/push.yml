@@ -6,6 +6,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
+      - name: Install django
+        run: |
+          pip install django
       - uses: pre-commit/action@v2.0.0
 
   test:
