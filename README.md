@@ -1,5 +1,5 @@
 [![Build Status](https://github.com/maxisme/idmyteam-server/workflows/ID%20My%20Team%20Server/badge.svg)](https://github.com/maxisme/idmyteam-server/actions)
-
+[![codecov](https://codecov.io/gh/maxisme/idmyteam-server/branch/master/graph/badge.svg?token=3BHMWx6kUO)](https://codecov.io/gh/maxisme/idmyteam-server)
 [Client Code](https://github.com/maxisme/idmyteam-server)
 
 ## utils
