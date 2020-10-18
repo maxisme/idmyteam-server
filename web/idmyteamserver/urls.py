@@ -27,7 +27,6 @@ PUBLIC_URL_NAMES = [
     "signup",
     "login",
     "forgot-password",
-    "reset-password",
 ]
 
 AUTH_URL_NAMES = ["profile"]
