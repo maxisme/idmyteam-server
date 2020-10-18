@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, logout, login
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 
 from idmyteamserver import forms
-from idmyteamserver.email import send_confirm, send_reset
+from idmyteamserver import email
 from idmyteamserver.helpers import (
     SUCCESS_COOKIE_KEY,
     is_valid_email,
@@ -12,72 +12,23 @@ from idmyteamserver.helpers import (
     ERROR_COOKIE_KEY,
     random_str,
 )
-from idmyteamserver.models import Account
+from idmyteamserver.models import Team
 from idmyteamserver.views import render
 from web.settings import PASS_RESET_TOKEN_LEN
+from django.forms.models import model_to_dict
 
 clients = {}
 
 
-# def profile_handler(request):
-#     if request.user.is_authenticated:
-#         context = {}
-#         context["team"] = team = functions.Team.get(
-#             self.conn, username=hashed_username
-#         )
-#         if context["team"]:
-#             context["num_members"] = functions.Team.num_users(
-#                 self.conn, hashed_username
-#             )
-#             context["num_members"] = functions.Team.num_users(
-#                 self.conn, hashed_username
-#             )
-#             context["num_images"] = functions.Team.num_stored_images(
-#                 hashed_username, config.STORE_IMAGES_DIR
-#             )
-#             context["local_ip"] = (
-#                 clients[hashed_username].local_ip
-#                 if hashed_username in clients
-#                 else False
-#             )
-#             context["has_model"] = Classifier.exists(hashed_username)
-#             context["root_password"] = "zFHbmDM59nQIt5w6eYbWL2KsHHWdk4PQ9laRHZ5b"
-#             context["credentials"] = functions.AESCipher(
-#                 config.SECRETS["crypto"]
-#             ).decrypt(team["credentials"])
-#             return render(request, "profile.html", context)
-#         else:
-#             self.clear_cookie("username")
-#     return self.redirect("/login")
-
-
 def profile_handler(request):
-    user: Account = request.user
-    if user.is_authenticated:
+    team: Team = request.user
+    if team.is_authenticated:
+        context = model_to_dict(team)
+        context["root_password"] = random_str(30)
         return render(
-            request,
-            "profile.html",
-            context={
-                "local_ip": user.local_ip,
-                "root_password": random_str(30),  # TODO
-                "username": user.username,
-                "credentials": user.credentials,
-                "allow_image_storage": bool(user.allow_image_storage),
-                "max_class_num": user.max_class_num,
-                "num_classifications": user.num_classifications or 0,
-            },
+            request, "profile.html", context=context
         )  # TODO maybe just pass whole user
     return redirect("/login")
-
-
-# def view_stored_images_handler(request):
-#     context = {"title": "Stored Images"}
-#     if request.user.is_authenticated():
-#         context["images"] = functions.Team.get_stored_images(
-#             functions.hash(request.user.username), config.STORE_IMAGES_DIR
-#         )
-#         return render("profile/images.html", context)
-#     return HttpResponseRedirect("/")
 
 
 INVALID_LOGIN_MESSAGE = "Invalid credentials! Please try again."
@@ -91,17 +42,19 @@ def login_handler(request):
     if request.method == "POST":
         form = forms.LoginForm(request.POST)
         if form.is_valid():
-            username = request.POST["username"]
-            password = request.POST["password"]
-            user: Account = authenticate(request, username=username, password=password)
-            if user:
-                if user.is_confirmed:
-                    login(request, user)
+            team: Team = authenticate(
+                request,
+                username=form.cleaned_data["username"],
+                password=form.cleaned_data["password"],
+            )
+            if team:
+                if team.is_confirmed:
+                    login(request, team)
                     return HttpResponseRedirect("/profile")
                 else:
                     logout(request)
                     error_message = f"""
-                    You have not confirmed your email! <a href='/resend?email={user.email}'>Resend confirmation?</a>
+                    You have not confirmed your email! <a href='/resend?email={team.email}'>Resend confirmation?</a>
                     """
             else:
                 error_message = INVALID_LOGIN_MESSAGE
@@ -116,29 +69,30 @@ def login_handler(request):
     )
 
 
-def signup_handler(request):
-    unstored_keys = ("confirm", "terms", "captcha")
+SUCCESS_SIGNUP_MSG = "Welcome! Please confirm your email to complete signup!"
+IGNORED_INPUTS = ("confirm", "terms", "captcha")
 
+
+def signup_handler(request):
     if request.method == "POST":
         form = forms.SignUpForm(request.POST)
         if form.is_valid():
             post_data = form.cleaned_data
-            for key in unstored_keys:
+            for key in IGNORED_INPUTS:
                 del post_data[key]
-            user = Account.objects.create_user(**post_data)
-            if user:
+
+            team = Team.objects.create_user(**post_data)
+            if team:
                 # send confirmation email
-                send_confirm(
+                email.send_confirm(
                     request,
                     to=form.cleaned_data.get("email"),
-                    key=user.confirmation_key,
+                    key=team.confirmation_key,
                 )
 
                 return redirect(
                     "/",
-                    cookies={
-                        SUCCESS_COOKIE_KEY: "Welcome! Please confirm your email to complete signup!"
-                    },
+                    cookies={SUCCESS_COOKIE_KEY: SUCCESS_SIGNUP_MSG},
                 )
     else:
         form = forms.SignUpForm()
@@ -147,13 +101,13 @@ def signup_handler(request):
 
 
 def confirm_handler(request, key):
-    user_email = request.GET.get("email", None)
-    if is_valid_email(user_email):
-        user = Account.objects.get(email=user_email)
-        if user:
+    team_email = request.GET.get("email", None)
+    if is_valid_email(team_email):
+        team = Team.objects.get(email=team_email)
+        if team:
             email = None
             try:
-                email = user.confirm_email(key)
+                email = team.confirm_email(key)
             except Exception as e:
                 logging.error(e)
 
@@ -161,14 +115,48 @@ def confirm_handler(request, key):
                 return redirect(
                     "/",
                     cookies={
-                        SUCCESS_COOKIE_KEY: f"Confirmed! Welcome to the Team {user.username}!"
+                        SUCCESS_COOKIE_KEY: f"Confirmed! Welcome to the Team {team.username}!"
                     },
                 )
     return redirect(
         "/",
         cookies={
-            ERROR_COOKIE_KEY: "Problem confirming your account! Please try again."
+            ERROR_COOKIE_KEY: "Problem confirming your team account! Please try again."
         },
+    )
+
+
+def forgot_handler(request):
+    if request.method == "POST":
+        form = forms.ForgotForm(request.POST)
+        if form.is_valid():
+            username_email = form.cleaned_data.get("username_email")
+            if is_valid_email(
+                username_email
+            ):  # TODO prevent username being a valid email
+                team = Team.objects.get(email=username_email)
+            else:
+                team = Team.objects.get(username=username_email)
+
+            if team:
+                # store reset key
+                team.password_reset_token = random_str(PASS_RESET_TOKEN_LEN)
+                team.save()
+
+                # send reset key
+                email.send_reset(request, to=team.email, key=team.password_reset_token)
+
+        return redirect(
+            "/",
+            cookies={
+                SUCCESS_COOKIE_KEY: "If the username or email exists you will receive a password reset to your email!"
+            },
+        )
+    else:
+        form = forms.ForgotForm()
+
+    return render(
+        request, "forms/forgot.html", {"title": "Forgot Password", "form": form}
     )
 
 
@@ -182,13 +170,13 @@ def reset_handler(request):
     else:
         form = forms.ResetForm(request.POST)
         if form.is_valid():
-            user = Account.objects.get(
+            team = Team.objects.get(
                 password_reset_token=form.cleaned_data.get("reset_key")
             )
-            if user:
-                user.password_reset_token = ""
-                user.set_password(form.cleaned_data.get("password"))
-                user.save()
+            if team:
+                team.password_reset_token = ""
+                team.set_password(form.cleaned_data.get("password"))
+                team.save()
 
                 return redirect(
                     "/", cookies={SUCCESS_COOKIE_KEY: "Successfully reset password!"}
@@ -199,122 +187,6 @@ def reset_handler(request):
     )
 
 
-def forgot_handler(request):
-    if request.method == "POST":
-        form = forms.ForgotForm(request.POST)
-        if form.is_valid():
-            username_email = form.cleaned_data.get("usernameemail")
-            if is_valid_email(username_email):
-                user = Account.objects.get(email=username_email)
-            else:
-                user = Account.objects.get(username=username_email)
-
-            if user:
-                # store reset key
-                key = random_str(PASS_RESET_TOKEN_LEN)
-                user.password_reset_token = key
-                user.save()
-
-                # send reset key
-                send_reset(request, user.email, key)
-
-        return redirect(
-            "/",
-            cookies={
-                SUCCESS_COOKIE_KEY: "If the username or email exists you will receive a password reset to your email!"
-            },
-        )
-
-    else:
-        form = forms.ForgotForm()
-
-    return render(
-        request, "forms/forgot.html", {"title": "Forgot Password", "form": form}
-    )
-
-
 def logout_handler(request):
     logout(request)
     return redirect("/")
-
-
-# def _screen(self):
-#     context["title"] = "Sign Up"
-#     self.render("forms/form.html", **context)
-#
-#
-# class ForgotPassword(LoginHandler):
-#     def get(self):
-#         context["form"] = forms.ForgotForm()
-#         self._screen()
-#
-#     def _screen(self):
-#         context["title"] = "Forgot Password"
-#         self.render("forms/form.html", **context)
-#
-#     def post(self):
-#         context["form"] = form = forms.ForgotForm(self.request.arguments)
-#         if form.validate():
-#             self.conn = db.pool.raw_connection()
-#             if form.email.data or form.username.data:
-#                 if form.email.data:
-#                     args = {"email": form.email.data}
-#                 else:
-#                     args = {"username": functions.hash(form.username.data)}
-#                 team = functions.Team.get(self.conn, **args)
-#                 if team["email"]:
-#                     functions.Team.PasswordReset.reset(
-#                         self.conn,
-#                         team["email"],
-#                         config.EMAIL_CONFIG,
-#                         config.SECRETS["token"],
-#                         config.ROOT,
-#                     )
-#                     return self.flash_success("Sent reset email!", "/")
-#             else:
-#                 form.errors.append("Please enter either an email or a username.")
-#         self._screen()
-#
-#
-# class ResetPassword(LoginHandler):
-#     SUCCESS = "Success resetting password!"
-#     ERROR = "Invalid request to reset password."
-#
-#     def get(self):
-#         email = self.get_argument("email", "")
-#         username = self.get_argument("username", "")
-#         token = self.get_argument("token", "")
-#
-#         if (email or username) and token:
-#             context["form"] = forms.ResetPasswordForm(
-#                 data={"token": token, "email": email, "username": username}
-#             )
-#             self._screen()
-#         else:
-#             return self.redirect("/")
-#
-#     def _screen(self):
-#         context["title"] = "Reset Password"
-#         self.render("forms/form.html", **context)
-#
-#     def post(self):
-#         if self._is_valid_captcha(self.request.arguments):
-#             context["form"] = form = forms.ResetPasswordForm(self.request.arguments)
-#             if form.validate():
-#                 if form.email.data:
-#                     args = {"email": form.email.data}
-#                 else:
-#                     args = {"username": functions.hash(form.username.data)}
-#                 self.conn = db.pool.raw_connection()
-#                 team = functions.Team.get(self.conn, **args)
-#                 if team and functions.Team.PasswordReset.validate(
-#                     self.conn, team["email"], form.token.data, config.SECRETS["token"]
-#                 ):
-#                     if functions.Team.reset_password(
-#                         self.conn, form.password.data, **args
-#                     ):
-#                         return self.flash_success(self.SUCCESS, "/login")
-#             return self.flash_error(self.ERROR, "/forgot")
-#         else:
-#             context["failed_captcha"] = True
-#         self._screen()

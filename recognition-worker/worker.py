@@ -1,98 +1,90 @@
 import os
-from threading import Thread
 
 import redis
 import sentry_sdk
+from rq import Worker, Queue, Connection
+from rq.job import Job
+
 from classifier import Classifier
 from detecter import Detecter
-from raven import Client
-from raven.transport.http import HTTPTransport
-from rq import Worker, Queue, Connection
-from rq.contrib.sentry import register_sentry
+from idmyteam.structs import (
+    JobStruct,
+    DetectJob,
+    StoreImageJob,
+    TrainJob,
+    LoadClassifierJob,
+    UnloadClassifierJob,
+)
+from idmyteamserver.models import Team
+from web.settings import REDIS_QS
+
+team_classifiers = {}
 
 
-# initialise sentry
+class CustomJob(Job):
+    team: Team
 
-# redis
-listen = ["high", "medium", "low"]
-# redis_url = os.getenv("REDISTOGO_URL", "redis://localhost:6379")
-# rq_conn = redis.from_url(redis_url)
+    def _execute(self):
+        job_type = JobStruct.Type(self.kwargs["type"])
 
-classifiers = {}
-no_classifier_jobs = {}
+        self.team: Team = Team.objects.get(username=self.kwargs["team_username"])
+        if not self.team:
+            raise Exception(
+                f"No such team with the username: {self.kwargs['team_username']}"
+            )
+
+        if job_type == JobStruct.Type.DETECT:
+            return self._detect_image(DetectJob(**self.kwargs))
+        elif job_type == JobStruct.Type.STORE_IMG:
+            return self._store_image(StoreImageJob(**self.kwargs))
+        elif job_type == JobStruct.Type.TRAIN:
+            return self._train_team(TrainJob(**self.kwargs))
+        elif job_type == JobStruct.Type.LOAD_CLASSIFIER:
+            return self._load_team_classifier(LoadClassifierJob(**self.kwargs))
+        elif job_type == JobStruct.Type.UNLOAD_CLASSIFIER:
+            return self._unload_team_classifier(UnloadClassifierJob(**self.kwargs))
+        return Exception("Not a valid job")
+
+    def _store_image(self, job: StoreImageJob):
+        num_trained = self.team.num_features_added_last_hr()
+        num_allowed = self.team.max_train_imgs_per_hr
+        if num_trained >= num_allowed:
+            raise Exception(f"User {job.team_username} has uploaded too many images.")
+
+        return detecter.store_image(job.img, job.file_name, job.member_id, self.team)
+
+    def _detect_image(self, job: DetectJob):
+        if (
+            job.team_username in team_classifiers
+            and team_classifiers[job.team_username].has_trained_model()
+        ):
+            return detecter.detect(
+                img=job.img,
+                file_name=job.file_name,
+                store_image_features=job.store_image_features,
+                classifier=team_classifiers[job.team_username],
+                team=self.team,
+            )
+        else:
+            raise Exception(
+                f"The team '{job.team_username}' does not have a trained model."
+            )
+
+    def _train_team(self, job: TrainJob):
+        if job.team_username in team_classifiers:
+            team_classifiers[job.team_username].train(self.team)
+        else:
+            raise Exception(f"The team '{job.team_username}' has no classifier loaded.")
+
+    def _load_team_classifier(self, job: LoadClassifierJob):
+        team_classifiers[job.team_username] = Classifier(self.team)
+
+    def _unload_team_classifier(self, job: UnloadClassifierJob):
+        team_classifiers.pop(job.team_username, None)
 
 
-def start_worker(redis_url, sentry_url):
-    rq_conn = redis.from_url(redis_url)
-
-    with Connection(rq_conn):
-        worker = MainWorker(list(map(Queue, listen)))
-
-        # add sentry logging to worker
-        register_sentry(Client(sentry_url, transport=HTTPTransport), worker)
-
-        # start worker
-        worker.work()
-
-
-class MainWorker(Worker):
-    def execute_job(self, job, queue):
-        if "hashed_username" in job.kwargs:
-            type = job.kwargs.pop("type")
-            hashed_username = job.kwargs["hashed_username"]
-            if type == "detect":
-                if hashed_username in classifiers:
-                    db_conn = db.pool.raw_connection()
-                    if "member_id" in job.kwargs:
-                        # image used for training
-                        num_trained = functions.Team.get_num_trained_last_hr(
-                            db_conn, hashed_username
-                        )
-                        num_allowed = functions.Team.get(
-                            db_conn, username=hashed_username
-                        )["max_train_imgs_per_hr"]
-                        if num_trained >= num_allowed:
-                            logger.warning(
-                                f"User {hashed_username} has uploaded too many images."
-                            )
-                            return
-                    db_conn.close()
-
-                    detecter.run(classifier=classifiers[hashed_username], **job.kwargs)
-                else:
-                    logger.error(
-                        f"{hashed_username} has no classifier to run detector with. Reconnect websocket."
-                    )
-
-                    # TODO force a reconnect of client
-
-                    # add to failed classification jobs # TODO put back on redis
-                    if hashed_username in no_classifier_jobs:
-                        no_classifier_jobs[hashed_username].append((job, queue))
-                    else:
-                        no_classifier_jobs[hashed_username] = [(job, queue)]
-            elif type == "train":
-                if hashed_username in classifiers:
-                    thread = Thread(target=classifiers[hashed_username].train)
-                    thread.daemon = True
-                    thread.start()
-                else:
-                    logger.error(
-                        f"Asked to train team that is not connected to ws {hashed_username}"
-                    )
-            elif type == "add":
-                classifiers[hashed_username] = Classifier(hashed_username)
-                logger.info(f"Added classifier for {hashed_username}")
-
-                # enque 'detect' jobs that have been pending the addition of this classifier
-                if hashed_username in no_classifier_jobs:
-                    for arr in no_classifier_jobs[hashed_username]:
-                        job, queue = arr
-                        queue.enqueue_job(job)
-            elif type == "remove":
-                # remove classifier
-                classifiers.pop(hashed_username, None)
-                logger.info(f"Removed classifier for {hashed_username}")
+class CustomQueue(Queue):
+    job_class = CustomJob
 
 
 if __name__ == "__main__":
@@ -107,8 +99,12 @@ if __name__ == "__main__":
         print("Missing REDIS_URL environment variable")
         quit(1)
 
-    # start detector
+    # load large detector model
     global detecter
     detecter = Detecter()
 
-    start_worker(redis_url, sentry_url)
+    # start worker
+    rq_conn = redis.from_url(redis_url)
+    with Connection(rq_conn):
+        worker = Worker(list(map(CustomQueue, REDIS_QS)))
+        worker.work()

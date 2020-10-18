@@ -1,35 +1,37 @@
+import ast
 import io
-import json
+import logging
 import math
 import os
-import time
-from random import randint
-import tensorflow as tf
-
-import numpy as np
-
-from redis import Redis
-from rq import Queue
 from importlib import import_module
-import ast
+from random import randint
+
 import chainer
+import numpy as np
+import tensorflow as tf
 from PIL import Image
 from chainercv.links import FasterRCNNVGG16
-import logging
+
 import config
 import functions
+from classifier import Classifier
+from idmyteam.structs import (
+    DeleteImageWSStruct,
+    ClassificationWSStruct,
+    InvalidClassificationWSStruct,
+)
+from idmyteamserver.models import Team, Feature
 
 chainer.config.train = False  # tells chainer to not be in training mode
 
-redis_conn = Redis()
-classifier_q = Queue("low", connection=redis_conn)
+from typing import TypedDict, List
 
 
 class Detecter:
     def __init__(self):
         logging.info("Started loading recognition-worker models...")
         self.face_localiser = self.FaceLocalisation()
-        self.feaure_extractor = self.FeatureExtractor()
+        self.feature_extractor = self.FeatureExtractor()
         logging.info("Finished loading recognition-worker models!")
 
     class FeatureExtractor:
@@ -39,23 +41,13 @@ class Detecter:
         def __init__(self):
             self._load_model()
 
-        def predict(self, img, conn=None):
-            t = time.time()
-
-            features = self.sess.run(
+        def predict(self, img: np.array) -> List:
+            return self.sess.detect(
                 self.endpoints["emb"], feed_dict={self.image_placeholder: [img]}
             ).tolist()
 
-            # if conn:
-            #     functions.log_data(
-            #         conn, "Feature Extractor", "Model", "Predict", str(time.time() - t)
-            #     )
-            return features
-
         def _load_model(self):
-            logging.info("Loading feature extractor model ...")
-            load_model_begin = time.time()
-
+            # load model
             self.image_placeholder = tf.placeholder(
                 tf.float32,
                 shape=(
@@ -78,7 +70,6 @@ class Detecter:
             tf.train.Saver().restore(
                 self.sess, config.ROOT + "/models/checkpoint-407500"
             )
-            #########################################
 
             # run prediction with white image as the first prediction takes longer than all proceeding ones
             img = np.zeros(
@@ -92,221 +83,200 @@ class Detecter:
             img[:] = 255  # set white pixels
             self.predict(img)
 
-            # how long it took to load model
-            load_time = str(time.time() - load_model_begin)
-            logging.info(f"loading feature extractor took {load_time}")
-            conn = db.pool.raw_connection()
-            # functions.log_data(conn, "Feature Extractor", "Model", "Load", load_time)
-            # functions.purge_log(
-            #     conn, "Feature Extractor", "Model", "Predict", "system"
-            # )  # clear all prediction scores
-            conn.close()
-
     class FaceLocalisation(object):
         def __init__(self):
             self._load_model()
 
-        def predict(self, img, conn=None):
-            """
-            :param img:
-            :param conn:
-            :return: tuple of lists
-            """
-            t = time.time()
-
-            try:
-                prediction = self.localisation_model.predict([img])
-            except Exception as e:
-                logging.error(f"Localisation model error: {e}")
-                return None, None, None
-
-            # if conn:
-            #     functions.log_data(
-            #         conn, "Face Localisation", "Model", "Predict", str(time.time() - t)
-            #     )
-            return prediction
+        def predict(self, img: np.array):
+            return self.localisation_model.predict([img])
 
         def _load_model(self):
-            logging.info("Loading localisation model...")
-            t = time.time()
-
-            ############ LOAD MODEL ##################
             self.localisation_model = FasterRCNNVGG16(
                 n_fg_class=1, pretrained_model=config.LOCALISATION_MODEL
             )
             self.localisation_model.to_gpu(0)
             chainer.cuda.get_device(0).use()
-            #########################################
 
-            # run white pass through image as the first prediction takes longer than all proceeding ones
-            img = np.zeros([3, 480, 640], dtype=np.uint8)
+            # Run prediction with a white image.
+            # (The first prediction takes longer than all proceeding ones)
+            img = np.zeros(
+                [
+                    3,
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                ],
+                dtype=np.uint8,
+            )
             img[:] = 255
             self.predict(img)
 
-            # log how long it took to load model
-            load_time = str(time.time() - t)
-            conn = db.pool.raw_connection()
-            # functions.log_data(conn, "Face Localisation", "Model", "Load", load_time)
-            # functions.purge_log(
-            #     conn, "Face Localisation", "Model", "Predict", "system"
-            # )  # clear all predicted scores
-
-    def run(
-            self,
-            img,
-            file_name,
-            hashed_username,
-            classifier,
-            member_id=False,
-            store_image=False,
-            store_image_features=True,
+    def detect(
+        self,
+        img: bytes,
+        file_name: str,
+        store_image_features: bool,
+        classifier: Classifier,
+        team: Team,
     ):
         """
-        :type classifier: recognition-worker.Classifier
-        :param img:
-        :param file_name:
-        :param hashed_username:
-        :param classifier:
-        :param member_id:
-        :param bool store_image: whether to store the trained image file on ID My Team for increased recognition-worker accuraccy.
-        :param bool store_image_features: whether to store the predicted images features for constant learning.
-        :return:
+        Extracts facial area from img
+        Parses extracted facial area into 128 floats
+        Runs 128 floats through the teams classifier model to extract a team member
+        Returns member id, etc... to team via websocket
         """
-
-        conn = db.pool.raw_connection()
-
-        is_training = bool(member_id)
-
-        # parse image to array
-        start_time = time.time()
+        # parse image bytes to np array
         try:
-            original_image = Image.open(io.BytesIO(img))
-            # convert to recognition-worker readable image
-            img = original_image.convert("RGB")
-            img = np.asarray(img, dtype=np.float32)
-            img = img.transpose((2, 0, 1))
+            img, _ = self._bytes_to_image(img)
         except Exception as e:
-            logging.warning(f"not a valid image {e} from {hashed_username}")
-            return False
+            raise Exception(f"Invalid image: {e}")
 
-        face_coords = None
-        if not is_training:
-            # run face localisation and find the face which returns the most likely to be a face
-            # TODO MAYBE MAKE RANDOM:
-            # AS THIS COULD LEAD TO WHEN TWO PEOPLE COME IN together IT ALWAYS SAYS HELLO
-            # TO ONE OF THEM BECAUSE THEY HAVE A CLEARER FACE
+        b_boxes, labels, scores = self.face_localiser.predict(img)
 
-            bboxes, labels, scores = self.face_localiser.predict(img, conn)
+        if scores:
+            bbox = None
+            best_coord_score = 0
+            if len(scores[0]) > 0:
+                logging.info(scores)
+                # pick bbox with best score that it is a face
+                for i, score in enumerate(scores):
+                    s = score[0]
+                    if s >= best_coord_score and s >= config.MIN_LOCALISATION_PROB:
+                        best_coord_score = s
+                        bbox = b_boxes[i][0]
 
-            if scores:
-                bbox = None
-                best_coord_score = 0
-                if len(scores[0]) > 0:
-                    logging.info(scores)
-                    # pick bbox with best score that it is a face
-                    for i, score in enumerate(scores):
-                        s = score[0]
-                        if s >= best_coord_score and s >= config.MIN_LOCALISATION_PROB:
-                            best_coord_score = s
-                            bbox = bboxes[i][0]
-
-                    if best_coord_score > 0:
-                        # found detected face coords (ints for json)
-                        # convert back to our preferred bbox format - (y_min, x_min, y_max, x_max) -> (x,y,w,h)
-                        face_coords = {
-                            "x": int(math.floor(bbox[1])),
-                            "y": int(math.floor(bbox[0])),
-                            "width": int(math.ceil(bbox[3] - bbox[1])),
-                            "height": int(math.ceil(bbox[2] - bbox[0])),
-                            "score": str(best_coord_score),
-                            "method": "model",
-                        }
-
-        else:
-            # get image file comment with face coords
-            try:
-                face_coords = ast.literal_eval(original_image.app["COM"].decode())
-            except Exception as e:
-                logging.warning(f"Training image does not have valid coordinates {e}")
-
-        socket = functions.create_local_socket(config.LOCAL_SOCKET_URL)
-        if face_coords:
-            # crop image to coords of face + config.CROP_PADDING
-            pre_time = time.time()
-            x, y, w, h = functions.add_coord_padding(
-                img,
-                config.CROP_PADDING,
-                face_coords["x"],
-                face_coords["y"],
-                face_coords["width"],
-                face_coords["height"],
-            )
-            img = functions.crop_img(img, x, y, w, h)
-            img = functions.pre_process_img(img, config.FEATURE_EXTRACTOR_IMG_SIZE)
-            logging.info(f"pre_time took: {time.time() - pre_time}")
-
-            feature_time = time.time()
-            features = self.feaure_extractor.predict(img, conn)
-            logging.info(f"feature_time took: {time.time() - feature_time}")
-
-            if member_id:
-                # insert features into db
-                functions.store_feature(conn, hashed_username, member_id, features)
-
-                # create more training features by adding augmentation to images
-                for _ in range(config.NUM_SHUFFLES):
-                    aug_img = functions.img_augmentation(img)
-                    features = self.feaure_extractor.predict(aug_img)
-                    functions.store_feature(
-                        conn, hashed_username, member_id, features, manual=False
+                if best_coord_score > 0:
+                    # found detected face coords (ints for json)
+                    # convert back to our preferred bbox format - (y_min, x_min, y_max, x_max) -> (x,y,w,h)
+                    face_coords = FaceCoordinates(
+                        x=int(math.floor(bbox[1])),
+                        y=int(math.floor(bbox[0])),
+                        width=int(math.ceil(bbox[3] - bbox[1])),
+                        height=int(math.ceil(bbox[2] - bbox[0])),
+                        score=best_coord_score,
+                        is_manual=False,
                     )
 
-                # forward to client they can now delete the training image locally
-                functions.send_to_client(
-                    socket,
-                    hashed_username,
-                    {"type": "delete_trained_image", "img_path": file_name},
-                )
-
-                if store_image:  # permission granted by team to store image
-                    # move uploaded image to directory for pending semi anonymous face training (FE and FL).
-                    hashed_team_member = str(
-                        functions.hash(str(member_id) + hashed_username)
+                    # crop image to coords of face + config.CROP_PADDING
+                    img = functions.crop_img(img, face_coords, config.CROP_PADDING)
+                    img = functions.pre_process_img(
+                        img, config.FEATURE_EXTRACTOR_IMG_SIZE
                     )
 
-                    # get unique filepath to store face with
-                    while True:
-                        dir = config.STORE_IMAGES_DIR + hashed_username + "/"
-                        if not os.path.exists(dir):
-                            os.makedirs(dir)
+                    # extract features from image
+                    features = self.feature_extractor.predict(img)
 
-                        file_path = (
-                                dir
-                                + hashed_team_member
-                                + "_"
-                                + str(randint(0, 1e20))
-                                + config.IMG_TYPE
+                    # predict the member based on features
+                    member_id, max_prob = classifier.predict(features)
+
+                    # send member classification back to user
+                    team.send_ws_message(
+                        ClassificationWSStruct(
+                            coords=face_coords,
+                            member_id=member_id,
+                            recognition_score=max_prob,
+                            file_name=file_name,
                         )
-                        if not os.path.isfile(file_path):
-                            break
+                    )
 
-                    original_image.save(file_path)
+                    if member_id > 0:
+                        # increase number of successful classifications
+                        team.num_classifications += 1
+                        team.save()
 
-            else:
-                #######################################################
-                ### send FE to custom team model for classification ###
-                #######################################################
-                predict_time = time.time()
-                classifier.predict(
-                    features, file_name, face_coords, store_image_features
-                )
-                logging.info(f"predict_time took: {time.time() - predict_time}")
+                        if store_image_features:
+                            # store features in db for further training of model
+                            Feature.objects.create(
+                                team=team,
+                                member=member_id,
+                                features=features,
+                                manual=False,
+                                score=max_prob,
+                            )
+                    return
 
-        elif not is_training:
-            # no face detected so send INVALID classification
-            functions.send_classification(
-                json.dumps(face_coords), -1, 0, file_name, hashed_username, socket
+        team.send_ws_message(InvalidClassificationWSStruct(file_name))
+
+    def store_image(self, img: bytes, file_name: str, member_id: int, team: Team):
+        """
+        Stores image for training in the future
+        """
+        # parse image bytes to np array
+        try:
+            img, original_image = self._bytes_to_image(img)
+        except Exception as e:
+            raise Exception(f"Invalid image: {e}")
+
+        # get facial coordinates from comment in original image
+        try:
+            face_coords = ast.literal_eval(original_image.app["COM"].decode())
+        except Exception as e:
+            raise Exception(
+                f"Training image does not have valid facial coordinates: {e}"
             )
 
-        logging.info(f"total took: {time.time() - start_time}")
-        conn.close()
+        # crop image to coords of face + config.CROP_PADDING
+        img = functions.crop_img(img, face_coords, config.CROP_PADDING)
+        img = functions.pre_process_img(img, config.FEATURE_EXTRACTOR_IMG_SIZE)
+
+        # extract features from image
+        features = self.feature_extractor.predict(img)
+
+        # insert features into db for training later
+        Feature.objects.create(team=team, member=member_id, features=features)
+
+        # create more training features by adding augmentation to images
+        for _ in range(config.NUM_SHUFFLES):
+            # augment image
+            aug_img = functions.img_augmentation(img)
+            # extract new features from augmented image
+            features = self.feature_extractor.predict(aug_img)
+            # save features
+            Feature.objects.create(
+                team=team, member=member_id, features=features, manual=False
+            )
+
+        # tell the client they can now delete the training image
+        team.send_ws_message(DeleteImageWSStruct(file_name))
+
+        if team.allow_image_storage:
+            # - permission granted by team to store image for further training
+            # - move uploaded image to directory for pending semi anonymous face training (FE and FL).
+            file_path = self._get_unique_file_path(team)
+            original_image.save(file_path)
+
+    @staticmethod
+    def _bytes_to_image(img: bytes) -> (np.array, Image):
+        original_image = Image.open(io.BytesIO(img))
+        # convert to recognition-worker readable image
+        img = original_image.convert("RGB")
+        img = np.asarray(img, dtype=np.float32)
+        return img.transpose((2, 0, 1)), original_image
+
+    @staticmethod
+    def _get_unique_file_path(team: Team) -> str:
+        """
+        get unique filepath to store face at
+        @param team:
+        @return:
+        """
+        hashed_team_member = functions.hash(str(team.id) + team.username)
+        while True:
+            dir = config.STORE_IMAGES_DIR + team.username + "/"
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+
+            file_path = (
+                dir + hashed_team_member + "_" + str(randint(0, 1e20)) + config.IMG_TYPE
+            )
+            if not os.path.isfile(file_path):
+                break
+        return file_path
+
+
+class FaceCoordinates(TypedDict):
+    x: int
+    y: int
+    width: int
+    height: int
+    score: float
+    is_manual: bool

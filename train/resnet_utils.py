@@ -36,6 +36,7 @@ implementation is more memory efficient.
 
 
 import collections
+
 import tensorflow as tf
 
 slim = tf.contrib.slim
@@ -44,28 +45,28 @@ slim = tf.contrib.slim
 class Block(collections.namedtuple("Block", ["scope", "unit_fn", "args"])):
     """A named tuple describing a ResNet block.
 
-  Its parts are:
-    scope: The scope of the `Block`.
-    unit_fn: The ResNet unit function which takes as input a `Tensor` and
-      returns another `Tensor` with the output of the ResNet unit.
-    args: A list of length equal to the number of units in the `Block`. The list
-      contains one (depth, depth_bottleneck, stride) tuple for each unit in the
-      block to serve as argument to unit_fn.
-  """
+    Its parts are:
+      scope: The scope of the `Block`.
+      unit_fn: The ResNet unit function which takes as input a `Tensor` and
+        returns another `Tensor` with the output of the ResNet unit.
+      args: A list of length equal to the number of units in the `Block`. The list
+        contains one (depth, depth_bottleneck, stride) tuple for each unit in the
+        block to serve as argument to unit_fn.
+    """
 
 
 def subsample(inputs, factor, scope=None):
     """Subsamples the input along the spatial dimensions.
 
-  Args:
-    inputs: A `Tensor` of size [batch, height_in, width_in, channels].
-    factor: The subsampling factor.
-    scope: Optional variable_scope.
+    Args:
+      inputs: A `Tensor` of size [batch, height_in, width_in, channels].
+      factor: The subsampling factor.
+      scope: Optional variable_scope.
 
-  Returns:
-    output: A `Tensor` of size [batch, height_out, width_out, channels] with the
-      input, either intact (if factor == 1) or subsampled (if factor > 1).
-  """
+    Returns:
+      output: A `Tensor` of size [batch, height_out, width_out, channels] with the
+        input, either intact (if factor == 1) or subsampled (if factor > 1).
+    """
     if factor == 1:
         return inputs
     else:
@@ -75,37 +76,37 @@ def subsample(inputs, factor, scope=None):
 def conv2d_same(inputs, num_outputs, kernel_size, stride, rate=1, scope=None):
     """Strided 2-D convolution with 'SAME' padding.
 
-  When stride > 1, then we do explicit zero-padding, followed by conv2d with
-  'VALID' padding.
+    When stride > 1, then we do explicit zero-padding, followed by conv2d with
+    'VALID' padding.
 
-  Note that
+    Note that
 
-     net = conv2d_same(inputs, num_outputs, 3, stride=stride)
+       net = conv2d_same(inputs, num_outputs, 3, stride=stride)
 
-  is equivalent to
+    is equivalent to
 
-     net = slim.conv2d(inputs, num_outputs, 3, stride=1, padding='SAME')
-     net = subsample(net, factor=stride)
+       net = slim.conv2d(inputs, num_outputs, 3, stride=1, padding='SAME')
+       net = subsample(net, factor=stride)
 
-  whereas
+    whereas
 
-     net = slim.conv2d(inputs, num_outputs, 3, stride=stride, padding='SAME')
+       net = slim.conv2d(inputs, num_outputs, 3, stride=stride, padding='SAME')
 
-  is different when the input's height or width is even, which is why we add the
-  current function. For more details, see ResnetUtilsTest.testConv2DSameEven().
+    is different when the input's height or width is even, which is why we add the
+    current function. For more details, see ResnetUtilsTest.testConv2DSameEven().
 
-  Args:
-    inputs: A 4-D tensor of size [batch, height_in, width_in, channels].
-    num_outputs: An integer, the number of output filters.
-    kernel_size: An int with the kernel_size of the filters.
-    stride: An integer, the output stride.
-    rate: An integer, rate for atrous convolution.
-    scope: Scope.
+    Args:
+      inputs: A 4-D tensor of size [batch, height_in, width_in, channels].
+      num_outputs: An integer, the number of output filters.
+      kernel_size: An int with the kernel_size of the filters.
+      stride: An integer, the output stride.
+      rate: An integer, rate for atrous convolution.
+      scope: Scope.
 
-  Returns:
-    output: A 4-D tensor of size [batch, height_out, width_out, channels] with
-      the convolution output.
-  """
+    Returns:
+      output: A 4-D tensor of size [batch, height_out, width_out, channels] with
+        the convolution output.
+    """
     if stride == 1:
         return slim.conv2d(
             inputs,
@@ -139,41 +140,41 @@ def conv2d_same(inputs, num_outputs, kernel_size, stride, rate=1, scope=None):
 def stack_blocks_dense(net, blocks, output_stride=None, outputs_collections=None):
     """Stacks ResNet `Blocks` and controls output feature density.
 
-  First, this function creates scopes for the ResNet in the form of
-  'block_name/unit_1', 'block_name/unit_2', etc.
+    First, this function creates scopes for the ResNet in the form of
+    'block_name/unit_1', 'block_name/unit_2', etc.
 
-  Second, this function allows the user to explicitly control the ResNet
-  output_stride, which is the ratio of the input to output spatial resolution.
-  This is useful for dense prediction tasks such as semantic segmentation or
-  object detection.
+    Second, this function allows the user to explicitly control the ResNet
+    output_stride, which is the ratio of the input to output spatial resolution.
+    This is useful for dense prediction tasks such as semantic segmentation or
+    object detection.
 
-  Most ResNets consist of 4 ResNet blocks and subsample the activations by a
-  factor of 2 when transitioning between consecutive ResNet blocks. This results
-  to a nominal ResNet output_stride equal to 8. If we set the output_stride to
-  half the nominal network stride (e.g., output_stride=4), then we compute
-  responses twice.
+    Most ResNets consist of 4 ResNet blocks and subsample the activations by a
+    factor of 2 when transitioning between consecutive ResNet blocks. This results
+    to a nominal ResNet output_stride equal to 8. If we set the output_stride to
+    half the nominal network stride (e.g., output_stride=4), then we compute
+    responses twice.
 
-  Control of the output feature density is implemented by atrous convolution.
+    Control of the output feature density is implemented by atrous convolution.
 
-  Args:
-    net: A `Tensor` of size [batch, height, width, channels].
-    blocks: A list of length equal to the number of ResNet `Blocks`. Each
-      element is a ResNet `Block` object describing the units in the `Block`.
-    output_stride: If `None`, then the output will be computed at the nominal
-      network stride. If output_stride is not `None`, it specifies the requested
-      ratio of input to output spatial resolution, which needs to be equal to
-      the product of unit strides from the start up to some level of the ResNet.
-      For example, if the ResNet employs units with strides 1, 2, 1, 3, 4, 1,
-      then valid values for the output_stride are 1, 2, 6, 24 or None (which
-      is equivalent to output_stride=24).
-    outputs_collections: Collection to add the ResNet block outputs.
+    Args:
+      net: A `Tensor` of size [batch, height, width, channels].
+      blocks: A list of length equal to the number of ResNet `Blocks`. Each
+        element is a ResNet `Block` object describing the units in the `Block`.
+      output_stride: If `None`, then the output will be computed at the nominal
+        network stride. If output_stride is not `None`, it specifies the requested
+        ratio of input to output spatial resolution, which needs to be equal to
+        the product of unit strides from the start up to some level of the ResNet.
+        For example, if the ResNet employs units with strides 1, 2, 1, 3, 4, 1,
+        then valid values for the output_stride are 1, 2, 6, 24 or None (which
+        is equivalent to output_stride=24).
+      outputs_collections: Collection to add the ResNet block outputs.
 
-  Returns:
-    net: Output tensor with stride equal to the specified output_stride.
+    Returns:
+      net: Output tensor with stride equal to the specified output_stride.
 
-  Raises:
-    ValueError: If the target output_stride is not valid.
-  """
+    Raises:
+      ValueError: If the target output_stride is not valid.
+    """
     # The current_stride variable keeps track of the effective stride of the
     # activations. This allows us to invoke atrous convolution whenever applying
     # the next residual unit would result in the activations having stride larger
@@ -218,25 +219,25 @@ def resnet_arg_scope(
 ):
     """Defines the default ResNet arg scope.
 
-  TODO(gpapan): The batch-normalization related default values above are
-    appropriate for use in conjunction with the reference ResNet models
-    released at https://github.com/KaimingHe/deep-residual-networks. When
-    training ResNets from scratch, they might need to be tuned.
+    TODO(gpapan): The batch-normalization related default values above are
+      appropriate for use in conjunction with the reference ResNet models
+      released at https://github.com/KaimingHe/deep-residual-networks. When
+      training ResNets from scratch, they might need to be tuned.
 
-  Args:
-    weight_decay: The weight decay to use for regularizing the model.
-    batch_norm_decay: The moving average decay when estimating layer activation
-      statistics in batch normalization.
-    batch_norm_epsilon: Small constant to prevent division by zero when
-      normalizing activations by their variance in batch normalization.
-    batch_norm_scale: If True, uses an explicit `gamma` multiplier to scale the
-      activations in the batch normalization layer.
-    activation_fn: The activation function which is used in ResNet.
-    use_batch_norm: Whether or not to use batch normalization.
+    Args:
+      weight_decay: The weight decay to use for regularizing the model.
+      batch_norm_decay: The moving average decay when estimating layer activation
+        statistics in batch normalization.
+      batch_norm_epsilon: Small constant to prevent division by zero when
+        normalizing activations by their variance in batch normalization.
+      batch_norm_scale: If True, uses an explicit `gamma` multiplier to scale the
+        activations in the batch normalization layer.
+      activation_fn: The activation function which is used in ResNet.
+      use_batch_norm: Whether or not to use batch normalization.
 
-  Returns:
-    An `arg_scope` to use for the resnet models.
-  """
+    Returns:
+      An `arg_scope` to use for the resnet models.
+    """
     batch_norm_params = {
         "decay": batch_norm_decay,
         "epsilon": batch_norm_epsilon,

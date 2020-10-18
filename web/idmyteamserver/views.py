@@ -1,11 +1,13 @@
 import os
 
+import redis
+from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
-from django.db import connection
 
 from idmyteamserver.helpers import render
+from web.settings import REDIS_CONN
 
 
 def welcome_handler(request):
@@ -45,7 +47,13 @@ def health_handler(request):
     # check db
     connection.connect()
     if not connection.is_usable():
-        return HttpResponse(status=500)
+        return HttpResponse(content=b"db down", status=500)
+
+    # check redis
+    try:
+        REDIS_CONN.client_list()
+    except redis.ConnectionError:
+        return HttpResponse(content=b"redis down", status=500)
 
     return HttpResponse(status=200)
 

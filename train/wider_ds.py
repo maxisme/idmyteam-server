@@ -1,9 +1,10 @@
 # parse wider dataset to chainercv dataset format for  train_face_localisation
-import chainer
-from chainercv.utils import read_image
-import numpy as np
 import os
+
+import chainer
+import numpy as np
 from PIL import Image
+from chainercv.utils import read_image
 
 
 class WiderDataset(chainer.dataset.DatasetMixin):
@@ -15,7 +16,6 @@ class WiderDataset(chainer.dataset.DatasetMixin):
         current_path = None
         width, height = None, None
         file_bboxs = []
-        start = True
         with open(annotation_file) as f:
             for line in f:
                 if "/" in line:

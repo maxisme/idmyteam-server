@@ -3,27 +3,25 @@ from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
 from django.forms import ModelForm
 
-from idmyteamserver.models import Account
+from idmyteamserver.models import Team
+from web import settings
 
 
 class RecaptchaForm(forms.Form):
-    class CustomCaptcha(ReCaptchaField):
+    class CustomCaptchaField(ReCaptchaField):
         widget = ReCaptchaV2Invisible
 
         def validate(self, value):
             # only validate if there is a private_key
-            if self.private_key:
+            if len(self.private_key) > 0:
                 super().validate(value)
 
-    captcha = CustomCaptcha()
+    captcha = CustomCaptchaField()
 
 
 class SignUpForm(RecaptchaForm, ModelForm):
     password = forms.CharField(
-        min_length=8,
-        widget=forms.PasswordInput(),
-        required=True,
-        label="Password",
+        min_length=8, widget=forms.PasswordInput(), required=True, label="Password"
     )
     confirm = forms.CharField(
         min_length=8,
@@ -43,7 +41,7 @@ class SignUpForm(RecaptchaForm, ModelForm):
     )
 
     class Meta:
-        model = Account
+        model = Team
         fields = [
             "username",
             "password",
@@ -63,15 +61,9 @@ class SignUpForm(RecaptchaForm, ModelForm):
 
 
 class LoginForm(RecaptchaForm):
-    username = forms.CharField(
-        required=True,
-        label="Username",
-    )
+    username = forms.CharField(required=True, label="Username")
     password = forms.CharField(
-        min_length=8,
-        widget=forms.PasswordInput(),
-        required=True,
-        label="Password",
+        min_length=8, widget=forms.PasswordInput(), required=True, label="Password"
     )
 
     class Meta:
@@ -79,16 +71,13 @@ class LoginForm(RecaptchaForm):
 
 
 class ForgotForm(RecaptchaForm):
-    usernameemail = forms.CharField(label="Username or Email")
+    username_email = forms.CharField(label="Username or email")
 
 
 class ResetForm(RecaptchaForm):
     reset_key = forms.CharField(widget=forms.HiddenInput())
     password = forms.CharField(
-        min_length=8,
-        widget=forms.PasswordInput(),
-        required=True,
-        label="Password",
+        min_length=8, widget=forms.PasswordInput(), required=True, label="Password"
     )
     confirm = forms.CharField(
         min_length=8,
@@ -96,6 +85,22 @@ class ResetForm(RecaptchaForm):
         required=True,
         label="Confirm Password",
     )
+
+
+class UploadFileForm(forms.Form):
+    username = forms.CharField(required=True, label="Username")
+    credentials = forms.CharField(
+        min_length=settings.CREDENTIAL_LEN,
+        max_length=settings.CREDENTIAL_LEN,
+        widget=forms.PasswordInput(),
+        required=True,
+        label="Credentials",
+    )
+    store_image_features = forms.BooleanField()
+    file = forms.FileField(max_length=settings.MAX_UPLOAD_SIZE, allow_empty_file=False)
+
+    class Meta:
+        model = Team
 
 
 # class CustomForm(Form):

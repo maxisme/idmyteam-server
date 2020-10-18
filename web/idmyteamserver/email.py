@@ -4,7 +4,7 @@ from django.template.loader import get_template
 FROM_EMAIL = "noreply@idmy.team"
 
 
-def send_confirm(request, to, key):
+def send_confirm(request, to: str, key: str):
     template = get_template("emails/confirm.html")
     confirm_link = request.build_absolute_uri(f"/confirm/{key}") + f"?email={to}"
     html_content = template.render({"confirm_link": confirm_link})
@@ -16,7 +16,7 @@ def send_confirm(request, to, key):
     )
 
 
-def send_reset(request, to, key):
+def send_reset(request, to: str, key: str):
     template = get_template("emails/reset.html")
     reset_link = request.build_absolute_uri(f"/reset?key={key}")
     html_content = template.render({"reset_link": reset_link})

@@ -5,6 +5,8 @@ from datetime import timedelta
 
 import sentry_sdk
 from dotenv import load_dotenv
+from redis import Redis
+from rq import Queue
 from sentry_sdk.integrations.django import DjangoIntegration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -14,9 +16,6 @@ load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
-
-RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
-RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
 EMAIL_CONFIRMATION_PERIOD_DAYS = 7
 SIMPLE_EMAIL_CONFIRMATION_PERIOD = timedelta(days=EMAIL_CONFIRMATION_PERIOD_DAYS)
@@ -28,13 +27,11 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-CREDENTIAL_LEN = 150
-
 DEBUG = bool(os.environ.get("DEBUG", False))
 
 ALLOWED_HOSTS = ["idmy.team", "127.0.0.1", "localhost"]
 
-AUTH_USER_MODEL = "idmyteamserver.Account"
+AUTH_USER_MODEL = "idmyteamserver.Team"
 
 INSTALLED_APPS = [
     "django.contrib.auth",
@@ -47,6 +44,8 @@ INSTALLED_APPS = [
     "idmyteamserver.apps.IdmyteamserverConfig",
     "captcha",
     "simple_email_confirmation",
+    "channels",
+    "ws",
 ]
 
 MIDDLEWARE = [
@@ -76,9 +75,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ],
+            ]
         },
-    },
+    }
 ]
 
 WSGI_APPLICATION = "web.wsgi.application"
@@ -91,25 +90,17 @@ DATABASES = {
         "PASSWORD": os.environ.get("DATABASE_PASS", "idmyteam"),
         "HOST": os.environ.get("DATABASE_HOST", "127.0.0.1"),
         "PORT": os.environ.get("DATABASE_PORT", "5432"),
-        "TEST": {
-            "NAME": os.environ.get("DATABASE_NAME", "idmyteam") + "_test",
-        },
+        "TEST": {"NAME": os.environ.get("DATABASE_NAME", "idmyteam") + "_test"},
     }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 PASSWORD_HASHERS = [
@@ -118,6 +109,26 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
     "django.contrib.auth.hashers.Argon2PasswordHasher",
 ]
+
+# redis
+REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
+
+REDIS_CONN = Redis(host=REDIS_HOST, port=REDIS_PORT)
+TRAIN_Q_TIMEOUT = 600
+REDIS_QS = ["high", "medium", "low"]
+REDIS_HIGH_Q = Queue("high", connection=REDIS_CONN, default_timeout=60)
+REDIS_MED_Q = Queue("medium", connection=REDIS_CONN, default_timeout=60)
+REDIS_LOW_Q = Queue("low", connection=REDIS_CONN, default_timeout=TRAIN_Q_TIMEOUT)
+
+# Channels
+ASGI_APPLICATION = "idmyteamserver.routing.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [(REDIS_HOST, REDIS_PORT)]},
+    }
+}
 
 LANGUAGE_CODE = "en-us"
 
@@ -143,6 +154,11 @@ sentry_sdk.init(
 
 # project stuff
 DEFAULT_NUM_TRAINING_IMGS_PER_HOUR = 60
-DEFAULT_NUM_CLASSES = 5
+DEFAULT_MAX_NUM_TEAM_MEMBERS = 5
 DEFAULT_UPLOAD_RETRY_LIMIT = 0.5
 PASS_RESET_TOKEN_LEN = 200
+MAX_IMG_UPLOAD_SIZE_KB = 1000
+CREDENTIAL_LEN = 150
+MAX_UPLOAD_SIZE = 104857600
+RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")
+RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY", "")

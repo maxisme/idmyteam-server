@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h3>Account</h3>
+    <h3>Team</h3>
 
     <div class="row">
         <div class="col s12">
@@ -13,8 +13,9 @@
                         <span class="material-icons">face</span> TODO{{ num_recognitions }} recognitions have been made.
                     </p>
                     <p>
-                        <span class="material-icons">people_outline</span> Trained {{ num_classifications }} out of a maximum of
-                        {{ max_class_num }} members. <!-- TODO add option to buy more one day-->
+                        <span class="material-icons">people_outline</span> Trained {{ num_classifications }} out of a
+                        maximum of
+                        {{ max_team_members }} members. <!-- TODO add option to buy more one day-->
                     </p>
                     {% if allow_storage %}
                         <p>
@@ -38,11 +39,11 @@
                         <span class="material-icons">tune</span> Preferences
                     </span>
                     <p>
-                        <input {% if allow_image_storage %}checked{% endif %} name="imagestore" type="checkbox"
+                        <input {% if allow_image_storage is True %}checked{% endif %} name="imagestore" type="checkbox"
                                id="imagestore"/>
-                        <label for="imagestore">Allow us to <a target="_blank" href="/storage">store images</a> for
-                            improved
-                            recognition.</label>
+                        <label for="imagestore">
+                            Allow us to <a target="_blank" href="/storage">store images</a> for improved recognition.
+                        </label>
                     </p>
                 </div>
             </div>
@@ -65,8 +66,8 @@
         <div class="col s12 m6">
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title">Delete Account</span>
-                    <a href="#" id="delete-account" class="btn-floating halfway-fab red">
+                    <span class="card-title">Delete Team</span>
+                    <a href="#" id="delete-team" class="btn-floating halfway-fab red">
                         <i class="material-icons {% if not has_model %}disabled{% endif %}">delete</i>
                     </a>
                     <p>
@@ -77,6 +78,48 @@
         </div>
     </div>
     <p>&nbsp;</p>
+
+    <h3>Web Panel Setup</h3>
+    <p>
+        First you will need to purchase and setup your raspberry pi. Once you have done that and have ssh access you can
+        install the web panel by running the following commands.
+    </p>
+
+    <div class="flex row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title"><span class="material-icons">computer</span> Docker Install</span>
+                    <p>
+                        As recommended by <a target="_blank" href="https://get.docker.com/">Docker</a>:
+                    </p>
+                    <code>
+                        $ curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh && rm get-docker.sh
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title"><span class="material-icons">computer</span> Web Panel Install</span>
+                    <code style="word-break: break-all">
+                        $ docker run -d --restart always \<br>
+                        -e TMP_ROOT_PASSWORD={{ root_password }} \<br>
+                        -e USERNAME={{ username }} \<br>
+                        -e SERVER_CREDENTIALS={{ credentials }} \<br>
+                        -e LD_LIBRARY_PATH=/opt/vc/lib \<br>
+                        -v /opt/vc:/opt/vc \<br>
+                        -p 127.0.0.1:80:8080 \<br>
+                        maxisme/idmyteam-client
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <h3>Web Panel login details</h3>
     <p>
@@ -97,10 +140,10 @@
                     </span>
                     <p>
                         {% if local_ip %}
-                            <a target="_blank" href='http://{{ local_ip }}:8080'>{{ local_ip }}</a>
+                            <a target="_blank" href='http://{{ local_ip }}'>{{ local_ip }}</a>
                         {% else %}
                             <div class="error">
-                                Raspberry Pi not connected to the internet.
+                                Client not connected to server.
                             </div>
                         {% endif %}
                     </p>
@@ -180,9 +223,9 @@
                 }
             });
 
-            $("#delete-account").click(function () {
+            $("#delete-team").click(function () {
                 if (confirm('Are you sure? This is irreversible!')) {
-                    $.post("/delete-account", {
+                    $.post("/delete-team", {
                         '_xsrf': '{{ xsrf_token }}'
                     });
                     location.reload();

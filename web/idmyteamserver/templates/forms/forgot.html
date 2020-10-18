@@ -1,11 +1,11 @@
 {% extends 'form.html' %}
 {% load materializecss %}
 {% block form %}
+    <p class="info">
+        Enter <b>username</b> or <b>email</b> that you have forgotten
+    </p>
     <div class="row">
-        Enter username or email that you have forgotten!
-    </div>
-    <div class="row">
-        {{ form.usernameemail|materializecss:'s12' }}
+        {{ form.username_email|materializecss:'s12' }}
     </div>
 
     <div align="center" class="row">

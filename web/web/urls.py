@@ -27,11 +27,7 @@ urlpatterns = [
     path(
         "sitemap.xml",
         sitemap,
-        {
-            "sitemaps": {
-                "static": StaticViewSitemap,
-            }
-        },
+        {"sitemaps": {"static": StaticViewSitemap}},
         name="django.contrib.sitemaps.views.sitemap",
     ),
 ]

@@ -1,10 +1,11 @@
 # code 100% comes from https://github.com/VisualComputingInstitute/triplet-reid/blob/master/loss.py
 import numbers
+
 import tensorflow as tf
 
 
 def all_diffs(a, b):
-    """ Returns a tensor of all combinations of a - b.
+    """Returns a tensor of all combinations of a - b.
 
     Args:
         a (2D tensor): A batch of vectors shaped (B1, F).
