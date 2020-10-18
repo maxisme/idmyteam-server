@@ -1,11 +1,10 @@
 import pytest
-from django.db.models import AutoField
 from django.test import Client
 from django.urls import reverse
 
 from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, ERROR_COOKIE_KEY
 from idmyteamserver.models import Team
-from idmyteamserver.tests.factories import TeamFactory
+from idmyteamserver.tests.factories import TeamFactory, dict_from_team_factory
 from idmyteamserver.urls import AUTH_URL_NAMES
 from web.sitemap import PUBLIC_URL_NAMES
 
@@ -50,7 +49,7 @@ class TestAuthViews:
 
         # initialise signup form data
         team = TeamFactory.build()
-        team_dict = self._dict_from_team_factory(team)
+        team_dict = dict_from_team_factory(team)
         team_dict["confirm"] = team_dict["password"]
         team_dict["terms"] = True
 
@@ -70,7 +69,7 @@ class TestAuthViews:
 
         # initialise signup form data
         team_factory = TeamFactory.build()
-        team_dict = self._dict_from_team_factory(team_factory)
+        team_dict = dict_from_team_factory(team_factory)
         team = Team.objects.create_user(**team_dict)
 
         # confirm email
@@ -84,7 +83,7 @@ class TestAuthViews:
 
         # initialise signup form data
         team_factory = TeamFactory.build()
-        team_dict = self._dict_from_team_factory(team_factory)
+        team_dict = dict_from_team_factory(team_factory)
         Team.objects.create_user(**team_dict)
 
         assert Team.objects.filter(username=team_factory.username).exists()
@@ -97,7 +96,7 @@ class TestAuthViews:
 
         # initialise signup form data
         team_factory = TeamFactory.build()
-        team_dict = self._dict_from_team_factory(team_factory)
+        team_dict = dict_from_team_factory(team_factory)
 
         # attempt to login without creating team
         response = client.post(reverse("login"), team_dict, follow=True)
@@ -110,7 +109,7 @@ class TestAuthViews:
 
         # initialise signup form data
         team = TeamFactory.build()
-        team_dict = self._dict_from_team_factory(team)
+        team_dict = dict_from_team_factory(team)
         team_dict["confirm"] = team_dict["password"]
         team_dict["terms"] = True
 
@@ -145,7 +144,7 @@ class TestAuthViews:
 
         # initialise signup form data
         team = TeamFactory.build()
-        team_dict = self._dict_from_team_factory(team)
+        team_dict = dict_from_team_factory(team)
         team_dict["confirm"] = team_dict["password"]
         team_dict["terms"] = True
 
@@ -169,20 +168,20 @@ class TestAuthViews:
         # verify that the team has not been confirmed
         assert not Team.objects.get(username=team.username).is_confirmed
 
-    @pytest.mark.parametrize("is_email", [True, False])
-    def test_forgot_email_username_reset(self, monkeypatch, is_email):
+    @pytest.mark.parametrize("test_email", [True, False])
+    def test_forgot_email_username_reset(self, monkeypatch, test_email):
         client = Client()
 
         # create a random user
         team_factory = TeamFactory.build()
-        team_dict = self._dict_from_team_factory(team_factory)
+        team_dict = dict_from_team_factory(team_factory)
         team = Team.objects.create_user(**team_dict)
 
         # mock send_confirm
         mock_send_reset = unittest.mock.Mock()
         monkeypatch.setattr("idmyteamserver.email.send_reset", mock_send_reset)
 
-        if is_email:
+        if test_email:
             client.post(reverse("forgot-password"), {"username_email": team.email})
         else:
             client.post(reverse("forgot-password"), {"username_email": team.username})
@@ -206,12 +205,7 @@ class TestAuthViews:
         team = Team.objects.get(username=team_factory.username)
         assert team.check_password(new_password)
 
-    def _dict_from_team_factory(self, team: TeamFactory) -> dict:
-        result = {}
-        for k, v in team.__dict__.items():
-            field: AutoField
-            for field in Team._meta.fields:
-                if v and field.attname == k:
-                    result[k] = v
-                    break
-        return result
+
+# @pytest.mark.django_db
+# class TestApiViews:
+#

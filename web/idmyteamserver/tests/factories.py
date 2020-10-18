@@ -1,3 +1,4 @@
+from django.db.models import AutoField
 from factory import Faker
 from factory.django import DjangoModelFactory
 
@@ -12,3 +13,14 @@ class TeamFactory(DjangoModelFactory):
     password = Faker("password")
     email = Faker("email")
     allow_image_storage = Faker("boolean")
+
+
+def dict_from_team_factory(team: TeamFactory) -> dict:
+    result = {}
+    for k, v in team.__dict__.items():
+        field: AutoField
+        for field in Team._meta.fields:
+            if v and field.attname == k:
+                result[k] = v
+                break
+    return result
