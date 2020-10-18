@@ -205,6 +205,14 @@ class TestAuthViews:
         team = Team.objects.get(username=team_factory.username)
         assert team.check_password(new_password)
 
+    def test_logout_handler(self):
+        client = Client()
+        team, team_dict = create_team()
+        request = client.post(reverse("login"), team_dict, follow=True)
+        assert request.context["user"].is_authenticated
+        request = client.post(reverse("logout"), team_dict, follow=True)
+        assert not request.context["user"].is_authenticated
+
 
 @pytest.mark.django_db
 class TestApiViews:

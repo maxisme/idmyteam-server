@@ -27,6 +27,7 @@ PUBLIC_URL_NAMES = [
     "signup",
     "login",
     "forgot-password",
+    "reset-password",
 ]
 
 AUTH_URL_NAMES = ["profile"]
@@ -43,7 +44,7 @@ urlpatterns = [
     path("signup", auth.signup_handler, name="signup"),
     path("login", auth.login_handler, name="login"),
     path("profile", auth.profile_handler, name="profile"),
-    path("logout", auth.logout_handler),
+    path("logout", auth.logout_handler, name="logout"),
     path("forgot", auth.forgot_handler, name="forgot-password"),
     path("reset", auth.reset_handler, name="reset-password"),
     path("confirm/<key>", auth.confirm_handler, name="confirm-email"),

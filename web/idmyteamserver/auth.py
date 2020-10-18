@@ -1,7 +1,6 @@
 import logging
 
 from django.contrib.auth import authenticate, logout, login
-from django.contrib.auth.backends import ModelBackend
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 
 from idmyteamserver import forms
@@ -191,17 +190,3 @@ def reset_handler(request):
 def logout_handler(request):
     logout(request)
     return redirect("/")
-
-
-class CustomAuthenticationBackend(ModelBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
-        team = Team.objects.get(username=username)
-        if not team:
-            team = Team.objects.get(email=kwargs.get(Team.EMAIL_FIELD))
-        if not team:
-            team = Team.objects.get(credentials=kwargs.get(Team.CREDENTIALS_FIELD))
-        if not team or not self.user_can_authenticate(team):
-            return
-
-        if team.check_password(password):
-            return team
