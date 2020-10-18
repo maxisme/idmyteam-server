@@ -5,7 +5,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 
 from idmyteamserver import forms
-from idmyteamserver.email import send_confirm, send_reset
+from idmyteamserver import email
 from idmyteamserver.helpers import (
     SUCCESS_COOKIE_KEY,
     is_valid_email,
@@ -45,8 +45,8 @@ def login_handler(request):
         if form.is_valid():
             team: Team = authenticate(
                 request,
-                username=request.POST["username"],
-                password=request.POST["password"],
+                username=form.cleaned_data["username"],
+                password=form.cleaned_data["password"],
             )
             if team:
                 if team.is_confirmed:
@@ -85,7 +85,7 @@ def signup_handler(request):
             team = Team.objects.create_user(**post_data)
             if team:
                 # send confirmation email
-                send_confirm(
+                email.send_confirm(
                     request,
                     to=form.cleaned_data.get("email"),
                     key=team.confirmation_key,
@@ -127,6 +127,40 @@ def confirm_handler(request, key):
     )
 
 
+def forgot_handler(request):
+    if request.method == "POST":
+        form = forms.ForgotForm(request.POST)
+        if form.is_valid():
+            username_email = form.cleaned_data.get("username_email")
+            if is_valid_email(
+                username_email
+            ):  # TODO prevent username being a valid email
+                team = Team.objects.get(email=username_email)
+            else:
+                team = Team.objects.get(username=username_email)
+
+            if team:
+                # store reset key
+                team.password_reset_token = random_str(PASS_RESET_TOKEN_LEN)
+                team.save()
+
+                # send reset key
+                email.send_reset(request, to=team.email, key=team.password_reset_token)
+
+        return redirect(
+            "/",
+            cookies={
+                SUCCESS_COOKIE_KEY: "If the username or email exists you will receive a password reset to your email!"
+            },
+        )
+    else:
+        form = forms.ForgotForm()
+
+    return render(
+        request, "forms/forgot.html", {"title": "Forgot Password", "form": form}
+    )
+
+
 def reset_handler(request):
     if request.method == "GET":
         key = request.GET.get("key", "")
@@ -151,42 +185,6 @@ def reset_handler(request):
 
     return render(
         request, "forms/reset.html", {"title": "Reset Password", "form": form}
-    )
-
-
-def forgot_handler(request):
-    if request.method == "POST":
-        form = forms.ForgotForm(request.POST)
-        if form.is_valid():
-            username_email = form.cleaned_data.get("username_email")
-            if is_valid_email(
-                username_email
-            ):  # TODO prevent username being a valid email
-                team = Team.objects.get(email=username_email)
-            else:
-                team = Team.objects.get(username=username_email)
-
-            if team:
-                # store reset key
-                key = random_str(PASS_RESET_TOKEN_LEN)
-                team.password_reset_token = key
-                team.save()
-
-                # send reset key
-                send_reset(request, team.email, key)
-
-        return redirect(
-            "/",
-            cookies={
-                SUCCESS_COOKIE_KEY: "If the username or email exists you will receive a password reset to your email!"
-            },
-        )
-
-    else:
-        form = forms.ForgotForm()
-
-    return render(
-        request, "forms/forgot.html", {"title": "Forgot Password", "form": form}
     )
 
 
