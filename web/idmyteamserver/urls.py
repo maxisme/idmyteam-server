@@ -47,8 +47,10 @@ urlpatterns = [
     path("forgot", auth.forgot_handler, name="forgot-password"),
     path("reset", auth.reset_handler, name="reset-password"),
     path("confirm/<key>", auth.confirm_handler, name="confirm-email"),
-    path("reset-credentials", api.reset_credentials_handler),
-    path("toggle-storage", api.toggle_storage_handler),
+    path("reset-credentials", api.reset_credentials_handler, name="reset-credentials"),
+    path(
+        "toggle-storage", api.toggle_image_storage_handler, name="toggle-image-storage"
+    ),
     path("trace", views.trace_hander),
     path("health", views.health_handler),
     path("commit-hash", views.commit_hash_handler),

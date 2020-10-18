@@ -206,6 +206,34 @@ class TestAuthViews:
         assert team.check_password(new_password)
 
 
-# @pytest.mark.django_db
-# class TestApiViews:
-#
+@pytest.mark.django_db
+class TestApiViews:
+    def test_toggle_image_storage_handler(self):
+        client = Client()
+        team, team_dict = create_team()
+        client.post(reverse("login"), team_dict)
+        client.get(reverse("toggle-image-storage"))
+        # verify allow_image_storage have changed
+        assert (
+            team.allow_image_storage
+            != Team.objects.get(username=team.username).allow_image_storage
+        )
+
+    def test_reset_credentials_handler(self):
+        client = Client()
+        team, team_dict = create_team()
+        client.post(reverse("login"), team_dict)
+        client.get(reverse("reset-credentials"))
+        # verify credentials have changed
+        assert team.credentials != Team.objects.get(username=team.username).credentials
+
+
+def create_team() -> (Team, dict):
+    """
+    Creates a test team
+    """
+    team_factory = TeamFactory.build()
+    team_dict = dict_from_team_factory(team_factory)
+    team = Team.objects.create_user(**team_dict)
+    team.confirm_email(team.get_confirmation_key())
+    return team, team_dict
