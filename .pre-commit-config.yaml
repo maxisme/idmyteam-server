@@ -23,5 +23,5 @@ repos:
       - id: migrations-check
         language: system
         name: uncreated migrations
-        entry: sh -c "echo $INSTALL_PYTHON > test.txt"
+        entry: ./web/manage.py makemigrations --check --dry-run
         pass_filenames: false
