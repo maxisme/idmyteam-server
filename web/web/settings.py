@@ -1,6 +1,5 @@
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
 
 import sentry_sdk
@@ -8,10 +7,11 @@ from dotenv import load_dotenv
 from redis import Redis
 from rq import Queue
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# initialise .env
+# initialise environment variables from .env
 load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -146,7 +146,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # sentry
 sentry_sdk.init(
     dsn=os.environ.get("SENTRY_DSN"),
-    integrations=[DjangoIntegration()],
+    integrations=[DjangoIntegration(), RedisIntegration()],
     # If you wish to associate users to errors (assuming you are using
     # django.contrib.auth) you may enable sending PII data.
     send_default_pii=True,

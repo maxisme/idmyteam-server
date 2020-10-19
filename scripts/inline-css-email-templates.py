@@ -1,7 +1,6 @@
 import os
 from premailer import transform
 from urllib.parse import unquote
-from utils import config
 
 html_head = """
 <head>

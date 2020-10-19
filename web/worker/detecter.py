@@ -12,15 +12,14 @@ import tensorflow as tf
 from PIL import Image
 from chainercv.links import FasterRCNNVGG16
 
-import config
-import functions
-from classifier import Classifier
 from idmyteam.structs import (
     DeleteImageWSStruct,
     ClassificationWSStruct,
     InvalidClassificationWSStruct,
 )
 from idmyteamserver.models import Team, Feature
+from worker import config, functions
+from worker.classifier import Classifier
 
 chainer.config.train = False  # tells chainer to not be in training mode
 
@@ -29,14 +28,14 @@ from typing import TypedDict, List
 
 class Detecter:
     def __init__(self):
-        logging.info("Started loading recognition-worker models...")
+        logging.info("Started loading worker models...")
         self.face_localiser = self.FaceLocalisation()
         self.feature_extractor = self.FeatureExtractor()
-        logging.info("Finished loading recognition-worker models!")
+        logging.info("Finished loading worker models!")
 
     class FeatureExtractor:
-        model = import_module("train.resnet_v1_50")
-        head = import_module("train.fc1024")
+        model = import_module("modules.resnet_v1_50")
+        head = import_module("modules.fc1024")
 
         def __init__(self):
             self._load_model()
@@ -247,7 +246,7 @@ class Detecter:
     @staticmethod
     def _bytes_to_image(img: bytes) -> (np.array, Image):
         original_image = Image.open(io.BytesIO(img))
-        # convert to recognition-worker readable image
+        # convert to worker readable image
         img = original_image.convert("RGB")
         img = np.asarray(img, dtype=np.float32)
         return img.transpose((2, 0, 1)), original_image

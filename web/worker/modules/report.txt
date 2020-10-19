@@ -1,0 +1,21 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 1 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: resnet_v1_50.py
+--------------------------------------------------------------------------------
+resnet_v1_50.py:14:9: ERROR: Using member tf.contrib.slim.arg_scope in deprecated module tf.contrib. tf.contrib.slim.arg_scope cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file 'resnet_v1_50.py'
+ outputting to 'resnet_v1_50.py'
+--------------------------------------------------------------------------------
+
+14:9: ERROR: Using member tf.contrib.slim.arg_scope in deprecated module tf.contrib. tf.contrib.slim.arg_scope cannot be converted automatically. tf.contrib will not be distributed with TensorFlow 2.0, please consider an alternative in non-contrib TensorFlow, a community-maintained repository such as tensorflow/addons, or fork the required code.
+--------------------------------------------------------------------------------
+

@@ -19,7 +19,7 @@ def endpoints(image, is_training):
         )
 
     endpoints["model_output"] = endpoints["global_pool"] = tf.reduce_mean(
-        endpoints["resnet_v1_50/block4"], [1, 2], name="pool5"
+        input_tensor=endpoints["resnet_v1_50/block4"], axis=[1, 2], name="pool5"
     )
 
     return endpoints, "resnet_v1_50"

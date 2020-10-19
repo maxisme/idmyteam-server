@@ -1,12 +1,10 @@
-import os
+import django
 
-import redis
-import sentry_sdk
+django.setup()
+
 from rq import Worker, Queue, Connection
 from rq.job import Job
 
-from classifier import Classifier
-from detecter import Detecter
 from idmyteam.structs import (
     JobStruct,
     DetectJob,
@@ -16,7 +14,9 @@ from idmyteam.structs import (
     UnloadClassifierJob,
 )
 from idmyteamserver.models import Team
-from web.settings import REDIS_QS
+from web.settings import REDIS_QS, REDIS_CONN
+from worker.detecter import Detecter
+from worker.classifier import Classifier
 
 team_classifiers = {}
 
@@ -88,23 +88,11 @@ class CustomQueue(Queue):
 
 
 if __name__ == "__main__":
-    sentry_url = os.getenv("SENTRY_URL", False)
-    if not sentry_url:
-        print("Missing SENTRY_URL environment variable")
-        quit(1)
-    sentry_sdk.init(sentry_url)
-
-    redis_url = os.getenv("REDIS_URL", False)
-    if not redis_url:
-        print("Missing REDIS_URL environment variable")
-        quit(1)
-
     # load large detector model
     global detecter
     detecter = Detecter()
 
     # start worker
-    rq_conn = redis.from_url(redis_url)
-    with Connection(rq_conn):
+    with Connection(REDIS_CONN):
         worker = Worker(list(map(CustomQueue, REDIS_QS)))
         worker.work()

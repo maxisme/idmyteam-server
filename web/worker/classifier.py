@@ -1,6 +1,7 @@
 import ast
 import datetime
 import json
+import logging
 import os
 from typing import Tuple
 
@@ -9,12 +10,10 @@ import numpy as np
 from django.db.models import Q
 from sklearn.svm import SVC
 
-import functions
 from idmyteam.structs import ErrorWSStruct, TrainedWSStruct
 from idmyteamserver.models import Team, Feature
-from utils import config
-from utils.logs import logger
 from web.settings import TRAIN_Q_TIMEOUT
+from worker import functions
 
 
 class Classifier(object):
@@ -55,7 +54,7 @@ class Classifier(object):
         self.team.is_training_dttm = datetime.datetime.now()
         self.team.save()
 
-        logger.info(f"Creating new model for {self.team.username}")
+        logging.info(f"Creating new model for {self.team.username}")
 
         # create a new model using ALL the team training data
         training_input, training_output, sample_weight = self._get_training_data()
@@ -82,7 +81,7 @@ class Classifier(object):
         num_outputs = np.nonzero(unique_outputs)[0]
         cnt_uni = list(zip(num_outputs, unique_outputs[num_outputs]))
 
-        logger.info(
+        logging.info(
             f"fitted {len(training_input)} features from {len(set(training_output))} classes"
         )
 
