@@ -236,6 +236,12 @@ class TestApiViews:
         assert team.credentials != Team.objects.get(username=team.username).credentials
 
 
+@pytest.mark.django_db
+class TestUploadViews:
+    def test_predict_image_handler(self, monkeypatch):
+        pass
+
+
 def create_team() -> (Team, dict):
     """
     Creates a test team

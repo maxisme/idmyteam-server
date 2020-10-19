@@ -34,7 +34,7 @@ def tutorials_handler(request):
     return render(request, "tutorials/list.html", {"title": "Tutorials"})
 
 
-def trace_hander(request):
+def trace_handler(request):
     tracer = trace.get_tracer(__name__)
 
     with tracer.start_as_current_span("here is a trace"):
@@ -47,13 +47,13 @@ def health_handler(request):
     # check db
     connection.connect()
     if not connection.is_usable():
-        return HttpResponse(content=b"db down", status=500)
+        return HttpResponse(content=b"DB down", status=500)
 
     # check redis
     try:
         REDIS_CONN.client_list()
     except redis.ConnectionError:
-        return HttpResponse(content=b"redis down", status=500)
+        return HttpResponse(content=b"Redis down", status=500)
 
     return HttpResponse(status=200)
 
@@ -62,7 +62,7 @@ def commit_hash_handler(request):
     return HttpResponse(os.getenv("COMMIT_HASH"))
 
 
-def tutorial_hander(request, slug):
+def tutorial_handler(request, slug):
     title = slug.replace("-", " ").title()
     path = "tutorials/" + slug + ".html"
     return render(request, path, {"title": title})

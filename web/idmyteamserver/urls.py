@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 
-from idmyteamserver import views, auth, api
+from idmyteamserver import views, auth, api, upload
 
 PUBLIC_URL_NAMES = [
     "main",
@@ -39,7 +39,7 @@ urlpatterns = [
     path("terms", views.terms_handler, name="terms"),
     path("storage", views.storage_handler, name="storage_terms"),
     path("tutorials", views.tutorials_handler, name="tutorials"),
-    path("tutorials/<slug:slug>", views.tutorial_hander),
+    path("tutorials/<slug:slug>", views.tutorial_handler, name="tutorial"),
     path("signup", auth.signup_handler, name="signup"),
     path("login", auth.login_handler, name="login"),
     path("profile", auth.profile_handler, name="profile"),
@@ -51,7 +51,9 @@ urlpatterns = [
     path(
         "toggle-storage", api.toggle_image_storage_handler, name="toggle-image-storage"
     ),
-    path("trace", views.trace_hander),
+    path("predict", upload.predict_image_handler, name="predict"),
+    path("train", upload.train_team_handler, name="train"),
+    path("trace", views.trace_handler),
     path("health", views.health_handler),
     path("commit-hash", views.commit_hash_handler),
 ]
