@@ -5,7 +5,7 @@ import zlib
 import cv2
 import numpy as np
 
-from detecter import FaceCoordinates
+from worker.detecter import FaceCoordinates
 
 
 def pre_process_img(img, size):
