@@ -14,8 +14,6 @@ from web.settings import REDIS_HIGH_Q
 
 
 class WSConsumer(AsyncWebsocketConsumer):
-    team: Team
-
     async def connect(self):
         try:
             self.team = await self._verify_credentials(self.scope["headers"])
@@ -32,19 +30,19 @@ class WSConsumer(AsyncWebsocketConsumer):
         )
 
         if bool(self.team.classifier_model_path):
-            await self.send(HasModelWSStruct("").dict()["message"])
+            await self.send(HasModelWSStruct().dict()["message"])
         else:
-            await self.send(NoModelWSStruct("").dict()["message"])
+            await self.send(NoModelWSStruct().dict()["message"])
 
     async def disconnect(self, close_code):
-        # ask redis to unload teams classifier ML model
-        REDIS_HIGH_Q.enqueue_call(
-            func=".",
-            kwargs=UnloadClassifierJob(team_username=self.team.username).dict(),
-        )
+        if hasattr(self, "team"):
+            # ask redis to unload teams classifier ML model
+            REDIS_HIGH_Q.enqueue_call(
+                func=".",
+                kwargs=UnloadClassifierJob(team_username=self.team.username).dict(),
+            )
 
-        # remove socket channel
-        await self._mark_team_socket_as_none()
+            await self._team_socket_disconnect()
 
     async def receive(self, text_data=None, bytes_data=None):
         await self.send(text_data=self.team.username)
@@ -92,7 +90,8 @@ class WSConsumer(AsyncWebsocketConsumer):
         return team
 
     @sync_to_async
-    def _mark_team_socket_as_none(self):
+    def _team_socket_disconnect(self):
+        self.team.local_ip = None
         self.team.socket_channel = None
         self.team.save()
 

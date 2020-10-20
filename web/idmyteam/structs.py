@@ -29,7 +29,7 @@ class WSStruct(Struct):
     type = "chat_message"
     _type: Type
 
-    def __init__(self, message: str):
+    def __init__(self, message=""):
         self.message = json.dumps({"type": self._type, "message": message})
 
 
