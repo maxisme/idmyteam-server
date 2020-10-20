@@ -24,22 +24,6 @@ TMP_FILE_DIR = f"{CURRENT_DIR}/files/"
 TMP_ZIP_DIR = f"{CURRENT_DIR}/zip/"
 
 
-def argtest():
-    """
-    returns all arguments passed to function as well as if it has been called
-    @return:
-    """
-
-    class TestArgs(object):
-        hit = False
-
-        def __call__(self, *args):
-            self.args = list(args)
-            self.hit = True
-
-    return TestArgs()
-
-
 @pytest.mark.django_db
 class TestViews:
     @pytest.mark.parametrize("url_name", PUBLIC_URL_NAMES)

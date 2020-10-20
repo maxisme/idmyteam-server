@@ -1,3 +1,5 @@
+import logging
+
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -11,11 +13,16 @@ from idmyteamserver.models import Team
 from web.settings import REDIS_HIGH_Q
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
+class WSConsumer(AsyncWebsocketConsumer):
     team: Team
 
     async def connect(self):
-        self.team = await self._verify_credentials(self.scope["headers"])
+        try:
+            self.team = await self._verify_credentials(self.scope["headers"])
+        except InvalidCredentials as e:
+            logging.warning(e)
+            await self.close(1)
+            return
 
         await self.accept()
 
@@ -56,7 +63,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         username, credentials, ip = None, None, None
         for key, val in headers:
             if key == b"username":
-                username = val.decode("utf-8")
+                username = val.decode()
             elif key == b"credentials":
                 credentials = val
             elif key == b"local-ip":
@@ -66,14 +73,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 break
 
         if not username or not credentials or not ip:
-            raise Exception(
+            raise InvalidCredentials(
                 "No username or credentials or local-ip header on connection"
             )
 
         team = Team.objects.get(username=username)
         if not team or not team.validate_credentials(credentials.decode()):
             # TODO prevent brute force
-            raise Exception("Invalid credentials")
+            raise InvalidCredentials("Invalid credentials")
 
         # set client local ip
         team.local_ip = ip.decode()
@@ -88,3 +95,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def _mark_team_socket_as_none(self):
         self.team.socket_channel = None
         self.team.save()
+
+
+class InvalidCredentials(BaseException):
+    pass
