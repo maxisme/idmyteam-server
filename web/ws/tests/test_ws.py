@@ -59,9 +59,3 @@ class TestWS:
     @sync_to_async
     def get_team(self, username) -> Team:
         return Team.objects.get(username=username)
-
-    # await communicator.send_to(text_data="hello")
-    # response = await communicator.receive_from()
-    # assert response == "hello"
-    #
-    # await communicator.disconnect()

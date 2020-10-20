@@ -1,0 +1,5 @@
+ignore:
+  - "web/manage.py"
+  - "web/web/asgi.py"
+  - "web/ws/apps.py"
+  - "web/ws/routing.py"
