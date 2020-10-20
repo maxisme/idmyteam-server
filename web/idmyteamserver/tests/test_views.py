@@ -16,12 +16,15 @@ from idmyteamserver.models import Team
 from idmyteamserver.tests.factories import TeamFactory, dict_from_team_factory
 from idmyteamserver.upload import MISSING_TEAM_MODEL_MSG
 from idmyteamserver.urls import AUTH_URL_NAMES
-from web.settings import DEFAULT_MAX_NUM_TEAM_MEMBERS
+from web.settings import DEFAULT_MAX_NUM_TEAM_MEMBERS, PASSWORD_HASHERS
 from web.sitemap import PUBLIC_URL_NAMES
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 TMP_FILE_DIR = f"{CURRENT_DIR}/files/"
 TMP_ZIP_DIR = f"{CURRENT_DIR}/zip/"
+
+# use rubbish password hasher to speed up tests
+PASSWORD_HASHERS[0] = "django.contrib.auth.hashers.MD5PasswordHasher"
 
 
 @pytest.mark.django_db

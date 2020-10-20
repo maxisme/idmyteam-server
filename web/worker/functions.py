@@ -5,51 +5,51 @@ import zlib
 import cv2
 import numpy as np
 
-from worker.detecter import FaceCoordinates
-
 
 def pre_process_img(img, size):
     return cv2.resize(img, dsize=(size, size), interpolation=cv2.INTER_LINEAR)
 
 
-def add_coord_padding(img, padding, x, y, w, h):
+def add_coord_padding(img: np.array, padding: int, face_coords):
+    """
+
+    @param padding:
+    @param img:
+    @type face_coords: worker.detecter.FaceCoords
+    """
     if padding:
         min_x = 0
         max_x = img.shape[2]
         min_y = 0
         max_y = img.shape[1]
 
-        x = int(x - padding)
+        x = int(face_coords.x - padding)
         if x < min_x:
             x = min_x
         elif x > max_x:
             x = max_x
 
-        y = int(y - padding)
+        y = int(face_coords.y - padding)
         if y > max_y:
             y = max_y
         elif y < min_y:
             y = min_y
 
-        w = int(w + padding)
+        w = int(face_coords.w + padding)
         if x + w > max_x:
             w = max_x - x
 
-        h = int(h + padding)
+        h = int(face_coords.h + padding)
         if y + h > max_y:
             h = max_y - y
     return int(x), int(y), int(w), int(h)  # TODO this REDUCES ACCURACY
 
 
-def crop_img(img: np.array, face_coords: FaceCoordinates, padding: int):
-    x, y, w, h = add_coord_padding(
-        img,
-        padding,
-        face_coords["x"],
-        face_coords["y"],
-        face_coords["width"],
-        face_coords["height"],
-    )
+def crop_img(img: np.array, face_coords, padding: int):
+    """
+    @type face_coords: worker.detecter.FaceCoordinates
+    """
+    x, y, w, h = add_coord_padding(img, padding, face_coords)
 
     # img = np.array(img)
     img = img[:, y : y + h, x : x + w]

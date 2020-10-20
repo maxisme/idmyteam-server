@@ -34,16 +34,13 @@ def tutorials_handler(request):
     return render(request, "tutorials/list.html", {"title": "Tutorials"})
 
 
-def trace_handler(request):
+def trace_handler(request):  # pragma: no cover
     tracer = trace.get_tracer(__name__)
-
     with tracer.start_as_current_span("here is a trace"):
-        pass
-
-    return HttpResponse(str(request.headers.items()))
+        return HttpResponse(str(request.headers.items()))
 
 
-def health_handler(request):
+def health_handler(request):  # pragma: no cover
     # check db
     connection.connect()
     if not connection.is_usable():
@@ -58,7 +55,7 @@ def health_handler(request):
     return HttpResponse(status=200)
 
 
-def commit_hash_handler(request):
+def commit_hash_handler(request):  # pragma: no cover
     return HttpResponse(os.getenv("COMMIT_HASH"))
 
 
