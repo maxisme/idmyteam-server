@@ -41,7 +41,7 @@ ____
 
 ### Helpers
 When editing the models files run:
- - `python manage.py makemigrations`
+ - `python3 manage.py makemigrations`
 
 
 #### sass

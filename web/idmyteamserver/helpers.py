@@ -4,13 +4,13 @@ import random
 import re
 import string
 from functools import lru_cache
-from zipfile import ZipFile, ZipInfo
+from zipfile import ZipFile
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from rq import Queue
 
-from idmyteam.structs import StoreImageJob
+from idmyteam.structs import StoreImageJob, TrainJob
 from web.settings import CREDENTIAL_LEN
 
 SUCCESS_COOKIE_KEY = "success_message"
@@ -78,7 +78,7 @@ def random_str(length):
     )
 
 
-def create_credentials() -> (str, str):
+def create_credentials() -> str:
     # return bcrypt.hashpw(bytes(random_str(CREDENTIAL_LEN), encoding='utf8'), bcrypt.gensalt()).decode()
     return random_str(CREDENTIAL_LEN)
 
@@ -87,61 +87,73 @@ def kb_to_b(kb: int) -> int:
     return kb * 1024
 
 
-class TeamTrainingImages:
-    _images = {}
+class ZipImg:
+    def __init__(self, name: str, img: bytes):
+        self.name = name
+        self.img = img
 
-    def __init__(self, z: ZipFile, max_img_size_kb: int):
-        self.z = z
+
+class TeamTrainingZip:
+    def __init__(
+        self,
+        z: ZipFile,
+        num_images_allowed_to_train: int,
+        max_team_member_size: int,
+        max_img_size_kb: int,
+    ):
+        self._imgs = {}
+        members = set()
+        img_cnt = 0
         for file in z.infolist():
             if file.file_size:
+                img_cnt += 1
+                if img_cnt > num_images_allowed_to_train:
+                    logging.info("Too many images uploaded")
+                    break
+
                 if file.file_size > kb_to_b(max_img_size_kb):
                     raise Exception(f"Training image '{file.filename}' is too large!")
 
                 # get member from file structure
                 try:
                     # members images expected to be put in separate directories
-                    member = int(os.path.dirname(file.filename))
-                except Exception as e:
-                    logging.error(e)
+                    member = self._extract_member_from_file_path(file.filename)
+                except ValueError:
                     logging.error("Invalid named file uploaded")
                     continue
+                members.add(member)
+                if len(members) > max_team_member_size:
+                    raise Exception(
+                        f"You can't train more than {max_team_member_size} members!"
+                    )
+                self._add(member, ZipImg(name=file.filename, img=z.read(file)))
 
-                self._add(member, file)
+        if len(members) == 0:
+            raise Exception(f"No members passed!")
+
+    @staticmethod
+    def _extract_member_from_file_path(path: str) -> int:
+        # members images expected to be put in separate directories
+        return int(os.path.basename(os.path.normpath(os.path.dirname(path))))
 
     def __len__(self):
-        return len(self._images)
+        return len(self._imgs)
 
-    def _add(self, member: int, file: ZipInfo):
-        if member in self._images:
-            self._images[member].append(file)
+    def _add(self, member: int, file: ZipImg):
+        if member in self._imgs:
+            self._imgs[member].append(file)
         else:
-            self._images[member] = [file]
+            self._imgs[member] = [file]
 
-    def crop(self, num):
-        """
-        extract a cropped amount of the team training images
-        @param num:
-        @return:
-        """
-        cropped_images = {}
-        each, rem = divmod(num, len(self._images))
-        for i, member in enumerate(self._images):
-            if i < rem:
-                cropped_images[member] = self._images[member][: each + 1]
-            else:
-                cropped_images[member] = self._images[member][:each]
-        self._images = cropped_images
-
-    def train(self, queue: Queue, team_username: str):
-        for member in self._images:
-            for file in self._images[member]:
-                img: bytes = self.z.read(file)
-
+    def enqueue(self, queue: Queue, team_username: str):
+        for member in self._imgs:
+            img: ZipImg
+            for img in self._imgs[member]:
                 queue.enqueue_call(
                     func=".",
                     kwargs=StoreImageJob(
-                        img=img,
-                        file_name=file.filename,
+                        img=img.img,
+                        file_name=img.name,
                         team_username=team_username,
                         member_id=member,
                     ).dict(),
@@ -149,5 +161,8 @@ class TeamTrainingImages:
 
         # tell model to now train
         queue.enqueue_call(
-            func=".", kwargs={"type": "train", "team_username": team_username}
+            func=".",
+            kwargs=TrainJob(
+                team_username=team_username,
+            ).dict(),
         )

@@ -71,7 +71,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         team = Team.objects.get(username=username)
-        if not team or not team.validate_credentials(credentials):
+        if not team or not team.validate_credentials(credentials.decode()):
             # TODO prevent brute force
             raise Exception("Invalid credentials")
 

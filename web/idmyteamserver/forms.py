@@ -96,7 +96,7 @@ class UploadFileForm(forms.Form):
         required=True,
         label="Credentials",
     )
-    store_image_features = forms.BooleanField()
+    store_image_features = forms.BooleanField(required=False)
     file = forms.FileField(max_length=settings.MAX_UPLOAD_SIZE, allow_empty_file=False)
 
     class Meta:

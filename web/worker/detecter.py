@@ -21,7 +21,7 @@ from idmyteamserver.models import Team, Feature
 from worker import config, functions
 from worker.classifier import Classifier
 
-chainer.config.train = False  # tells chainer to not be in training mode
+chainer.config.enqueue = False  # tells chainer to not be in training mode
 
 from typing import TypedDict, List
 

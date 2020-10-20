@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib.auth import authenticate, logout, login
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponseNotFound
 
 from idmyteamserver import forms
@@ -20,15 +21,14 @@ from django.forms.models import model_to_dict
 clients = {}
 
 
+@login_required(login_url="/login")
 def profile_handler(request):
     team: Team = request.user
-    if team.is_authenticated:
-        context = model_to_dict(team)
-        context["root_password"] = random_str(30)
-        return render(
-            request, "profile.html", context=context
-        )  # TODO maybe just pass whole user
-    return redirect("/login")
+    context = model_to_dict(team)
+    context["root_password"] = random_str(30)
+    return render(
+        request, "profile.html", context=context
+    )  # TODO maybe just pass whole user
 
 
 INVALID_LOGIN_MESSAGE = "Invalid credentials! Please try again."

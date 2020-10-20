@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
 from idmyteam.structs import WSStruct
+from idmyteamserver import helpers
 from web import settings
 
 
@@ -17,7 +18,7 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     email = models.EmailField(_("email address"), blank=True, unique=True)
 
     allow_image_storage = models.BooleanField(default=False)
-    credentials = models.CharField(max_length=255)
+    credentials = models.CharField(max_length=255, default=helpers.create_credentials)
     CREDENTIALS_FIELD = "credentials"
 
     password_reset_token = models.CharField(max_length=settings.PASS_RESET_TOKEN_LEN)
@@ -43,14 +44,15 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     update_dttm = models.DateTimeField(auto_now=True)
 
     def num_features_added_last_hr(self) -> int:
-        return self.objects.filter(
-            feature__manual=False,
-            feature__create_dttm__gt=datetime.now() - timedelta(hours=1),
+        return Feature.objects.filter(
+            team_id=self.id,
+            is_manual=False,
+            create_dttm__gt=datetime.now() - timedelta(hours=1),
         ).count()
 
-    def validate_credentials(self, credentials: bytes) -> bool:
+    def validate_credentials(self, credentials: str) -> bool:
         # return bcrypt.checkpw(credentials, self.credentials.encode())
-        return credentials == self.credentials.encode()
+        return credentials == self.credentials
 
     def send_ws_message(self, message: WSStruct) -> bool:
         channel_layer = get_channel_layer()
