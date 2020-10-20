@@ -23,8 +23,10 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 TMP_FILE_DIR = f"{CURRENT_DIR}/files/"
 TMP_ZIP_DIR = f"{CURRENT_DIR}/zip/"
 
-# use rubbish password hasher to speed up tests
-PASSWORD_HASHERS[0] = "django.contrib.auth.hashers.MD5PasswordHasher"
+
+@pytest.fixture(autouse=True)
+def overide_hasher():
+    PASSWORD_HASHERS[0] = "django.contrib.auth.hashers.MD5PasswordHasher"
 
 
 @pytest.mark.django_db
