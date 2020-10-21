@@ -9,6 +9,8 @@ from idmyteam.structs import (
     UnloadClassifierJob,
     NoModelWSStruct,
     HasModelWSStruct,
+    WSStruct,
+    ErrorWSStruct,
 )
 from idmyteamserver.models import Team
 from idmyteamserver.tests import test_views
@@ -30,7 +32,7 @@ class TestWS:
         if with_model:
             extras = {"classifier_model_path": "/path/to/none/existent/model"}
 
-        communicator, team = await self.init_communicator(**extras)
+        communicator, team = await self.init_team_communicator(**extras)
 
         # create enqueue_call mock
         mock_enqueue_call = unittest.mock.Mock()
@@ -53,7 +55,7 @@ class TestWS:
         # verify socket channel was stored in user
         assert len(team.socket_channel) > 0
 
-        # verify immediate response message
+        # verify immediate response message with status of model
         incoming_msg = await communicator.receive_from()
         if with_model:
             assert incoming_msg == HasModelWSStruct().dict()["message"]
@@ -63,7 +65,7 @@ class TestWS:
         await communicator.disconnect()
 
     async def test_successful_disconnect(self, monkeypatch):
-        communicator, team = await self.init_communicator()
+        communicator, team = await self.init_team_communicator()
         connected, _ = await communicator.connect()
         assert connected
 
@@ -86,7 +88,17 @@ class TestWS:
         # verify socket channel was removed from team
         assert not team.socket_channel
 
-    async def init_communicator(self, **extras):
+    async def test_team_send_ws_message(self):
+        communicator, t = await self.init_team_communicator()
+        connected, _ = await communicator.connect()
+        _ = await communicator.receive_from()  # ignore first message
+
+        test_msg = ErrorWSStruct("test")
+        await self._send_team_ws_message(t.username, test_msg)
+        msg = await communicator.receive_from()
+        assert msg == test_msg.dict()["message"]
+
+    async def init_team_communicator(self, **extras):
         team, _ = await self._create_team(**extras)
         return (
             WebsocketCommunicator(
@@ -108,3 +120,8 @@ class TestWS:
     @sync_to_async
     def _get_team(self, username) -> Team:
         return Team.objects.get(username=username)
+
+    @sync_to_async
+    def _send_team_ws_message(self, username, message: WSStruct):
+        team = Team.objects.get(username=username)
+        team.send_ws_message(message)
