@@ -91,10 +91,12 @@ class TestWS:
     async def test_team_send_ws_message(self):
         communicator, t = await self.init_team_communicator()
         connected, _ = await communicator.connect()
-        _ = await communicator.receive_from()  # ignore first message
+        _ = await communicator.receive_from()  # ignore first message on connection
 
+        # send message via Team
         test_msg = ErrorWSStruct("test")
         await self._send_team_ws_message(t.username, test_msg)
+
         msg = await communicator.receive_from()
         assert msg == test_msg.dict()["message"]
 
@@ -123,5 +125,4 @@ class TestWS:
 
     @sync_to_async
     def _send_team_ws_message(self, username, message: WSStruct):
-        team = Team.objects.get(username=username)
-        team.send_ws_message(message)
+        Team.objects.get(username=username).send_ws_message(message)
