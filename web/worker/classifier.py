@@ -13,12 +13,10 @@ from sklearn.svm import SVC
 from idmyteam.structs import ErrorWSStruct, TrainedWSStruct
 from idmyteamserver.models import Team, Feature
 from web.settings import TRAIN_Q_TIMEOUT
-from worker import functions
+from worker import functions, config
 
 
 class Classifier(object):
-    team: Team
-
     def __init__(self, team: Team):
         self.team = team
         self.clf = self._load_model()
@@ -140,26 +138,9 @@ class Classifier(object):
     def has_trained_model(self) -> bool:
         return bool(self.clf)
 
-    @classmethod
-    def get_model_path(cls, hashed_username, expected_path=False):
+    def delete(self) -> bool:
         """
-        Returns the team models path if there is a model there
-        :param hashed_username:
-        :param expected_path: returns the path of where the teams model should be stored even if there isn't a model already
-        :return:
+        delete file at teams classifier_model_path
+        @return: if file was successfully deleted
         """
-        path = config.CLIENT_MODEL_DIR + hashed_username + ".model"
-        if os.path.isfile(path):
-            return path
-        return path if expected_path else None
-
-    @classmethod
-    def exists(cls, team_username: str) -> bool:
-        return bool(cls.get_model_path(team_username))
-
-    @classmethod
-    def delete(cls, team_username) -> bool:
-        model_path = cls.get_model_path(team_username)
-        if model_path:
-            return bool(os.remove(model_path))
-        return False
+        return bool(os.remove(self.team.classifier_model_path))

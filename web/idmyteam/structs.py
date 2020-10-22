@@ -85,6 +85,7 @@ class JobStruct(Struct):
         TRAIN = 3  # use all store images to train
         LOAD_CLASSIFIER = 4
         UNLOAD_CLASSIFIER = 5
+        DELETE_CLASSIFIER = 6
 
 
 class TrainJob(JobStruct):
@@ -100,6 +101,10 @@ class LoadClassifierJob(TrainJob):
 
 class UnloadClassifierJob(TrainJob):
     type = JobStruct.Type.UNLOAD_CLASSIFIER
+
+
+class DeleteClassifierJob(TrainJob):
+    type = JobStruct.Type.DELETE_CLASSIFIER
 
 
 class DetectJob(JobStruct):

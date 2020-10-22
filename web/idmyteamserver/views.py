@@ -52,7 +52,7 @@ def health_handler(request):  # pragma: no cover
     except redis.ConnectionError:
         return HttpResponse(content=b"Redis down", status=500)
 
-    return HttpResponse(status=200)
+    return HttpResponse()
 
 
 def commit_hash_handler(request):  # pragma: no cover

@@ -40,7 +40,9 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     socket_channel = models.CharField(max_length=255, default=None, null=True)
     local_ip = models.GenericIPAddressField(null=True)
 
-    classifier_model_path = models.CharField(max_length=255, default=None, null=True)
+    classifier_model_path = models.CharField(
+        max_length=255, default=None, null=True
+    )  # prevent calling
     update_dttm = models.DateTimeField(auto_now=True)
 
     def num_features_added_last_hr(self) -> int:

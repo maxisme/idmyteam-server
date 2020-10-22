@@ -29,7 +29,7 @@ PUBLIC_URL_NAMES = [
     "forgot-password",
 ]
 
-AUTH_URL_NAMES = ["profile"]
+AUTH_URL_NAMES = ["profile", "reset-credentials", "toggle-image-storage", "delete-team"]
 
 # REMEMBER: update sitemap.py
 urlpatterns = [
@@ -51,6 +51,8 @@ urlpatterns = [
     path(
         "toggle-storage", api.toggle_image_storage_handler, name="toggle-image-storage"
     ),
+    path("delete-team", api.delete_team_handler, name="delete-team"),
+    path("delete-model", api.delete_model_handler, name="delete-model"),
     path("predict", upload.predict_image_handler, name="predict"),
     path("train", upload.train_team_handler, name="train"),
     path("trace", views.trace_handler),

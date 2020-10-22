@@ -9,7 +9,7 @@ from idmyteamserver.decorators import file_upload_auth_decorator
 from idmyteamserver.helpers import TeamTrainingZip
 from idmyteamserver.models import Team
 from web import settings
-from web.settings import REDIS_MED_Q, REDIS_LOW_Q
+from worker.queue import REDIS_MED_Q, REDIS_LOW_Q
 
 MISSING_TEAM_MODEL_MSG = "Your team must train a model before you can predict."
 

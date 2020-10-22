@@ -5,7 +5,6 @@ from datetime import timedelta
 import sentry_sdk
 from dotenv import load_dotenv
 from redis import Redis
-from rq import Queue
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
@@ -116,10 +115,6 @@ REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
 
 REDIS_CONN = Redis(host=REDIS_HOST, port=REDIS_PORT)
 TRAIN_Q_TIMEOUT = 600
-REDIS_QS = ["high", "medium", "low"]
-REDIS_HIGH_Q = Queue("high", connection=REDIS_CONN, default_timeout=60)
-REDIS_MED_Q = Queue("medium", connection=REDIS_CONN, default_timeout=60)
-REDIS_LOW_Q = Queue("low", connection=REDIS_CONN, default_timeout=TRAIN_Q_TIMEOUT)
 
 # Channels
 ASGI_APPLICATION = "idmyteamserver.routing.application"

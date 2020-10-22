@@ -10,7 +10,7 @@ from idmyteam.structs import (
     UnloadClassifierJob,
 )
 from idmyteamserver.models import Team
-from web.settings import REDIS_HIGH_Q
+from worker.queue import REDIS_HIGH_Q
 
 
 class WSConsumer(AsyncWebsocketConsumer):

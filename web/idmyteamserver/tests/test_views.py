@@ -16,8 +16,9 @@ from idmyteamserver.models import Team
 from idmyteamserver.tests.factories import TeamFactory, dict_from_team_factory
 from idmyteamserver.upload import MISSING_TEAM_MODEL_MSG
 from idmyteamserver.urls import AUTH_URL_NAMES
-from web.settings import DEFAULT_MAX_NUM_TEAM_MEMBERS, PASSWORD_HASHERS
+from web.settings import DEFAULT_MAX_NUM_TEAM_MEMBERS, PASSWORD_HASHERS, REDIS_CONN
 from web.sitemap import PUBLIC_URL_NAMES
+from worker.queue import MyQueue
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 TMP_FILE_DIR = f"{CURRENT_DIR}/files/"
@@ -129,14 +130,11 @@ class TestAuthViews:
         confirm_email_key = mock_send_confirm.call_args.kwargs["key"]
 
         # confirm email
-        request = client.get(
+        client.get(
             reverse("confirm-email", kwargs={"key": confirm_email_key}),
             {"email": team.email},
             follow=False,
         )
-
-        # verify that a succesful cookie was returned
-        assert len(request.cookies[SUCCESS_COOKIE_KEY]) > 0
 
         # verify that the team has been confirmed
         assert Team.objects.get(username=team.username).is_confirmed
@@ -222,20 +220,54 @@ class TestApiViews:
         client = Client()
         team, team_dict = create_team()
         client.post(reverse("login"), team_dict)
-        client.get(reverse("toggle-image-storage"))
+        client.patch(reverse("toggle-image-storage"))
+
         # verify allow_image_storage have changed
-        assert (
-            team.allow_image_storage
-            != Team.objects.get(username=team.username).allow_image_storage
-        )
+        allow_storage = Team.objects.get(username=team.username).allow_image_storage
+        assert team.allow_image_storage != allow_storage
 
     def test_reset_credentials_handler(self):
         client = Client()
         team, team_dict = create_team()
         client.post(reverse("login"), team_dict)
-        client.get(reverse("reset-credentials"))
+        client.patch(reverse("reset-credentials"))
         # verify credentials have changed
         assert team.credentials != Team.objects.get(username=team.username).credentials
+
+    def test_delete_model_handler(self, monkeypatch):
+        client = Client()
+        team, team_dict = create_team(
+            classifier_model_path="/path/to/none/existent/model"
+        )
+        client.post(reverse("login"), team_dict)
+
+        monkeypatch.setattr(
+            "worker.queue.REDIS_HIGH_Q",
+            MyQueue("high", connection=REDIS_CONN, is_async=False),
+        )
+        request = client.delete(reverse("delete-model"))
+        assert request.status_code == 200
+
+        # verify classifier_model_path has been removed
+        assert (
+            team.classifier_model_path
+            != Team.objects.get(username=team.username).classifier_model_path
+        )
+
+    def test_delete_team_handler(self, monkeypatch):
+        client = Client()
+        team, team_dict = create_team()
+        client.post(reverse("login"), team_dict)
+
+        monkeypatch.setattr(
+            "worker.queue.REDIS_HIGH_Q",
+            MyQueue("high", connection=REDIS_CONN, is_async=False),
+        )
+        request = client.delete(reverse("delete-team"))
+        assert request.status_code == 200
+
+        # verify team no longer exists
+        assert not bool(Team.objects.filter(username=team.username).exists())
 
 
 @pytest.mark.django_db
