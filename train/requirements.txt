@@ -1,0 +1,2 @@
+tensorflow-datasets==4.0.1
+tensorflow-gpu==2.3.1
