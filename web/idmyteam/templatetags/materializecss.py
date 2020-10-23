@@ -162,3 +162,8 @@ def is_select_multiple(field):
 @register.filter
 def is_captcha(field):
     return "captcha.widgets.ReCaptchaV2Invisible" in str(type(field.field.widget))
+
+
+@register.filter
+def is_required(field):
+    return bool(field.field.required)
