@@ -31,11 +31,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install requirements
         run: |
           cd web
-          pip install -r web/requirements.txt
-          pip install -r worker/requirements.txt
+          pip install -r requirements.txt
           pip install -r test_requirements.txt
 
       - uses: pre-commit/action@v2.0.0
