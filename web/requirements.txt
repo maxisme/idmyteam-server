@@ -1,5 +1,6 @@
 bcrypt==3.2.0
-channels-redis==3.1.0
+channels-redis==3.1pip.0
+Django==3.1.0
 django-recaptcha==2.0.6
 django-simple-email-confirmation==0.70
 opentelemetry-ext-asgi==0.11b0
