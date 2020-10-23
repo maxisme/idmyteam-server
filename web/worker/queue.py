@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 from rq import Queue, Worker
 from rq.job import Job
@@ -15,11 +14,14 @@ from idmyteam.structs import (
 )
 from idmyteamserver.models import Team
 from web.settings import REDIS_CONN, TRAIN_Q_TIMEOUT
-from worker.classifier import Classifier
-from worker.detecter import Detecter
 
-team_classifiers: Dict[str, Classifier] = {}
-detecter: Detecter
+try:
+    from worker.classifier import Classifier
+except ModuleNotFoundError:
+    pass
+
+team_classifiers = {}
+detecter = None
 
 
 class MyJob(Job):

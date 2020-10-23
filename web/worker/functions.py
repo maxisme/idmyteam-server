@@ -2,8 +2,11 @@ import base64
 import hashlib
 import zlib
 
-import cv2
-import numpy as np
+try:
+    import cv2
+    import numpy as np
+except ImportError:
+    pass
 
 
 def pre_process_img(img, size):

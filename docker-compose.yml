@@ -21,6 +21,8 @@ services:
       - static_volume:/usr/src/app/static
     environment:
       DEBUG: 1
+      DATABASE_HOST: db
+      REDIS_HOST: redis
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.idmyteam.rule=Host(`localhost`)"
@@ -34,6 +36,9 @@ services:
       context: "./web/"
     env_file:
       - "./web/.env"
+    environment:
+      DATABASE_HOST: db
+      REDIS_HOST: redis
     command: python manage.py migrate
     depends_on:
       - db
@@ -56,7 +61,6 @@ services:
       POSTGRES_DATABASE: idmyteam
       POSTGRES_USER: idmyteam
       POSTGRES_PASSWORD: idmyteam
-    tty: true
 
   redis:
     image: "redis:alpine"

@@ -26,7 +26,7 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-DEBUG = bool(os.environ.get("DEBUG", False))
+DEBUG = bool(os.environ.get("DEBUG") or False)
 
 ALLOWED_HOSTS = ["idmy.team", "127.0.0.1", "localhost"]
 
@@ -84,12 +84,12 @@ WSGI_APPLICATION = "web.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DATABASE_NAME", "idmyteam"),
-        "USER": os.environ.get("DATABASE_USER", "idmyteam"),
-        "PASSWORD": os.environ.get("DATABASE_PASS", "idmyteam"),
-        "HOST": os.environ.get("DATABASE_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("DATABASE_PORT", "5432"),
-        "TEST": {"NAME": os.environ.get("DATABASE_NAME", "idmyteam") + "_test"},
+        "NAME": os.environ.get("DATABASE_NAME") or "idmyteam",
+        "USER": os.environ.get("DATABASE_USER") or "idmyteam",
+        "PASSWORD": os.environ.get("DATABASE_PASS") or "idmyteam",
+        "HOST": os.environ.get("DATABASE_HOST") or "127.0.0.1",
+        "PORT": os.environ.get("DATABASE_PORT") or "5432",
+        "TEST": {"NAME": "idmyteam_test"},
     }
 }
 
@@ -110,8 +110,8 @@ PASSWORD_HASHERS = [
 ]
 
 # redis
-REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
-REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
+REDIS_HOST = os.environ.get("REDIS_HOST") or "127.0.0.1"
+REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
 
 REDIS_CONN = Redis(host=REDIS_HOST, port=REDIS_PORT)
 TRAIN_Q_TIMEOUT = 600
