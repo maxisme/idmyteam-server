@@ -38,8 +38,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install requirements
+      - name: Install requirements for web
         run: |
+          pip install --upgrade pip
           cd web
           pip install -r requirements.txt
           pip install -r test_requirements.txt
