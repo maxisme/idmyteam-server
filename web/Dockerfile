@@ -8,6 +8,8 @@ WORKDIR /usr/src/app
 RUN apt-get update && apt-get install gcc -y
 ADD web/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+ADD worker/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN apt update && apt install -y curl

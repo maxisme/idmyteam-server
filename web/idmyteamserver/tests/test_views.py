@@ -9,6 +9,7 @@ from PIL import Image
 from django.http import HttpResponseBadRequest
 from django.test import Client
 from django.urls import reverse
+from rq import Queue
 
 from idmyteam.structs import DetectJob, TrainJob
 from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, ERROR_COOKIE_KEY, random_str
@@ -261,7 +262,7 @@ class TestApiViews:
 
         monkeypatch.setattr(
             "worker.queue.REDIS_HIGH_Q",
-            MyQueue("high", connection=REDIS_CONN, is_async=False),
+            Queue("high", connection=REDIS_CONN, is_async=False),
         )
         request = client.delete(reverse("delete-team"))
         assert request.status_code == 200
