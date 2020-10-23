@@ -6,7 +6,7 @@ ENV COMMIT_HASH=$COMMIT_HASH
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 RUN apt-get update && apt-get install gcc -y
-ADD requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
