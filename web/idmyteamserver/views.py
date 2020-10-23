@@ -1,7 +1,6 @@
 import os
 
 import redis
-from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
@@ -42,9 +41,9 @@ def trace_handler(request):  # pragma: no cover
 
 def health_handler(request):  # pragma: no cover
     # check db
-    connection.connect()
-    if not connection.is_usable():
-        return HttpResponse(content=b"DB down", status=500)
+    # connection.connect()
+    # if not connection.is_usable():
+    #     return HttpResponse(content=b"DB down", status=500)
 
     # check redis
     try:
