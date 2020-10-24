@@ -4,13 +4,16 @@ from idmyteam.structs import *
 
 
 def test_TrainJob_val():
-    tj = TrainJob("foo")
-    assert tj.dict() == {"team_username": "foo", "type": 3}
+    tj = ErrorWSStruct("foo")
+    assert tj.dict() == {
+        "message": '{"type": 1, "message": "foo"}',
+        "type": "chat_message",
+    }
 
 
 def test_missing_enum():
     with pytest.raises(ValueError):
-        assert JobStruct.Type("notatype")
+        assert ErrorWSStruct.Type("notatype")
 
 
 def test_train_struct():

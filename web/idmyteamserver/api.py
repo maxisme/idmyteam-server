@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseServerError
 from django.views.decorators.http import require_http_methods
 
-from idmyteam.structs import DeleteClassifierJob
+from worker.structs import DeleteClassifierJob
 from idmyteamserver import helpers
 from idmyteamserver.helpers import redirect
 from idmyteamserver.models import Team

@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import HttpResponseBadRequest, HttpResponse
 from django.views.decorators.http import require_http_methods
 
-from idmyteam.structs import DetectJob
+from worker.structs import DetectJob
 from idmyteamserver.decorators import file_upload_auth_decorator
 from idmyteamserver.helpers import TeamTrainingZip
 from idmyteamserver.models import Team

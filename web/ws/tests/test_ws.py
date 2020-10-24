@@ -5,13 +5,12 @@ from asgiref.sync import sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from idmyteam.structs import (
-    LoadClassifierJob,
-    UnloadClassifierJob,
     NoModelWSStruct,
     HasModelWSStruct,
     WSStruct,
     ErrorWSStruct,
 )
+from worker.structs import LoadClassifierJob, UnloadClassifierJob
 from idmyteamserver.models import Team
 from idmyteamserver.tests import test_views
 from ws.consumers import WSConsumer

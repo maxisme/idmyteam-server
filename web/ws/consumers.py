@@ -4,11 +4,10 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from idmyteam.structs import (
-    LoadClassifierJob,
     NoModelWSStruct,
     HasModelWSStruct,
-    UnloadClassifierJob,
 )
+from worker.structs import LoadClassifierJob, UnloadClassifierJob
 from idmyteamserver.models import Team
 from worker.queue import REDIS_HIGH_Q
 

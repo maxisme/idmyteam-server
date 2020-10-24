@@ -10,7 +10,7 @@ from django.http import HttpResponseBadRequest
 from django.test import Client
 from django.urls import reverse
 
-from idmyteam.structs import DetectJob, TrainJob
+from worker.structs import DetectJob, TrainJob
 from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, ERROR_COOKIE_KEY, random_str
 from idmyteamserver.models import Team
 from idmyteamserver.tests.factories import TeamFactory, dict_from_team_factory

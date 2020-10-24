@@ -3,7 +3,7 @@ import logging
 from rq import Queue, Worker
 from rq.job import Job
 
-from idmyteam.structs import (
+from worker.structs import (
     JobStruct,
     DetectJob,
     StoreImageJob,
