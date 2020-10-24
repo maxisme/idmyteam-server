@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from rq import Queue, Worker
 from rq.job import Job
@@ -17,16 +18,16 @@ from web.settings import REDIS_CONN, TRAIN_Q_TIMEOUT
 
 try:
     from worker.classifier import Classifier
-except ModuleNotFoundError:
-    pass
+    from worker.detecter import Detecter
 
-team_classifiers = {}
-detecter = None
+    team_classifiers: Dict[str, Classifier] = {}
+    detecter: Detecter
+except ModuleNotFoundError:
+    team_classifiers = {}
+    detecter = None
 
 
 class MyJob(Job):
-    team: Team
-
     def _execute(self):
         job_type = JobStruct.Type(self.kwargs.pop("type"))
 
@@ -50,15 +51,16 @@ class MyJob(Job):
             return self._delete_team_classifier(DeleteClassifierJob(**self.kwargs))
         return Exception("Not a valid job")
 
-    def _store_image(self, job: StoreImageJob):
+    def _store_image(self, job: StoreImageJob) -> bool:
         num_trained = self.team.num_features_added_last_hr()
         num_allowed = self.team.max_train_imgs_per_hr
         if num_trained >= num_allowed:
-            raise Exception(f"User {job.team_username} has uploaded too many images.")
+            logging.warning(f"User {job.team_username} has uploaded too many images.")
+            return False
 
         return detecter.store_image(job.img, job.file_name, job.member_id, self.team)
 
-    def _detect_image(self, job: DetectJob):
+    def _detect_image(self, job: DetectJob) -> bool:
         if (
             job.team_username in team_classifiers
             and team_classifiers[job.team_username].has_trained_model()
@@ -70,16 +72,13 @@ class MyJob(Job):
                 classifier=team_classifiers[job.team_username],
                 team=self.team,
             )
-        else:
-            raise Exception(
-                f"The team '{job.team_username}' does not have a trained model."
-            )
+        return False
 
     def _train_team(self, job: TrainJob) -> bool:
         if job.team_username in team_classifiers:
             team_classifiers[job.team_username].train()
             return True
-        logging.warning(
+        logging.error(
             f"Train - The team '{job.team_username}' has no classifier loaded."
         )
         return False

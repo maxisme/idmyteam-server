@@ -113,7 +113,7 @@ class Detecter:
         store_image_features: bool,
         classifier: Classifier,
         team: Team,
-    ):
+    ) -> bool:
         """
         Extracts facial area from img
         Parses extracted facial area into 128 floats
@@ -188,11 +188,12 @@ class Detecter:
                                 manual=False,
                                 score=max_prob,
                             )
-                    return
+                    return True
+        return team.send_ws_message(InvalidClassificationWSStruct(file_name))
 
-        team.send_ws_message(InvalidClassificationWSStruct(file_name))
-
-    def store_image(self, img: bytes, file_name: str, member_id: int, team: Team):
+    def store_image(
+        self, img: bytes, file_name: str, member_id: int, team: Team
+    ) -> bool:
         """
         Stores image for training in the future
         """
@@ -239,6 +240,8 @@ class Detecter:
             # - move uploaded image to directory for pending semi anonymous face training (FE and FL).
             file_path = self._get_unique_file_path(team)
             original_image.save(file_path)
+
+        return True
 
     @staticmethod
     def _bytes_to_image(img: bytes) -> (np.array, Image):
