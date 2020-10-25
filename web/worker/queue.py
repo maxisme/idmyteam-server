@@ -51,15 +51,6 @@ class MyJob(Job):
             return self._delete_team_classifier(DeleteClassifierJob(**self.kwargs))
         return Exception("Not a valid job")
 
-    def _store_image(self, job: StoreImageJob) -> bool:
-        num_trained = self.team.num_features_added_last_hr()
-        num_allowed = self.team.max_train_imgs_per_hr
-        if num_trained >= num_allowed:
-            logging.warning(f"User {job.team_username} has uploaded too many images.")
-            return False
-
-        return detecter.store_image(job.img, job.file_name, job.member_id, self.team)
-
     def _detect_image(self, job: DetectJob) -> bool:
         if (
             job.team_username in team_classifiers
@@ -73,6 +64,15 @@ class MyJob(Job):
                 team=self.team,
             )
         return False
+
+    def _store_image(self, job: StoreImageJob) -> bool:
+        num_trained = self.team.num_features_added_last_hr()
+        num_allowed = self.team.max_train_imgs_per_hr
+        if num_trained >= num_allowed:
+            logging.warning(f"User {job.team_username} has uploaded too many images.")
+            return False
+
+        return detecter.store_image(job.img, job.file_name, job.member_id, self.team)
 
     def _train_team(self, job: TrainJob) -> bool:
         if job.team_username in team_classifiers:
@@ -94,7 +94,7 @@ class MyJob(Job):
             team_classifiers[job.team_username].delete()
             team_classifiers.pop(job.team_username, None)
             return True
-        logging.info(
+        return Exception(
             f"Delete - The team '{job.team_username}' has no classifier loaded."
         )
         return False

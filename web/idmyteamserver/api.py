@@ -28,18 +28,6 @@ def delete_model_handler(request):
     return HttpResponse()
 
 
-def _delete_team_model(team: Team) -> bool:
-    job: queue.MyJob = queue.REDIS_HIGH_Q.enqueue_call(
-        func=".", kwargs=DeleteClassifierJob(team_username=team.username).dict(), ttl=1
-    )
-
-    # wait for job to complete
-    while not job.is_finished:
-        time.sleep(0.1)
-
-    return bool(job.result)
-
-
 @login_required
 @require_http_methods(["DELETE"])
 def delete_team_handler(request):
@@ -71,3 +59,21 @@ def reset_credentials_handler(request):
     team.save()
     # TODO logout of websocket
     return redirect("/profile")
+
+
+def _delete_team_model(team: Team) -> bool:
+    """
+    Tells worker to delete the teams classifier model and waits for verification.
+    @todo integration test.
+    @todo put function somewhere better :)
+    @return: whether the classifier model has been deleted or not
+    """
+    job: queue.MyJob = queue.REDIS_HIGH_Q.enqueue_call(
+        func=".", kwargs=DeleteClassifierJob(team_username=team.username).dict(), ttl=1
+    )
+
+    # wait for job to complete
+    while not job.is_finished:
+        time.sleep(0.1)
+
+    return bool(job.result)

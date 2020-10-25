@@ -46,3 +46,10 @@ pipdeptree | grep -P '^\w+' > web/requirements.txt
 #### sass
  - `sass source/stylesheets/index.scss build/stylesheets/index.css`
  - `$FilePath$ $FileNameWithoutExtension$.css` (intelij)
+ 
+ 
+___
+# Tests
+## TODO
+ - [ ] Already in use username when signing up
+ - [ ] Already in use email when signing up
