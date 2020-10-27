@@ -10,7 +10,7 @@ from django.http import HttpResponseBadRequest
 from django.test import Client
 from django.urls import reverse
 
-from idmyteam.structs import DetectJob, TrainJob
+from worker.structs import DetectJob, TrainJob
 from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, ERROR_COOKIE_KEY, random_str
 from idmyteamserver.models import Team
 from idmyteamserver.tests.factories import TeamFactory, dict_from_team_factory
@@ -58,13 +58,13 @@ class TestAuthViews:
 
         assert not bool(Team.objects.filter(username=team.username).exists())
 
-        mock_send_confirm = unittest.mock.Mock()
-        # monkeypatch send_confirm
-        monkeypatch.setattr("idmyteamserver.email.send_confirm", mock_send_confirm)
+        mock_send_email = unittest.mock.Mock()
+        # monkeypatch _send_email
+        monkeypatch.setattr("idmyteamserver.email._send_email", mock_send_email)
 
         client.post(reverse("signup"), team_dict)
 
-        mock_send_confirm.assert_called_once()
+        mock_send_email.assert_called_once()
         assert Team.objects.filter(username=team.username).exists()
 
     def test_valid_login(self):
@@ -116,7 +116,6 @@ class TestAuthViews:
         team_dict["confirm"] = team_dict["password"]
         team_dict["terms"] = True
 
-        # mock send_confirm
         mock_send_confirm = unittest.mock.Mock()
         monkeypatch.setattr("idmyteamserver.email.send_confirm", mock_send_confirm)
 
@@ -148,9 +147,8 @@ class TestAuthViews:
         team_dict["confirm"] = team_dict["password"]
         team_dict["terms"] = True
 
-        # mock send_confirm
-        mock_send_confirm = unittest.mock.Mock()
-        monkeypatch.setattr("idmyteamserver.email.send_confirm", mock_send_confirm)
+        mock_send_email = unittest.mock.Mock()
+        monkeypatch.setattr("idmyteamserver.email._send_email", mock_send_email)
 
         # create team
         client.post(reverse("signup"), team_dict)
@@ -177,7 +175,6 @@ class TestAuthViews:
         team_dict = dict_from_team_factory(team_factory)
         team = Team.objects.create_user(**team_dict)
 
-        # mock send_confirm
         mock_send_reset = unittest.mock.Mock()
         monkeypatch.setattr("idmyteamserver.email.send_reset", mock_send_reset)
 

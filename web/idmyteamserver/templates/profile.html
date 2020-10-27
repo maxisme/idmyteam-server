@@ -217,8 +217,15 @@
 
             $("#delete-model").click(function () {
                 if (confirm('Are you sure?')) {
-                    $.post("/delete-model", {
-                        '_xsrf': '{{ xsrf_token }}'
+                    $.ajax({
+                        url: '{% url 'delete-model' %}',
+                        type: 'DELETE',
+                        success: function() {
+                            location.reload();
+                        },
+                        error: function (error) {
+                            alert(error);
+                        }
                     });
                 }
             });

@@ -3,10 +3,12 @@ import io
 import logging
 import math
 import os
+from importlib import import_module
 from random import randint
 
 import chainer
 import numpy as np
+import tensorflow as tf
 from PIL import Image
 from chainercv.links import FasterRCNNVGG16
 
@@ -21,64 +23,61 @@ from worker.classifier import Classifier
 
 chainer.config.enqueue = False  # tells chainer to not be in training mode
 
-from typing import TypedDict
+from typing import TypedDict, List
 
 
 class Detecter:
     def __init__(self):
-        logging.info("Started loading worker models...")
         self.face_localiser = self.FaceLocalisation()
-        # self.feature_extractor = self.FeatureExtractor()
-        logging.info("Finished loading worker models!")
+        self.feature_extractor = self.FeatureExtractor()
 
-    # class FeatureExtractor:
-    #     model = import_module("modules.resnet_v1_50")
-    #     head = import_module("modules.fc1024")
-    #
-    #     def __init__(self):
-    #         self._load_model()
-    #
-    #     def predict(self, img: np.array) -> List:
-    #         return self.sess.detect(
-    #             self.endpoints["emb"], feed_dict={self.image_placeholder: [img]}
-    #         ).tolist()
-    #
-    #     def _load_model(self):
-    #         # load model
-    #         self.image_placeholder = tf.placeholder(
-    #             tf.float32,
-    #             shape=(
-    #                 None,
-    #                 config.FEATURE_EXTRACTOR_IMG_SIZE,
-    #                 config.FEATURE_EXTRACTOR_IMG_SIZE,
-    #                 3,
-    #             ),
-    #         )
-    #         self.endpoints, body_prefix = self.model.endpoints(
-    #             self.image_placeholder, is_training=False
-    #         )
-    #         with tf.name_scope("head"):
-    #             self.head.head(self.endpoints, 128, is_training=False)
-    #         c = tf.ConfigProto()
-    #         c.gpu_options.allow_growth = True
-    #         self.sess = tf.Session(config=c)
-    #
-    #         # TODO convert the below path into one file at config.FEATURE_MODEL_DIR (this path looks at multiple files)
-    #         tf.train.Saver().restore(
-    #             self.sess, config.ROOT + "/models/checkpoint-407500"
-    #         )
-    #
-    #         # run prediction with white image as the first prediction takes longer than all proceeding ones
-    #         img = np.zeros(
-    #             [
-    #                 config.FEATURE_EXTRACTOR_IMG_SIZE,
-    #                 config.FEATURE_EXTRACTOR_IMG_SIZE,
-    #                 3,
-    #             ],
-    #             dtype=np.uint8,
-    #         )
-    #         img[:] = 255  # set white pixels
-    #         self.predict(img)
+    class FeatureExtractor:
+        def __init__(self):
+            self._load_model()
+            self.model = import_module("modules.resnet_v1_50")
+            self.head = import_module("modules.fc1024")
+
+        def predict(self, img: np.array) -> List:
+            return self.sess.detect(
+                self.endpoints["emb"], feed_dict={self.image_placeholder: [img]}
+            ).tolist()
+
+        def _load_model(self):
+            # load model
+            self.image_placeholder = tf.placeholder(
+                tf.float32,
+                shape=(
+                    None,
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                    3,
+                ),
+            )
+            self.endpoints, body_prefix = self.model.endpoints(
+                self.image_placeholder, is_training=False
+            )
+            with tf.name_scope("head"):
+                self.head.head(self.endpoints, 128, is_training=False)
+            c = tf.ConfigProto()
+            c.gpu_options.allow_growth = True
+            self.sess = tf.Session(config=c)
+
+            # TODO convert the below path into one file at config.FEATURE_MODEL_DIR (this path looks at multiple files)
+            tf.train.Saver().restore(
+                self.sess, config.ROOT + "/models/checkpoint-407500"
+            )
+
+            # run prediction with white image as the first prediction takes longer than all proceeding ones
+            img = np.zeros(
+                [
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                    config.FEATURE_EXTRACTOR_IMG_SIZE,
+                    3,
+                ],
+                dtype=np.uint8,
+            )
+            img[:] = 255  # set white pixels
+            self.predict(img)
 
     class FaceLocalisation(object):
         def __init__(self):
@@ -114,7 +113,7 @@ class Detecter:
         store_image_features: bool,
         classifier: Classifier,
         team: Team,
-    ):
+    ) -> bool:
         """
         Extracts facial area from img
         Parses extracted facial area into 128 floats
@@ -189,11 +188,12 @@ class Detecter:
                                 manual=False,
                                 score=max_prob,
                             )
-                    return
+                    return True
+        return team.send_ws_message(InvalidClassificationWSStruct(file_name))
 
-        team.send_ws_message(InvalidClassificationWSStruct(file_name))
-
-    def store_image(self, img: bytes, file_name: str, member_id: int, team: Team):
+    def store_image(
+        self, img: bytes, file_name: str, member_id: int, team: Team
+    ) -> bool:
         """
         Stores image for training in the future
         """
@@ -240,6 +240,8 @@ class Detecter:
             # - move uploaded image to directory for pending semi anonymous face training (FE and FL).
             file_path = self._get_unique_file_path(team)
             original_image.save(file_path)
+
+        return True
 
     @staticmethod
     def _bytes_to_image(img: bytes) -> (np.array, Image):

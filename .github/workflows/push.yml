@@ -31,11 +31,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install requirements
+      - name: Install requirements for web
         run: |
+          pip install --upgrade pip
           cd web
-          pip install -r web/requirements.txt
-          pip install -r worker/requirements.txt
+          pip install -r requirements.txt
           pip install -r test_requirements.txt
 
       - uses: pre-commit/action@v2.0.0

@@ -2,32 +2,31 @@
 [![codecov](https://codecov.io/gh/maxisme/idmyteam-server/branch/master/graph/badge.svg?token=3BHMWx6kUO)](https://codecov.io/gh/maxisme/idmyteam-server)
 [Client Code](https://github.com/maxisme/idmyteam-server)
 
-## utils
-### setup pre-commit
+# Local environment
+## `pre-commit`
 ```
 $ pip install pre-commit
 $ pre-commit install
 ```
+
 to test:
 ```
 $ pre-commit run --all-files
 ```
 
-## Local setup
-### .env
-1. `$ cd web; cp .env.example .env`
-2. https://djecrety.ir/ add to SECRET_KEY
-3. DEBUG=True
-
-### Full
-Make sure the `.env` contains `DATABASE_HOST=db`
+## Updating models
 ```
-$ docker-compose up
+$ python3 manage.py makemigrations
+```
+
+## How to run
+### Full integration
+```
+$ docker-compose up --build
 ```
 Then access at `http://localhost/`.
 
-### Web
-Make sure the .env contains `DATABASE_HOST=127.0.0.1`
+### Custom `runserver`
 ```
 $ docker-compose up -d db redis
 $ cd web
@@ -37,13 +36,20 @@ $ python3 manage.py runserver
 ```
 You can then login with the credentials `testuser`:`testuser`
 
-____
+___
 
-### Helpers
-When editing the models files run:
- - `python3 manage.py makemigrations`
-
+#### requirements.txt
+```
+pipdeptree | grep -P '^\w+' > web/requirements.txt
+```
 
 #### sass
  - `sass source/stylesheets/index.scss build/stylesheets/index.css`
  - `$FilePath$ $FileNameWithoutExtension$.css` (intelij)
+ 
+ 
+___
+# Tests
+## TODO
+ - [ ] Already in use username when signing up
+ - [ ] Already in use email when signing up

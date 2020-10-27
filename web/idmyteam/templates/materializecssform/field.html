@@ -45,6 +45,14 @@
 
 
 
+
+
+
+
+
+
+
+
                 {% if field.value %}{% localize off %}{{ field.value }}{% endlocalize %}{% endif %}" {% include 'materializecssform/attrs.html' %} >
         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
 
@@ -60,6 +68,14 @@
         {% endif %}
 
         <input type="datetime-local" id="{{ field.auto_id }}" name="{{ field.html_name }}" value="
+
+
+
+
+
+
+
+
 
 
 
@@ -184,12 +200,14 @@
 
     </div>
 {% elif field|is_captcha %}
-    {% for error in field.errors %}
-        <span style="font-size: initial;" class="error {{ form.error_css_class }}">{{ error }}</span>
-    {% endfor %}
-    <div class="input-field col {{ classes.label }} {{ classes.value }} {{ classes.single_value }}">
-        {{ field }}
-    </div>
+    {% if field|is_required %}
+        {% for error in field.errors %}
+            <span style="font-size: initial;" class="error {{ form.error_css_class }}">{{ error }}</span>
+        {% endfor %}
+        <div class="input-field col {{ classes.label }} {{ classes.value }} {{ classes.single_value }}">
+            {{ field }}
+        </div>
+    {% endif %}
 {% else %}
 
     <div class="input-field col {{ classes.label }} {{ classes.value }} {{ classes.single_value }}">

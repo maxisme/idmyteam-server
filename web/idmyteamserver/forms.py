@@ -5,6 +5,7 @@ from django.forms import ModelForm
 
 from idmyteamserver.models import Team
 from web import settings
+from web.settings import RECAPTCHA_PRIVATE_KEY
 
 
 class RecaptchaForm(forms.Form):
@@ -15,6 +16,11 @@ class RecaptchaForm(forms.Form):
             # only validate if there is a private_key
             if len(self.private_key) > 0:
                 super().validate(value)
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            if len(RECAPTCHA_PRIVATE_KEY) == 0:
+                self.required = False
 
     captcha = CustomCaptchaField()
 
