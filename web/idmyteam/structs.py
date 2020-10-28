@@ -1,6 +1,7 @@
 import inspect
 import json
 from enum import Enum
+from typing import TypedDict
 
 
 class Struct:
@@ -73,3 +74,12 @@ class ClassificationWSStruct(WSStruct):
                 }
             )
         )
+
+
+class FaceCoordinates(TypedDict):
+    x: int
+    y: int
+    width: int
+    height: int
+    score: float
+    is_manual: bool

@@ -16,6 +16,7 @@ from idmyteam.structs import (
     DeleteImageWSStruct,
     ClassificationWSStruct,
     InvalidClassificationWSStruct,
+    FaceCoordinates,
 )
 from idmyteamserver.models import Team, Feature
 from worker import config, functions
@@ -23,7 +24,7 @@ from worker.classifier import Classifier
 
 chainer.config.enqueue = False  # tells chainer to not be in training mode
 
-from typing import TypedDict, List
+from typing import List
 
 
 class Detecter:
@@ -115,9 +116,9 @@ class Detecter:
         team: Team,
     ) -> bool:
         """
-        Extracts facial area from img
-        Parses extracted facial area into 128 floats
-        Runs 128 floats through the teams classifier model to extract a team member
+        Crop facial area from img bytes (face_localiser)
+        Parses crop into 128 floats (FeatureExtractor)
+        Runs 128 floats through the teams classifier model to extract a team member (Classifier)
         Returns member id, etc... to team via websocket
         """
         # parse image bytes to np array
@@ -191,12 +192,9 @@ class Detecter:
                     return True
         return team.send_ws_message(InvalidClassificationWSStruct(file_name))
 
-    def store_image(
+    def store_image_features(
         self, img: bytes, file_name: str, member_id: int, team: Team
     ) -> bool:
-        """
-        Stores image for training in the future
-        """
         # parse image bytes to np array
         try:
             img, original_image = self._bytes_to_image(img)
@@ -208,7 +206,7 @@ class Detecter:
             face_coords = ast.literal_eval(original_image.app["COM"].decode())
         except Exception as e:
             raise Exception(
-                f"Training image does not have valid facial coordinates: {e}"
+                f"Training image does not have valid facial coordinates in comment: {e}"
             )
 
         # crop image to coords of face + config.CROP_PADDING
@@ -258,9 +256,9 @@ class Detecter:
         @param team:
         @return:
         """
-        hashed_team_member = functions.hash(str(team.id) + team.username)
+        hashed_team_member = functions.hash(str(team.id) + team)
         while True:
-            dir = config.STORE_IMAGES_DIR + team.username + "/"
+            dir = config.STORE_IMAGES_DIR + team + "/"
             if not os.path.exists(dir):
                 os.makedirs(dir)
 
@@ -270,12 +268,3 @@ class Detecter:
             if not os.path.isfile(file_path):
                 break
         return file_path
-
-
-class FaceCoordinates(TypedDict):
-    x: int
-    y: int
-    width: int
-    height: int
-    score: float
-    is_manual: bool

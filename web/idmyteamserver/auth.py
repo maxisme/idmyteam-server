@@ -115,7 +115,7 @@ def confirm_handler(request, key):
                 return redirect(
                     "/",
                     cookies={
-                        SUCCESS_COOKIE_KEY: f"Confirmed! Welcome to the Team {team.username}!"
+                        SUCCESS_COOKIE_KEY: f"Confirmed! Welcome to the Team {team}!"
                     },
                 )
     return redirect(
