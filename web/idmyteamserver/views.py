@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render  # just for pycharm to create links to templates
 from opentelemetry import trace
 
-from idmyteamserver.helpers import render
+from idmyteam.idmyteam.helpers import render
 from web.settings import REDIS_CONN
 
 

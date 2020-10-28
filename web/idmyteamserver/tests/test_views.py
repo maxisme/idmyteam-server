@@ -13,7 +13,7 @@ from django.urls import reverse
 from tests.factories import TeamFactory, dict_from_team_factory
 from tests.helpers import create_test_team
 from worker.structs import DetectJob, TrainJob
-from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, ERROR_COOKIE_KEY, random_str
+from idmyteam.idmyteam.helpers import SUCCESS_COOKIE_KEY, ERROR_COOKIE_KEY, random_str
 from idmyteamserver.models import Team
 from idmyteamserver.upload import MISSING_TEAM_MODEL_MSG
 from idmyteamserver.urls import AUTH_URL_NAMES

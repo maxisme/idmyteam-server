@@ -4,9 +4,8 @@ from django.conf import settings
 import django.contrib.auth.models
 import django.contrib.auth.validators
 from django.db import migrations, models
-import django.db.models.deletion
 import django.utils.timezone
-import idmyteamserver.helpers
+import idmyteam.idmyteam.helpers
 import simple_email_confirmation.models
 
 
@@ -108,7 +107,7 @@ class Migration(migrations.Migration):
                 (
                     "credentials",
                     models.CharField(
-                        default=idmyteamserver.helpers.create_credentials,
+                        default=idmyteam.idmyteam.helpers.create_credentials,
                         max_length=255,
                     ),
                 ),

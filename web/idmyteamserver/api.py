@@ -8,8 +8,8 @@ from django.views.decorators.http import require_http_methods
 
 from worker.queue import enqueue
 from worker.structs import DeleteClassifierJob
-from idmyteamserver import helpers
-from idmyteamserver.helpers import redirect
+from idmyteam.idmyteam import helpers
+from idmyteam.idmyteam.helpers import redirect
 from idmyteamserver.models import Team
 from worker import queue
 

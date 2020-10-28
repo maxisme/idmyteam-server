@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponseNotFound
 
 from idmyteamserver import forms
 from idmyteamserver import email
-from idmyteamserver.helpers import (
+from idmyteam.idmyteam.helpers import (
     SUCCESS_COOKIE_KEY,
     is_valid_email,
     redirect,
