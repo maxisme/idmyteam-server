@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "idmyteam.apps.IdmyteamConfig",
+    "idmyteam.idmyteam.apps.IdmyteamConfig",
     "idmyteamserver.apps.IdmyteamserverConfig",
     "captcha",
     "simple_email_confirmation",
@@ -74,7 +74,11 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-            ]
+            ],
+            "libraries": {
+                "define_action": "idmyteam.idmyteam.templatetags.define_action",
+                "materializecss": "idmyteam.idmyteam.templatetags.materializecss",
+            },
         },
     }
 ]

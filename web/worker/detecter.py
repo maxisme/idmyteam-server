@@ -12,7 +12,7 @@ import tensorflow as tf
 from PIL import Image
 from chainercv.links import FasterRCNNVGG16
 
-from idmyteam.structs import (
+from idmyteam.idmyteam.structs import (
     DeleteImageWSStruct,
     ClassificationWSStruct,
     InvalidClassificationWSStruct,
