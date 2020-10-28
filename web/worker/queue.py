@@ -5,7 +5,7 @@ from typing import Dict
 from rq import Queue, Worker
 from rq.job import Job
 
-from idmyteam.idmyteam.structs import ErrorWSStruct, TrainedWSStruct
+from idmyteam.structs import ErrorWSStruct, TrainedWSStruct
 from worker import functions
 from worker.structs import (
     JobStruct,

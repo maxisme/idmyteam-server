@@ -1,6 +1,6 @@
 import pytest
 
-from idmyteam.idmyteam.structs import *
+from idmyteam.structs import *
 
 
 def test_TrainJob_val():

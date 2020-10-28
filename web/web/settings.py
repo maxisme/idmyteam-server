@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "idmyteam.idmyteam.apps.IdmyteamConfig",
+    "idmyteam.apps.IdmyteamConfig",
     "idmyteamserver.apps.IdmyteamserverConfig",
     "captcha",
     "simple_email_confirmation",

@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
-from idmyteam.idmyteam.structs import WSStruct
+from idmyteam.structs import WSStruct
 from idmyteamserver import helpers
 from web import settings
 
