@@ -10,10 +10,11 @@ from django.http import HttpResponseBadRequest
 from django.test import Client
 from django.urls import reverse
 
+from tests.factories import TeamFactory, dict_from_team_factory
+from tests.helpers import create_test_team
 from worker.structs import DetectJob, TrainJob
 from idmyteamserver.helpers import SUCCESS_COOKIE_KEY, ERROR_COOKIE_KEY, random_str
 from idmyteamserver.models import Team
-from idmyteamserver.tests.factories import TeamFactory, dict_from_team_factory
 from idmyteamserver.upload import MISSING_TEAM_MODEL_MSG
 from idmyteamserver.urls import AUTH_URL_NAMES
 from web.settings import DEFAULT_MAX_NUM_TEAM_MEMBERS, PASSWORD_HASHERS, REDIS_CONN
@@ -56,7 +57,7 @@ class TestAuthViews:
         team_dict["confirm"] = team_dict["password"]
         team_dict["terms"] = True
 
-        assert not bool(Team.objects.filter(username=team.username).exists())
+        assert not bool(Team.objects.filter(username=team).exists())
 
         mock_send_email = unittest.mock.Mock()
         # monkeypatch _send_email
@@ -65,7 +66,7 @@ class TestAuthViews:
         client.post(reverse("signup"), team_dict)
 
         mock_send_email.assert_called_once()
-        assert Team.objects.filter(username=team.username).exists()
+        assert Team.objects.filter(username=team).exists()
 
     def test_valid_login(self):
         client = Client()
@@ -136,7 +137,7 @@ class TestAuthViews:
         )
 
         # verify that the team has been confirmed
-        assert Team.objects.get(username=team.username).is_confirmed
+        assert Team.objects.get(username=team).is_confirmed
 
     def test_invalid_confirm_email_key(self, monkeypatch):
         client = Client()
@@ -164,7 +165,7 @@ class TestAuthViews:
         assert len(request.cookies[ERROR_COOKIE_KEY]) > 0
 
         # verify that the team has not been confirmed
-        assert not Team.objects.get(username=team.username).is_confirmed
+        assert not Team.objects.get(username=team).is_confirmed
 
     @pytest.mark.parametrize("test_email", [True, False])
     def test_forgot_email_username_reset(self, monkeypatch, test_email):
@@ -181,7 +182,7 @@ class TestAuthViews:
         if test_email:
             client.post(reverse("forgot-password"), {"username_email": team.email})
         else:
-            client.post(reverse("forgot-password"), {"username_email": team.username})
+            client.post(reverse("forgot-password"), {"username_email": team})
 
         # get password_reset_key
         password_reset_key = mock_send_reset.call_args.kwargs["key"]
@@ -204,7 +205,7 @@ class TestAuthViews:
 
     def test_logout_handler(self):
         client = Client()
-        team, team_dict = create_team()
+        team, team_dict = create_test_team()
         request = client.post(reverse("login"), team_dict, follow=True)
         assert request.context["user"].is_authenticated
         request = client.post(reverse("logout"), team_dict, follow=True)
@@ -215,25 +216,25 @@ class TestAuthViews:
 class TestApiViews:
     def test_toggle_image_storage_handler(self):
         client = Client()
-        team, team_dict = create_team()
+        team, team_dict = create_test_team()
         client.post(reverse("login"), team_dict)
         client.patch(reverse("toggle-image-storage"))
 
         # verify allow_image_storage have changed
-        allow_storage = Team.objects.get(username=team.username).allow_image_storage
+        allow_storage = Team.objects.get(username=team).allow_image_storage
         assert team.allow_image_storage != allow_storage
 
     def test_reset_credentials_handler(self):
         client = Client()
-        team, team_dict = create_team()
+        team, team_dict = create_test_team()
         client.post(reverse("login"), team_dict)
         client.patch(reverse("reset-credentials"))
         # verify credentials have changed
-        assert team.credentials != Team.objects.get(username=team.username).credentials
+        assert team.credentials != Team.objects.get(username=team).credentials
 
     def test_delete_model_handler(self, monkeypatch):
         client = Client()
-        team, team_dict = create_team(
+        team, team_dict = create_test_team(
             classifier_model_path="/path/to/none/existent/model"
         )
         client.post(reverse("login"), team_dict)
@@ -248,12 +249,12 @@ class TestApiViews:
         # verify classifier_model_path has been removed
         assert (
             team.classifier_model_path
-            != Team.objects.get(username=team.username).classifier_model_path
+            != Team.objects.get(username=team).classifier_model_path
         )
 
     def test_delete_team_handler(self, monkeypatch):
         client = Client()
-        team, team_dict = create_team()
+        team, team_dict = create_test_team()
         client.post(reverse("login"), team_dict)
 
         monkeypatch.setattr(
@@ -264,14 +265,14 @@ class TestApiViews:
         assert request.status_code == 200
 
         # verify team no longer exists
-        assert not bool(Team.objects.filter(username=team.username).exists())
+        assert not bool(Team.objects.filter(username=team).exists())
 
 
 @pytest.mark.django_db
 class TestPredictHandler:
     def test_successful(self, monkeypatch):
         client = Client()
-        team, form_dict = create_team(
+        team, form_dict = create_test_team(
             classifier_model_path="/path/to/none/existent/model"
         )
         img = create_img(TMP_FILE_DIR)
@@ -286,7 +287,7 @@ class TestPredictHandler:
             redis_queue_kwargs = DetectJob(
                 img=file.read(),
                 file_name=basename(file.name),
-                team_username=team.username,
+                team_username=team,
                 store_image_features=False,
             ).dict()
             assert mock_enqueue_call.call_args.kwargs["kwargs"] == redis_queue_kwargs
@@ -294,7 +295,7 @@ class TestPredictHandler:
 
     def test_missing_model(self):
         client = Client()
-        team, form_dict = create_team()
+        team, form_dict = create_test_team()
         img = create_img(TMP_FILE_DIR)
         with open(img, "rb") as file:
             form_dict["file"] = file
@@ -310,7 +311,7 @@ class TestTrainHandler:
     client = Client()
 
     def test_successful(self, monkeypatch):
-        team, form_dict = create_team()
+        team, form_dict = create_test_team()
 
         # create zip
         zip_path = create_zip(5, 1)
@@ -330,7 +331,7 @@ class TestTrainHandler:
         assert (
             mock_enqueue_call.call_args.kwargs["kwargs"]
             == TrainJob(
-                team_username=team.username,
+                team_username=team,
             ).dict()
         )
 
@@ -349,7 +350,7 @@ class TestTrainHandler:
     def test_different_number_of_members(
         self, monkeypatch, members, images_per_member, expected_status_code
     ):
-        team, form_dict = create_team()
+        team, form_dict = create_test_team()
         zip_path = create_zip(members, images_per_member)
         form_dict["file"] = open(zip_path, "rb")
         mock_enqueue_call = unittest.mock.Mock()
@@ -389,15 +390,3 @@ def create_zip(members=5, number_of_images=1) -> str:
     zip.close()
     shutil.rmtree(tmp_image_dir)
     return zip_path
-
-
-def create_team(**extras) -> (Team, dict):
-    """
-    Creates a test team
-    """
-    team_factory = TeamFactory.build()
-    team_dict = dict_from_team_factory(team_factory)
-    team_dict = {**team_dict, **extras}
-    team = Team.objects.create_user(**team_dict)
-    team.confirm_email(team.get_confirmation_key())
-    return team, team_dict

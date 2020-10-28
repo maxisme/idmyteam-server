@@ -1,43 +1,46 @@
 import ast
 import datetime
-import json
 import logging
 import os
 from typing import Tuple
 
 import joblib
 import numpy as np
-from django.db.models import Q
 from sklearn.svm import SVC
+from multiprocessing import Lock
 
-from idmyteam.structs import ErrorWSStruct, TrainedWSStruct
 from idmyteamserver.models import Team, Feature
-from web.settings import TRAIN_Q_TIMEOUT
-from worker import functions, config
+from web.settings import TRAIN_Q_TIMEOUT, TEAM_CLASSIFIER_BASE_DIR
+from worker import functions
+
+NO_TRAINING_DATA_MSG = "No training data!"
+ALREADY_TRAINING_MSG = "Already training classifier for team!"
 
 
 class Classifier(object):
     def __init__(self, team: Team):
+        self._clf_mutex = Lock()
         self.team = team
-        self.clf = self._load_model()
+        self.clf: SVC = self._get_model()
 
     def predict(self, features: np.array) -> Tuple[int, float]:
         if not self.clf:
-            raise Exception(f"Missing model for: {self.team.username}")
+            raise MissingModelException(f"Missing model for: {self.team}")
 
         # predict member id based on face_coords
-        member_id = 0
-        max_prob = config.MIN_PROB
-        members = self.clf.classes_
-        probabilities = self.clf.predict_proba(np.array(features))
+        with self._clf_mutex:
+            members = self.clf.classes_
+            probabilities = self.clf.predict_proba(np.array(features))
+
+        # choose member with highest probability
+        member_id, max_prob = 0, 0
         for i, prob in enumerate(probabilities[0]):
             if prob >= max_prob:
                 member_id = members[i]
                 max_prob = prob
-
         return member_id, max_prob
 
-    def train(self):
+    def train(self) -> list:
         timeout_training_dttm = datetime.datetime.now() - datetime.timedelta(
             seconds=TRAIN_Q_TIMEOUT
         )
@@ -45,93 +48,88 @@ class Classifier(object):
             self.team.is_training_dttm
             and self.team.is_training_dttm >= timeout_training_dttm
         ):
-            raise Exception("Already training classifier for team")
+            raise AlreadyTrainingException(ALREADY_TRAINING_MSG)
+
+        # todo limit number of training events per hour
 
         # mark team as currently training the classifier
         # TODO defer an is_training False
         self.team.is_training_dttm = datetime.datetime.now()
         self.team.save()
 
-        logging.info(f"Creating new model for {self.team.username}")
+        logging.info(f"Creating new model for {self.team}")
 
         # create a new model using ALL the team training data
-        training_input, training_output, sample_weight = self._get_training_data()
+        training_features, training_classes, sample_weight = self._get_training_data()
 
-        if training_input is not None:
-            # make sure there are more than 1 classes to train model
-            if len(np.unique(training_output)) <= 1:
-                return self.team.send_ws_message(
-                    ErrorWSStruct("You must train with more than one team member!")
+        if training_features is not None:
+            num_training_members = len(np.unique(training_classes))
+            # there must be at least 2 classes/members to train
+            if num_training_members <= 2:
+                raise NotEnoughClassesException(
+                    "You must train with more than one team member!"
                 )
-            else:
-                clf = SVC(probability=True)
+            clf = SVC(probability=True)  # initialise teams model
         else:
-            return self.team.send_ws_message(
-                ErrorWSStruct(
-                    f"You must train with at least {config.MIN_CLASSIFIER_TRAINING_IMAGES} members!"
-                )
-            )
+            raise NotEnoughClassesException(NO_TRAINING_DATA_MSG)
 
-        clf.fit(training_input, training_output, sample_weight=sample_weight)
-
-        new_output = [o for o in training_output if o > 0]
-        unique_outputs = np.bincount(new_output)
-        num_outputs = np.nonzero(unique_outputs)[0]
-        cnt_uni = list(zip(num_outputs, unique_outputs[num_outputs]))
+        clf.fit(training_features, training_classes, sample_weight=sample_weight)
 
         logging.info(
-            f"fitted {len(training_input)} features from {len(set(training_output))} classes"
+            f"fitted {len(training_features)} features from {len(set(training_classes))} classes"
         )
 
-        model_path = self.get_model_path(self.team.username, True)
-        joblib.dump(clf, model_path)  # save model to
-        self.clf = clf  # reload the new model
+        model_path = TEAM_CLASSIFIER_BASE_DIR + self.team
+        joblib.dump(clf, model_path)  # store model
+        with self._clf_mutex:
+            self.clf = clf  # reload the new model
 
         # mark all features as not new
-        Feature.objects.get(team__username=self.team.username).update(processed=True)
+        Feature.objects.get(team_id=self.team.id).update(processed=True)
 
-        # mark team as finished training and the model path
+        # mark team as finished training and the location of the model path
         self.team.is_training_dttm = None
         self.team.classifier_model_path = model_path
         self.team.save()
 
-        # send message to client with who has been trained
-        return self.team.send_ws_message(
-            TrainedWSStruct(json.dumps(cnt_uni, default=functions.json_helper))
-        )
+        # fetch number of unique
+        unique_outputs = np.bincount([o for o in training_classes if o > 0])
+        num_outputs = np.nonzero(unique_outputs)[0]
+        return list(zip(num_outputs, unique_outputs[num_outputs]))
 
-    def _load_model(self):
-        model_path = self.get_model_path(self.team.username)
-        if model_path:
-            return joblib.load(model_path)
-        return None
+    def _get_model(self):
+        if not self.team.classifier_model_path:
+            return None
 
-    def _get_training_data(self):
-        training_input, training_output, weight = [], [], []
-        results = Feature.objects.filter(
-            Q(team__username=self.team.username)
-            | Q(team__username=Feature.INIT_TEAM_USERNAME)
-        )
+        try:
+            return joblib.load(self.team.classifier_model_path)
+        except FileNotFoundError:
+            return None
 
-        num_new = 0
-        for row in results:
-            features = functions.decompress_string(str.encode(row.features))
-            training_input.append(ast.literal_eval(features))
-            training_output.append(int(row.member))
+    def _get_training_data(self) -> (np.array, np.array, np.array):
+        training_features, training_classes, weight = [], [], []
 
-            if row.is_manual:
-                weight.append(1)
-            else:
-                weight.append(0.1)  # 1/10th as reliable if data acquired from model
+        # fetch features from db
+        features = Feature.objects.filter(team_id=self.team.id)
+        if features:
+            for feature in features:
+                features = functions.decompress_string(feature.features)
 
-            if not row.has_processed:
-                num_new = num_new + 1
+                training_features.append(ast.literal_eval(features))
+                training_classes.append(int(feature.member))
 
-        if training_input == [] or num_new < config.MIN_CLASSIFIER_TRAINING_IMAGES:
+                if feature.is_manual:
+                    weight.append(1)
+                else:
+                    weight.append(
+                        0.1
+                    )  # 1/10th as reliable if data acquired via online learning
+
+        if not training_features:
             return None, None, None
         return (
-            np.array(training_input)[:, 0],
-            np.array(training_output),
+            np.array(training_features)[:, 0],
+            np.array(training_classes),
             np.array(weight),
         )
 
@@ -144,3 +142,15 @@ class Classifier(object):
         @return: if file was successfully deleted
         """
         return bool(os.remove(self.team.classifier_model_path))
+
+
+class AlreadyTrainingException(Exception):
+    pass
+
+
+class MissingModelException(Exception):
+    pass
+
+
+class NotEnoughClassesException(Exception):
+    pass

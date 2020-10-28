@@ -8,7 +8,7 @@ from worker.queue import MyQueue, MyWorker, REDIS_QS
 from web.settings import REDIS_CONN
 from worker.detecter import Detecter
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # load large detector model
     worker.detecter = Detecter()
 

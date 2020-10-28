@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseServerError
 from django.views.decorators.http import require_http_methods
 
+from worker.queue import enqueue
 from worker.structs import DeleteClassifierJob
 from idmyteamserver import helpers
 from idmyteamserver.helpers import redirect
@@ -19,7 +20,7 @@ def delete_model_handler(request):
     team: Team = request.user
 
     if not _delete_team_model(team):
-        logging.warning(f"Problem deleting the teams '{team.username}' classifier.")
+        logging.warning(f"Problem deleting the teams '{team}' classifier.")
 
     # delete model from path
     team.classifier_model_path = None
@@ -34,7 +35,7 @@ def delete_team_handler(request):
     team: Team = request.user
 
     if not _delete_team_model(team):
-        logging.warning(f"Problem deleting the teams '{team.username}' classifier.")
+        logging.warning(f"Problem deleting the teams '{team}' classifier.")
 
     if team.delete():
         logout(request)
@@ -68,9 +69,7 @@ def _delete_team_model(team: Team) -> bool:
     @todo put function somewhere better :)
     @return: whether the classifier model has been deleted or not
     """
-    job: queue.MyJob = queue.REDIS_HIGH_Q.enqueue_call(
-        func=".", kwargs=DeleteClassifierJob(team_username=team.username).dict(), ttl=1
-    )
+    job = enqueue(queue.REDIS_HIGH_Q, DeleteClassifierJob(team_username=team))
 
     # wait for job to complete
     while not job.is_finished:

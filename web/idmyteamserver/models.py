@@ -78,4 +78,4 @@ class Feature(models.Model):
     create_dttm = models.DateTimeField(auto_now_add=True)
     update_dttm = models.DateTimeField(auto_now=True)
 
-    INIT_TEAM_USERNAME = "init"
+    INIT_CLASSIFIER_TEAM_USERNAME = "init"

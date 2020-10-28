@@ -64,7 +64,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "idmyteam/templates"),
+            os.path.join(BASE_DIR, "idmyteam/idmyteam/templates"),
             os.path.join(BASE_DIR, "idmyteamserver/templates"),
         ],
         "APP_DIRS": True,
@@ -150,5 +150,6 @@ PASS_RESET_TOKEN_LEN = 200
 MAX_IMG_UPLOAD_SIZE_KB = 1000
 CREDENTIAL_LEN = 150
 MAX_UPLOAD_SIZE = 104857600
+TEAM_CLASSIFIER_BASE_DIR = os.path.join(BASE_DIR, "team-classifier/")
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY", "")

@@ -44,11 +44,11 @@ class TestWS:
         mock_enqueue_call.assert_called_once()
         assert (
             mock_enqueue_call.call_args.kwargs["kwargs"]
-            == LoadClassifierJob(team_username=team.username).dict()
+            == LoadClassifierJob(team_username=team).dict()
         )
 
         # verify ip was stored in user
-        team = await self._get_team(team.username)
+        team = await self._get_team(team)
         assert len(team.local_ip) > 0
 
         # verify socket channel was stored in user
@@ -77,11 +77,11 @@ class TestWS:
         # verify enqueue_call was called to UnloadClassifierJob on disconnect
         assert (
             mock_enqueue_call.call_args.kwargs["kwargs"]
-            == UnloadClassifierJob(team_username=team.username).dict()
+            == UnloadClassifierJob(team_username=team).dict()
         )
 
         # verify ip was removed from team
-        team = await self._get_team(team.username)
+        team = await self._get_team(team)
         assert not team.local_ip
 
         # verify socket channel was removed from team
@@ -123,7 +123,7 @@ class TestWS:
 
     @sync_to_async
     def _create_team(self, **extras):
-        return test_views.create_team(**extras)
+        return test_views.create_test_team(**extras)
 
     @sync_to_async
     def _get_team(self, username) -> Team:

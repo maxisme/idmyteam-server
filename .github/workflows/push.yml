@@ -36,6 +36,7 @@ jobs:
           pip install --upgrade pip
           cd web
           pip install -r requirements.txt
+          pip install -r worker/requirements.txt
           pip install -r test_requirements.txt
 
       - uses: pre-commit/action@v2.0.0
