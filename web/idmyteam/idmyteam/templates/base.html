@@ -1,6 +1,6 @@
 {% load define_action %}
 {% load static %}
-<html>
+<html lang="en">
 <head>
     <!-- custom meta -->
     <title>{{ title }}</title>
@@ -28,28 +28,16 @@
     {% block js %}{% endblock %}
 </head>
 
-{% if logged_in %}
-    {% define "<li><a href='/profile' class='button'>Profile</a></li>" as menu_bar_content %}
-{% else %}
-    {% define "<li><a href='/login' class='button'>Log In</a></li><li><a href='/signup' class='button'>Sign Up</a></li>" as menu_bar_content %}
-{% endif %}
-
-{% define menu_bar_content|add:"<li><a href='/tutorials' class='button'>Tutorials</a></li><li><a href='/about' class='button'>About</a></li><li><a href='/contact' class='button'>Contact</a></li>" as menu_bar_content %}
-
-{% if logged_in %}
-    {% define menu_bar_content|add:"<li><a href='/logout' class='button'>Log Out</a></li>" as menu_bar_content %}
-{% endif %}
-
 <body>
 <nav class="z-depth-0">
     <div class="nav-wrapper">
         <a href="/" class="brand-logo">{% get_logo %}</a>
         <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
         <ul class="right hide-on-med-and-down">
-            {{ menu_bar_content|safe }}
+            {% include "base/nav.html" %}
         </ul>
         <ul class="side-nav" id="mobile-demo">
-            {{ menu_bar_content|safe }}
+            {% include "base/nav.html" %}
         </ul>
     </div>
 </nav>
@@ -81,3 +69,4 @@
     {% block content %}{% endblock %}
 </div>
 </body>
+</html>

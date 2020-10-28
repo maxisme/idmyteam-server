@@ -1,0 +1,15 @@
+{% load define_action %}
+
+{% if logged_in %}
+    {% define "<li><a href='/profile' class='button'>Profile</a></li>" as nav_content %}
+{% else %}
+    {% define "<li><a href='/login' class='button'>Log In</a></li><li><a href='/signup' class='button'>Sign Up</a></li>" as nav_content %}
+{% endif %}
+
+{% define nav_content|add:"<li><a href='/tutorials' class='button'>Tutorials</a></li><li><a href='/about' class='button'>About</a></li><li><a href='/contact' class='button'>Contact</a></li>" as nav_content %}
+
+{% if logged_in %}
+    {% define nav_content|add:"<li><a href='/logout' class='button'>Log Out</a></li>" as nav_content %}
+{% endif %}
+
+{{ nav_content|safe }}
