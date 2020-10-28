@@ -6,9 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseServerError
 from django.views.decorators.http import require_http_methods
 
+from idmyteamserver.helpers import create_credentials
 from worker.queue import enqueue
 from worker.structs import DeleteClassifierJob
-from idmyteam.idmyteam import helpers
 from idmyteam.idmyteam.helpers import redirect
 from idmyteamserver.models import Team
 from worker import queue
@@ -56,7 +56,7 @@ def toggle_image_storage_handler(request):
 @require_http_methods(["PATCH"])
 def reset_credentials_handler(request):
     team: Team = request.user
-    team.credentials = helpers.create_credentials()
+    team.credentials = create_credentials()
     team.save()
     # TODO logout of websocket
     return redirect("/profile")
