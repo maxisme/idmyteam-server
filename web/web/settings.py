@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "idmyteam.apps.IdmyteamConfig",
+    "idmyteam.idmyteam.apps.IdmyteamConfig",
     "idmyteamserver.apps.IdmyteamserverConfig",
     "captcha",
     "simple_email_confirmation",
@@ -64,7 +64,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "idmyteam/templates"),
+            os.path.join(BASE_DIR, "idmyteam/idmyteam/templates"),
             os.path.join(BASE_DIR, "idmyteamserver/templates"),
         ],
         "APP_DIRS": True,

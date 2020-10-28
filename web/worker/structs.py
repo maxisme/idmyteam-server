@@ -1,6 +1,6 @@
 from enum import Enum
 
-from idmyteam.structs import Struct
+from idmyteam.idmyteam.structs import Struct
 
 
 class JobStruct(Struct):

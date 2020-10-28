@@ -53,6 +53,13 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./web/coverage.xml
 
+      - name: Publish idmyteam base  to PyPI
+        if: github.ref == 'refs/heads/master'
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
+
   publish:
     name: Publish Docker image
     needs: test

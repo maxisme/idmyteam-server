@@ -3,15 +3,12 @@ from datetime import datetime
 
 import pytest
 
-from idmyteam.structs import ErrorWSStruct
+from idmyteam.idmyteam.structs import ErrorWSStruct
 from idmyteamserver.models import Team
 from tests.helpers import create_test_team
 from web.settings import REDIS_CONN
 from worker.classifier import (
     Classifier,
-    AlreadyTrainingException,
-    MissingModelException,
-    NotEnoughClassesException,
     NO_TRAINING_DATA_MSG,
     ALREADY_TRAINING_MSG,
 )
