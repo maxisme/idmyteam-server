@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
 from idmyteam.idmyteam.structs import WSStruct
-from idmyteam.idmyteam import helpers
+from idmyteamserver.helpers import create_credentials
 from web import settings
 
 
@@ -18,7 +18,7 @@ class Team(AbstractUser, SimpleEmailConfirmationUserMixin):
     email = models.EmailField(_("email address"), blank=True, unique=True)
 
     allow_image_storage = models.BooleanField(default=False)
-    credentials = models.CharField(max_length=255, default=helpers.create_credentials)
+    credentials = models.CharField(max_length=255, default=create_credentials)
     CREDENTIALS_FIELD = "credentials"
 
     password_reset_token = models.CharField(max_length=settings.PASS_RESET_TOKEN_LEN)

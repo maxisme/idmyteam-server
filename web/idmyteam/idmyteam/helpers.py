@@ -6,9 +6,6 @@ from functools import lru_cache
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 
-# from worker.queue import enqueue
-from web.settings import CREDENTIAL_LEN
-
 SUCCESS_COOKIE_KEY = "success_message"
 ERROR_COOKIE_KEY = "error_message"
 
@@ -72,11 +69,6 @@ def random_str(length):
     return "".join(
         random.choice(string.ascii_letters + string.digits) for _ in range(length)
     )
-
-
-def create_credentials() -> str:
-    # return bcrypt.hashpw(bytes(random_str(CREDENTIAL_LEN), encoding='utf8'), bcrypt.gensalt()).decode()
-    return random_str(CREDENTIAL_LEN)
 
 
 @lru_cache()
