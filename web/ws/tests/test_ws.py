@@ -4,7 +4,7 @@ import pytest
 from asgiref.sync import sync_to_async
 from channels.testing import WebsocketCommunicator
 
-from idmyteam.structs import (
+from idmyteam.idmyteam.structs import (
     NoModelWSStruct,
     HasModelWSStruct,
     WSStruct,

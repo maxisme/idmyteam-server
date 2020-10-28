@@ -14,11 +14,6 @@ to test:
 $ pre-commit run --all-files
 ```
 
-## Updating models
-```
-$ python3 manage.py makemigrations
-```
-
 ## How to run
 ### Full integration
 ```
@@ -47,6 +42,11 @@ pipdeptree | grep -P '^\w+' > web/requirements.txt
  - `sass source/stylesheets/index.scss build/stylesheets/index.css`
  - `$FilePath$ $FileNameWithoutExtension$.css` (intelij)
  
+
+### Updating models
+```
+$ python3 manage.py makemigrations
+```
  
 ___
 # Tests
