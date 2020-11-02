@@ -50,7 +50,7 @@ def add_coord_padding(img: np.array, padding: int, face_coords):
 
 def crop_img(img: np.array, face_coords, padding: int):
     """
-    @type face_coords: worker.detecter.FaceCoordinates
+    @type face_coords: web.idmyteam.structs.FaceCoordinates
     """
     x, y, w, h = add_coord_padding(img, padding, face_coords)
 

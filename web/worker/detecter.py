@@ -16,6 +16,7 @@ from idmyteam.structs import (
     DeleteImageWSStruct,
     ClassificationWSStruct,
     InvalidClassificationWSStruct,
+    FaceCoordinates,
 )
 from idmyteamserver.models import Team, Feature
 from worker import config, functions
@@ -23,7 +24,7 @@ from worker.classifier import Classifier
 
 chainer.config.enqueue = False  # tells chainer to not be in training mode
 
-from typing import TypedDict, List
+from typing import List
 
 
 class Detecter:
@@ -270,12 +271,3 @@ class Detecter:
             if not os.path.isfile(file_path):
                 break
         return file_path
-
-
-class FaceCoordinates(TypedDict):
-    x: int
-    y: int
-    width: int
-    height: int
-    score: float
-    is_manual: bool
