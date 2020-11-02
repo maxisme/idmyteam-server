@@ -36,6 +36,7 @@ jobs:
           pip install --upgrade pip
           cd web
           pip install -r requirements.txt
+          pip install -r worker/requirements.txt
           pip install -r test_requirements.txt
 
       - uses: pre-commit/action@v2.0.0
@@ -51,6 +52,13 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./web/coverage.xml
+
+      - name: Publish idmyteam base  to PyPI
+        if: github.ref == 'refs/heads/master'
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
 
   publish:
     name: Publish Docker image

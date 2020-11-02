@@ -1,6 +1,6 @@
 from enum import Enum
 
-from idmyteam.structs import Struct
+from idmyteam.idmyteam.structs import Struct
 
 
 class JobStruct(Struct):
@@ -9,7 +9,7 @@ class JobStruct(Struct):
 
     class Type(int, Enum):
         DETECT = 1
-        STORE_IMG = 2  # store image to be used for training
+        STORE_IMG_FEATURES = 2  # store image to be used for training
         TRAIN = 3  # use all store images to train
         LOAD_CLASSIFIER = 4
         UNLOAD_CLASSIFIER = 5
@@ -48,8 +48,8 @@ class DetectJob(JobStruct):
         self.store_image_features = store_image_features
 
 
-class StoreImageJob(JobStruct):
-    type = JobStruct.Type.STORE_IMG
+class StoreImageFeaturesJob(JobStruct):
+    type = JobStruct.Type.STORE_IMG_FEATURES
 
     def __init__(self, team_username: str, img: bytes, file_name: str, member_id: int):
         self.team_username = team_username

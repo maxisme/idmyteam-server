@@ -8,7 +8,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from simple_email_confirmation.models import SimpleEmailConfirmationUserMixin
 
-from idmyteam.structs import WSStruct
+from idmyteam.idmyteam.structs import WSStruct
 from idmyteamserver import helpers
 from web import settings
 
@@ -78,4 +78,4 @@ class Feature(models.Model):
     create_dttm = models.DateTimeField(auto_now_add=True)
     update_dttm = models.DateTimeField(auto_now=True)
 
-    INIT_TEAM_USERNAME = "init"
+    INIT_CLASSIFIER_TEAM_USERNAME = "init"

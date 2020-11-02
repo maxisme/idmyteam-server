@@ -13,3 +13,4 @@ recognition-worker/models
 .pytest*
 /web/idmyteamserver/tests/files/
 /web/idmyteamserver/tests/zip/
+/web/idmyteam/idmyteam.egg-info/

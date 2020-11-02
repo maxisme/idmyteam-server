@@ -3,13 +3,13 @@ import logging
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from idmyteam.structs import (
+from idmyteam.idmyteam.structs import (
     NoModelWSStruct,
     HasModelWSStruct,
 )
 from worker.structs import LoadClassifierJob, UnloadClassifierJob
 from idmyteamserver.models import Team
-from worker.queue import REDIS_HIGH_Q
+from worker.queue import REDIS_HIGH_Q, enqueue
 
 
 class WSConsumer(AsyncWebsocketConsumer):
@@ -24,9 +24,7 @@ class WSConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # ask redis to load teams classifier ML model into memory for quicker actions
-        REDIS_HIGH_Q.enqueue_call(
-            func=".", kwargs=LoadClassifierJob(team_username=self.team.username).dict()
-        )
+        enqueue(REDIS_HIGH_Q, LoadClassifierJob(team_username=self.team))
 
         if bool(self.team.classifier_model_path):
             await self.send(HasModelWSStruct().dict()["message"])
@@ -36,15 +34,12 @@ class WSConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         if hasattr(self, "team"):
             # ask redis to unload teams classifier ML model
-            REDIS_HIGH_Q.enqueue_call(
-                func=".",
-                kwargs=UnloadClassifierJob(team_username=self.team.username).dict(),
-            )
+            enqueue(REDIS_HIGH_Q, UnloadClassifierJob(team_username=self.team))
 
             await self._team_socket_disconnect()
 
     async def receive(self, text_data=None, bytes_data=None):
-        await self.send(text_data=self.team.username)
+        await self.send(text_data=self.team)
 
     async def chat_message(self, event):
         # message from group
