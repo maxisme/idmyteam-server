@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseServerError
 from django.views.decorators.http import require_http_methods
 
-from idmyteam.idmyteam.structs import DeleteModelWSStruct
+from idmyteam.idmyteam.structs import DeletedModelWSStruct
 from idmyteamserver.helpers import create_credentials
 from worker.queue import enqueue
 from worker.structs import DeleteClassifierJob
@@ -78,5 +78,5 @@ def _delete_team_model(team: Team) -> bool:
         time.sleep(0.1)
 
     if bool(job.result):
-        return team.send_ws_message(DeleteModelWSStruct())
+        return team.send_ws_message(DeletedModelWSStruct())
     return False

@@ -26,7 +26,7 @@ class WSStruct(Struct):
         INVALID_CLASSIFICATION = 5
         NO_MODEL = 6
         HAS_MODEL = 7
-        DELETE_MODEL = 8
+        DELETED_MODEL = 8
 
     type = "chat_message"
     _type: Type
@@ -55,30 +55,12 @@ class HasModelWSStruct(WSStruct):
     _type = WSStruct.Type.HAS_MODEL
 
 
-class DeleteModelWSStruct(WSStruct):
-    _type = WSStruct.Type.DELETE_MODEL
+class DeletedModelWSStruct(WSStruct):
+    _type = WSStruct.Type.DELETED_MODEL
 
 
 class InvalidClassificationWSStruct(WSStruct):
     _type = WSStruct.Type.INVALID_CLASSIFICATION
-
-
-class ClassificationWSStruct(WSStruct):
-    _type = WSStruct.Type.CLASSIFICATION
-
-    def __init__(
-        self, coords: dict, member_id: int, recognition_score: float, file_name: str
-    ):
-        super().__init__(
-            json.dumps(
-                {
-                    "coords": json.dumps(coords),
-                    "member_id": member_id,
-                    "recognition_score": recognition_score,
-                    "file_name": file_name,
-                }
-            )
-        )
 
 
 class FaceCoordinates(TypedDict):
@@ -88,3 +70,20 @@ class FaceCoordinates(TypedDict):
     height: int
     score: float
     is_manual: bool
+
+
+class ClassificationWSStruct(WSStruct):
+    _type = WSStruct.Type.CLASSIFICATION
+
+    def __init__(
+        self,
+        coordinates: FaceCoordinates,
+        member_id: int,
+        recognition_score: float,
+        file_name: str,
+    ):
+        super().__init__()
+        self.coordinates = coordinates
+        self.member_id = member_id
+        self.recognition_score = recognition_score
+        self.file_name = file_name

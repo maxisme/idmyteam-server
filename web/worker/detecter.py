@@ -168,7 +168,7 @@ class Detecter:
                     # send member classification back to user
                     team.send_ws_message(
                         ClassificationWSStruct(
-                            coords=face_coords,
+                            coordinates=face_coords,
                             member_id=member_id,
                             recognition_score=max_prob,
                             file_name=file_name,

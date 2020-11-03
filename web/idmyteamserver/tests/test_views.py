@@ -11,7 +11,7 @@ from django.http import HttpResponseBadRequest
 from django.test import Client
 from django.urls import reverse
 
-from idmyteam.idmyteam.structs import DeleteModelWSStruct
+from idmyteam.idmyteam.structs import DeletedModelWSStruct
 from tests.factories import TeamFactory, dict_from_team_factory
 from tests.helpers import create_test_team
 from worker.structs import DetectJob, TrainJob
@@ -266,7 +266,7 @@ class TestApiViews:
             mock_send_ws_message.assert_called_once()
             assert (
                 mock_send_ws_message.call_args.args[0].dict()
-                == DeleteModelWSStruct().dict()
+                == DeletedModelWSStruct().dict()
             )
 
     def test_delete_team_handler(self, monkeypatch):
