@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import unittest.mock
 import zipfile
 from os.path import basename
@@ -10,6 +11,7 @@ from django.http import HttpResponseBadRequest
 from django.test import Client
 from django.urls import reverse
 
+from idmyteam.idmyteam.structs import DeleteModelWSStruct
 from tests.factories import TeamFactory, dict_from_team_factory
 from tests.helpers import create_test_team
 from worker.structs import DetectJob, TrainJob
@@ -234,23 +236,38 @@ class TestApiViews:
 
     def test_delete_model_handler(self, monkeypatch):
         client = Client()
-        team, team_dict = create_test_team(
-            classifier_model_path="/path/to/none/existent/model"
-        )
-        client.post(reverse("login"), team_dict)
+        with tempfile.NamedTemporaryFile(mode="w+b") as f:
+            team, team_dict = create_test_team(classifier_model_path=f.name)
+            client.post(reverse("login"), team_dict)
 
-        monkeypatch.setattr(
-            "worker.queue.REDIS_HIGH_Q",
-            MyQueue("high", connection=REDIS_CONN, is_async=False),
-        )
-        request = client.delete(reverse("delete-model"))
-        assert request.status_code == 200
+            # monkeypatches
+            monkeypatch.setattr(
+                "worker.queue.REDIS_HIGH_Q",
+                MyQueue("high", connection=REDIS_CONN, is_async=False),
+            )
+            mock_send_ws_message = unittest.mock.Mock()
+            monkeypatch.setattr(
+                "idmyteamserver.models.Team.send_ws_message", mock_send_ws_message
+            )
+            monkeypatch.setattr(
+                "worker.queue.MyJob._delete_team_classifier", _return_true
+            )
 
-        # verify classifier_model_path has been removed
-        assert (
-            team.classifier_model_path
-            != Team.objects.get(username=team).classifier_model_path
-        )
+            request = client.delete(reverse("delete-model"))
+            assert request.status_code == 200
+
+            # verify classifier_model_path has been removed
+            assert (
+                team.classifier_model_path
+                != Team.objects.get(username=team).classifier_model_path
+            )
+
+            # verify websocket message was sent to client to delete model
+            mock_send_ws_message.assert_called_once()
+            assert (
+                mock_send_ws_message.call_args.args[0].dict()
+                == DeleteModelWSStruct().dict()
+            )
 
     def test_delete_team_handler(self, monkeypatch):
         client = Client()
@@ -390,3 +407,7 @@ def create_zip(members=5, number_of_images=1) -> str:
     zip.close()
     shutil.rmtree(tmp_image_dir)
     return zip_path
+
+
+def _return_true(*args, **kwargs):
+    return True

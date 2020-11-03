@@ -26,6 +26,7 @@ class WSStruct(Struct):
         INVALID_CLASSIFICATION = 5
         NO_MODEL = 6
         HAS_MODEL = 7
+        DELETE_MODEL = 8
 
     type = "chat_message"
     _type: Type
@@ -52,6 +53,10 @@ class NoModelWSStruct(WSStruct):
 
 class HasModelWSStruct(WSStruct):
     _type = WSStruct.Type.HAS_MODEL
+
+
+class DeleteModelWSStruct(WSStruct):
+    _type = WSStruct.Type.DELETE_MODEL
 
 
 class InvalidClassificationWSStruct(WSStruct):

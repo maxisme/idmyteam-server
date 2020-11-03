@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseServerError
 from django.views.decorators.http import require_http_methods
 
+from idmyteam.idmyteam.structs import DeleteModelWSStruct
 from idmyteamserver.helpers import create_credentials
 from worker.queue import enqueue
 from worker.structs import DeleteClassifierJob
@@ -65,14 +66,17 @@ def reset_credentials_handler(request):
 def _delete_team_model(team: Team) -> bool:
     """
     Tells worker to delete the teams classifier model and waits for verification.
+    Then tells client over web socket to delete model
     @todo integration test.
     @todo put function somewhere better :)
     @return: whether the classifier model has been deleted or not
     """
-    job = enqueue(queue.REDIS_HIGH_Q, DeleteClassifierJob(team_username=team))
+    job = enqueue(queue.REDIS_HIGH_Q, DeleteClassifierJob(team_username=team.username))
 
     # wait for job to complete
     while not job.is_finished:
         time.sleep(0.1)
 
-    return bool(job.result)
+    if bool(job.result):
+        return team.send_ws_message(DeleteModelWSStruct())
+    return False
