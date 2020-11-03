@@ -109,11 +109,3 @@ def decompress_string(s):
     string = base64.decodebytes(s)
     string = zlib.decompress(string)
     return string.decode("utf-8")
-
-
-def json_helper(o):
-    if isinstance(o, np.int64):
-        return int(o)
-    if isinstance(o, bytes):
-        return o.decode("utf-8")
-    raise TypeError

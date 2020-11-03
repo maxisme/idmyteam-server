@@ -16,9 +16,9 @@ def test_missing_enum():
         assert ErrorWSStruct.Type("notatype")
 
 
-def test_train_struct():
-    ts = TrainedWSStruct("gi")
+def test_ws_struct():
+    ts = DeletedModelWSStruct("gi")
     assert ts.dict() == {
-        "message": '{"type": 2, "message": "gi"}',
+        "message": '{"type": 8, "message": "gi"}',
         "type": "chat_message",
     }

@@ -2,7 +2,7 @@ import ast
 import datetime
 import logging
 import os
-from typing import Tuple
+from typing import Tuple, List
 
 import joblib
 import numpy as np
@@ -40,7 +40,7 @@ class Classifier(object):
                 max_prob = prob
         return member_id, max_prob
 
-    def train(self) -> list:
+    def train(self) -> List[Tuple[int, int]]:
         timeout_training_dttm = datetime.datetime.now() - datetime.timedelta(
             seconds=TRAIN_Q_TIMEOUT
         )
@@ -95,6 +95,7 @@ class Classifier(object):
         # fetch number of unique
         unique_outputs = np.bincount([o for o in training_classes if o > 0])
         num_outputs = np.nonzero(unique_outputs)[0]
+        # zip class against number trained of class
         return list(zip(num_outputs, unique_outputs[num_outputs]))
 
     def _get_model(self):

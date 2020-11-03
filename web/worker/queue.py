@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Dict
 
@@ -6,7 +5,6 @@ from rq import Queue, Worker
 from rq.job import Job
 
 from idmyteam.idmyteam.structs import ErrorWSStruct, TrainedWSStruct
-from worker import functions
 from worker.structs import (
     JobStruct,
     DetectJob,
@@ -82,12 +80,8 @@ class MyJob(Job):
     def _train_team(self, job: TrainJob) -> bool:
         if job.team_username in team_classifiers:
             try:
-                trained_members = team_classifiers[job.team_username].train()
-                return self.team.send_ws_message(
-                    TrainedWSStruct(
-                        json.dumps(trained_members, default=functions.json_helper)
-                    )
-                )
+                num_trained_classes = team_classifiers[job.team_username].train()
+                return self.team.send_ws_message(TrainedWSStruct(num_trained_classes))
             except AlreadyTrainingException as e:
                 logging.warning(e)
                 return self.team.send_ws_message(ErrorWSStruct(str(e)))

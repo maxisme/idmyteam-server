@@ -1,7 +1,7 @@
 import inspect
 import json
 from enum import Enum
-from typing import TypedDict
+from typing import TypedDict, List, Tuple
 
 
 class Struct:
@@ -39,10 +39,6 @@ class ErrorWSStruct(WSStruct):
     _type = WSStruct.Type.ERROR
 
 
-class TrainedWSStruct(WSStruct):
-    _type = WSStruct.Type.TRAINED
-
-
 class DeleteImageWSStruct(WSStruct):
     _type = WSStruct.Type.DELETE_IMAGE
 
@@ -72,6 +68,14 @@ class FaceCoordinates(TypedDict):
     is_manual: bool
 
 
+class TrainedWSStruct(WSStruct):
+    _type = WSStruct.Type.TRAINED
+
+    def __init__(self, num_trained_classes: List[Tuple[int, int]]):
+        super().__init__()
+        self.num_trained_classes = num_trained_classes
+
+
 class ClassificationWSStruct(WSStruct):
     _type = WSStruct.Type.CLASSIFICATION
 
@@ -79,11 +83,11 @@ class ClassificationWSStruct(WSStruct):
         self,
         coordinates: FaceCoordinates,
         member_id: int,
-        recognition_score: float,
+        score: float,
         file_name: str,
     ):
         super().__init__()
         self.coordinates = coordinates
         self.member_id = member_id
-        self.recognition_score = recognition_score
+        self.score = score
         self.file_name = file_name

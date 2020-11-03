@@ -170,7 +170,7 @@ class Detecter:
                         ClassificationWSStruct(
                             coordinates=face_coords,
                             member_id=member_id,
-                            recognition_score=max_prob,
+                            score=max_prob,
                             file_name=file_name,
                         )
                     )
