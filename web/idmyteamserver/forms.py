@@ -1,7 +1,6 @@
 from captcha.fields import ReCaptchaField
 from captcha.widgets import ReCaptchaV2Invisible
 from django import forms
-from django.forms import ModelForm
 
 from idmyteamserver.models import Team
 from web import settings
@@ -25,7 +24,7 @@ class RecaptchaForm(forms.Form):
     captcha = CustomCaptchaField()
 
 
-class SignUpForm(RecaptchaForm, ModelForm):
+class SignUpForm(RecaptchaForm, forms.ModelForm):
     password = forms.CharField(
         min_length=8, widget=forms.PasswordInput(), required=True, label="Password"
     )

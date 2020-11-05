@@ -39,8 +39,8 @@ pipdeptree | grep -P '^\w+' > web/requirements.txt
 ```
 
 #### sass
- - `sass source/stylesheets/index.scss build/stylesheets/index.css`
- - `$FilePath$ $FileNameWithoutExtension$.css` (intelij)
+ - `sass source/stylesheets/index.scss build/stylesheets/index.css --style compressed`
+ - `$FilePath$ $FileNameWithoutExtension$.css --style compressed` (intelij)
  
 
 ### Updating models

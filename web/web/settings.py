@@ -82,6 +82,7 @@ TEMPLATES = [
         },
     }
 ]
+STATICFILES_DIRS = ["idmyteam/idmyteam/static"]
 
 WSGI_APPLICATION = "web.wsgi.application"
 
