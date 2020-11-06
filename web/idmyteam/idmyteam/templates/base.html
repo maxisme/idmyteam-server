@@ -55,7 +55,7 @@
                         <div class="col s12 m10">
                             <div class="card-content white-text">
                                 {% if error_message %}
-                                    <i class="material-icons">warning</i> {{ error_message }}
+                                    <i class="material-icons">warning</i> {{ error_message|safe }}
                                 {% else %}
                                     🎉 {{ success_message }}
                                 {% endif %}
