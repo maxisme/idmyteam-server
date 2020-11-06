@@ -6,24 +6,27 @@
     <title>{{ title }}</title>
     <meta name="keywords" content="{{ meta.keywords }}">
     <meta name="description" content="{{ meta.description }}">
+    <meta name="viewport" content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
     <link rel="shortcut icon" href="{% static 'images/icon_red.svg' %}">
 
-    {% block scripts %}{% endblock %}
-
-    <!-- mobile meta -->
-    <meta name="viewport" content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
     <!-- jQuery -->
     <script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+
     <!-- Third party JavaScript -->
     <script src="{% static 'js/materialize.min.js' %}"></script>
+    {% block scripts %}{% endblock %}
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Cutive+Mono&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700&display=swap" rel="stylesheet">
+
     <!-- Custom CSS -->
     <link href="{% static 'css/main.css' %}" rel="stylesheet">
+
     <!-- Custom JS -->
     <script src="{% static 'js/script.js' %}"></script>
+
     <!-- custom JS -->
     {% block js %}{% endblock %}
 </head>
