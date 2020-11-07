@@ -53,6 +53,13 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./web/coverage.xml
 
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: maxisme
+          password: ${{ secrets.PYPI_TOKEN }}
+          packages_dir: web/idmyteam/
+
   publish:
     name: Publish Docker image
     needs: test
