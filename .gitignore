@@ -14,3 +14,4 @@ recognition-worker/models
 /web/idmyteamserver/tests/files/
 /web/idmyteamserver/tests/zip/
 /web/idmyteam/idmyteam.egg-info/
+/web/idmyteam/dist/

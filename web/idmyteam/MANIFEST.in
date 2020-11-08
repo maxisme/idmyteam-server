@@ -1,1 +1,3 @@
-recursive-include idmyteam *
+recursive-include idmyteam/static *
+recursive-include idmyteam/templates *
+recursive-include idmyteam/templatetags *
