@@ -18,7 +18,12 @@ class WSConsumer(AsyncWebsocketConsumer):
             self.team = await self._verify_credentials(self.scope["headers"])
         except InvalidCredentials as e:
             logging.warning(e)
-            await self.close(1)
+            await self.close()
+            return
+
+        if self.team.socket_channel:
+            logging.warning(f"{self.team} is already connected")
+            await self.close(code=4123)
             return
 
         await self.accept()
