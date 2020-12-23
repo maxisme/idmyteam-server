@@ -18,7 +18,6 @@ class Struct:
 
 
 class WSStruct(Struct):
-
     class Type(int, Enum):
         ERROR = 1
         TRAINED = 2
