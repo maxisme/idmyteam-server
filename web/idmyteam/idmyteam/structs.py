@@ -18,7 +18,6 @@ class Struct:
 
 
 class WSStruct(Struct):
-    ALREADY_CONNECTED_CODE = 510
 
     class Type(int, Enum):
         ERROR = 1

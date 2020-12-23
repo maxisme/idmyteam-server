@@ -21,11 +21,6 @@ class WSConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        if self.team.socket_channel:
-            logging.warning(f"{self.team} is already connected")
-            await self.close(code=4123)
-            return
-
         await self.accept()
 
         # ask redis to load teams classifier ML model into memory for quicker actions

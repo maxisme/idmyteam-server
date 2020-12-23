@@ -29,7 +29,7 @@ class TestWS:
     async def test_successful_connect(self, monkeypatch, with_model):
         extras = {}
         if with_model:
-            extras = {"classifier_model_path": "/path/to/none/existent/model"}
+            extras["classifier_model_path"] = "/path/to/none/existent/model"
 
         communicator, team = await self._init_team_communicator(**extras)
 
