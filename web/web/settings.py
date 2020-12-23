@@ -28,7 +28,7 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 DEBUG = bool(os.environ.get("DEBUG") or False)
 
-ALLOWED_HOSTS = ["idmy.team", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["idmy.team", "127.0.0.1", "10.1.0.61", "localhost"]
 
 AUTH_USER_MODEL = "idmyteamserver.Team"
 
