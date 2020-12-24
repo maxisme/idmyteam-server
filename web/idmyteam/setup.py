@@ -7,9 +7,9 @@ if not version:
     quit(1)
 
 setuptools.setup(
+    version=version,
     name="idmyteam",
     description="Base django files for idmyteam-client and idmyteam-server",
-    version=version,
     url="https://idmy.team/",
     author="Maximilian Mitchell",
     author_email="max@max.me.uk",

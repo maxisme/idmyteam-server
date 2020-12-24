@@ -74,7 +74,8 @@ jobs:
           VERSION: ${{ steps.version.outputs.new_tag }}
         run: |
           pip3 install setuptools wheel
-          python3 web/idmyteam/setup.py sdist bdist_wheel
+          cd web/idmyteam/
+          python3 setup.py sdist
           
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@master
@@ -83,6 +84,7 @@ jobs:
           password: ${{ secrets.PYPI_TOKEN }}
           verify_metadata: false
           verbose: true
+          packages_dir: web/idmyteam/dist
 
   publish:
     name: Publish Docker image
