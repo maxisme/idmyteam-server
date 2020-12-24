@@ -1,5 +1,5 @@
 bcrypt==3.2.0
-channels-redis==3.2.0
+channels-redis==3.1.0
 Django==3.1
 django-recaptcha==2.0.6
 django-simple-email-confirmation==0.70
@@ -10,6 +10,6 @@ opentelemetry-ext-psycopg2==0.11b1
 psycopg2-binary==2.8.6
 pyOpenSSL==20.0.1
 python-dotenv==0.15.0
-rq==1.7.0
+rq==1.5.2
 sentry-sdk==0.19.5
 service-identity==18.1.0
