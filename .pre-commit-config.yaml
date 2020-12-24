@@ -18,10 +18,10 @@ repos:
 #    rev: 5.1.1
 #    hooks:
 #      - id: pydocstyle
-  - repo: local
-    hooks:
-      - id: migrations-check
-        language: system
-        name: uncreated migrations
-        entry: ./web/manage.py makemigrations --check --dry-run
-        pass_filenames: false
+#  - repo: local
+#    hooks:
+#      - id: migrations-check
+#        language: system
+#        name: uncreated migrations
+#        entry: ./web/manage.py makemigrations --check --dry-run
+#        pass_filenames: false
