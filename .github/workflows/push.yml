@@ -21,7 +21,7 @@ jobs:
           - 6379:6379
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v1
@@ -53,8 +53,26 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./web/coverage.xml
 
+  publish-pypi:
+    name: Publish PyPi
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+
+      - name: Bump version and push tag
+        id: v
+        uses: anothrNick/github-tag-action@1.33.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@master
+        env:
+          VERSION: jobs.v.new_tag
         with:
           user: maxisme
           password: ${{ secrets.PYPI_TOKEN }}
@@ -68,6 +86,7 @@ jobs:
       - uses: actions/checkout@master
         with:
           fetch-depth: '0'
+
       - name: Publish to Docker Registry
         uses: docker/build-push-action@v1
         with:
@@ -100,4 +119,3 @@ jobs:
           -d "image=${{ github.repository }}" \
           -d "tag=sha-${sha:0:7}" \
           -d "token=${{ secrets.HOOK_TOKEN }}"
-
