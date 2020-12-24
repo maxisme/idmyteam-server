@@ -70,11 +70,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Build dists
-        env:
-          VERSION: ${{ steps.version.outputs.new_tag }}
         run: |
           pip3 install setuptools wheel
           cd web/idmyteam/
+          sed -i -e "s/REPLACEDINCI/${{ steps.version.outputs.new_tag }}/g" web/idmyteam/idmyteam/__init__.py
           python3 setup.py sdist
           
       - name: Publish package to PyPI

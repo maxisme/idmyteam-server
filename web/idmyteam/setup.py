@@ -1,13 +1,8 @@
 import setuptools
-import os
-
-version = os.getenv("VERSION")
-if not version:
-    print("missing VERSION env variable")
-    quit(1)
+from idmyteam import __version__
 
 setuptools.setup(
-    version=version,
+    version=__version__,
     name="idmyteam",
     description="Base django files for idmyteam-client and idmyteam-server",
     url="https://idmy.team/",
