@@ -4,7 +4,6 @@ jobs:
 
   publish-pypi:
     name: Publish PyPi
-    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
