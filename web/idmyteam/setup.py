@@ -15,5 +15,5 @@ setuptools.setup(
     author_email="max@max.me.uk",
     license="BSD-3-Clause",
     include_package_data=True,
-    packages=setuptools.find_packages()
+    packages=setuptools.find_packages(),
 )
