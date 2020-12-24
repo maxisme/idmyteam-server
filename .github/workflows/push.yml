@@ -69,6 +69,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build dists
+        env:
+          VERSION: jobs.version.new_tag
         run: |
           cd web/idmyteam/
           python3 setup.py sdist bdist_wheel
