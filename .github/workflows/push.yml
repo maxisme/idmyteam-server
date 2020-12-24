@@ -71,7 +71,7 @@ jobs:
           
       - name: Build dists
         run: |
-          pip3 install setuptools wheel
+          pip3 install setuptools
           sed -i -e "s/REPLACEDINCI/${{ steps.version.outputs.new_tag }}/g" web/idmyteam/idmyteam/__init__.py
           cd web/idmyteam/
           python3 setup.py sdist
