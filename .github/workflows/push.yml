@@ -1,57 +1,6 @@
 name: ID My Team Server
 on: [push]
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    env:
-      SECRET_KEY: a8r(%ir&!=7rc0ycu(=fwks1qc$#lsr34_5p7v+dbif7kh%1pn
-      DJANGO_SETTINGS_MODULE: web.settings
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_DATABASE: idmyteam
-          POSTGRES_USER: idmyteam
-          POSTGRES_PASSWORD: idmyteam
-        ports:
-          - 5432:5432
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-    strategy:
-      matrix:
-        python-version: [3.8]
-
-    steps:
-      - uses: actions/checkout@v1
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install requirements for web
-        run: |
-          pip install --upgrade pip
-          cd web
-          pip install -r requirements.txt
-          pip install -r worker/requirements.txt
-          pip install -r test_requirements.txt
-
-      - uses: pre-commit/action@v2.0.0
-
-      - name: Test web
-        run: |
-          cd web
-          pytest --cov=./ --cov-report=xml
-
-      - name: Upload web coverage to Codecov
-        if: github.ref == 'refs/heads/master'
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./web/coverage.xml
 
   publish-pypi:
     name: Publish PyPi
@@ -72,6 +21,7 @@ jobs:
         env:
           VERSION: jobs.version.new_tag
         run: |
+          pip install setuptools
           cd web/idmyteam/
           python3 setup.py sdist bdist_wheel
       - name: Publish package to PyPI
