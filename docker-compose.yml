@@ -99,5 +99,10 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
+  test-web:
+    build:
+      context: "./web"
+      dockerfile: "Dockerfile.test"
+
 volumes:
   static_volume:

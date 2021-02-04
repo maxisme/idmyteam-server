@@ -85,7 +85,7 @@ jobs:
           verbose: true
           packages_dir: web/idmyteam/dist
 
-  publish:
+  build:
     name: Publish Docker image
     needs: test
     runs-on: ubuntu-latest
@@ -105,24 +105,28 @@ jobs:
           tag_with_sha: true
           build_args: COMMIT_HASH=${{ github.sha }}
 
-      - name: Update Swarm idmyteam_migrations
-        if: github.ref == 'refs/heads/master'
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/setup-helm@v1
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+      - name: Upgrade helm
         run: |
-          export sha="${{ github.sha }}"
-          curl -f -X POST ${{ secrets.SWARM_HOOK }} \
-          -H 'Content-Type: application/x-www-form-urlencoded' \
-          -d 'service=idmyteam_migrations' \
-          -d "image=${{ github.repository }}" \
-          -d "tag=sha-${sha:0:7}" \
-          -d "token=${{ secrets.HOOK_TOKEN }}"
+          # pull infra charts
+          helm repo add maxisme https://${{ secrets.GH_PA_TOKEN }}@raw.githubusercontent.com/maxisme/infra/master/k8s/charts/
+          helm repo update
 
-      - name: Update Swarm idmyteam_web
-        if: github.ref == 'refs/heads/master' && always()
-        run: |
-          export sha="${{ github.sha }}"
-          curl -f -X POST ${{ secrets.SWARM_HOOK }} \
-          -H 'Content-Type: application/x-www-form-urlencoded' \
-          -d 'service=idmyteam_web' \
-          -d "image=${{ github.repository }}" \
-          -d "tag=sha-${sha:0:7}" \
-          -d "token=${{ secrets.HOOK_TOKEN }}"
+          # create kube config
+          mkdir ~/.kube
+          echo "${{ secrets.B64_KUBE_CONFIG }}" | base64 --decode > ~/.kube/config
+
+          # deploy helms
+          repo="${{ github.repository }}"
+          helm upgrade "${repo//./}" maxisme/web -f helm-values.yml --set="image.tag=sha-${GITHUB_SHA::7}" --atomic --timeout 120s
+
+          # clean up
+          rm ~/.kube/config
