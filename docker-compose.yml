@@ -100,9 +100,22 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   test-web:
+    container_name: test-web
     build:
-      context: "./web"
+      context: "."
       dockerfile: "Dockerfile.test"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - "DEBUG=1"
+      - "DATABASE_HOST=db"
+      - "REDIS_HOST=redis"
+      - "SECRET_KEY=123"
+      - "DJANGO_SETTINGS_MODULE=web.settings"
+    volumes:
+      - ".:/usr/src/app"
+    command: ["pytest", "/usr/src/app/web/", "--cov=./", "--cov-report=xml"]
 
 volumes:
   static_volume:
