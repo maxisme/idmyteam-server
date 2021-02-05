@@ -1,3 +1,4 @@
+daphne==2.5.0
 Django==3.1
 bcrypt==3.2.0
 channels-redis==3.1.0
