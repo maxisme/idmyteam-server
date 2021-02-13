@@ -1,0 +1,22 @@
+ingress:
+  match: "Host(`idmy.team`)"
+
+image:
+  repository: "maxisme/idmyteam-server"
+  tag: "latest"
+  command: "daphne"
+  args: ["-b0.0.0.0", "-p8000", "web.asgi:application"]
+
+envSecretRef: "idmyteam" # kubectl create secret generic *thisval* --from-env-file .env
+
+service:
+  port: 8000
+
+djangoStatic:
+  enabled: true
+  staticPath: "/usr/src/app/static/"
+  ingressPath: "/static/"
+
+healthPath: "/"
+
+nodeSelector: {"kubernetes.io/arch": "amd64"}

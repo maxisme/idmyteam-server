@@ -4,17 +4,16 @@ services:
   web:
     build:
       context: "./web/"
-    command: daphne -b 0.0.0.0 -p 8000 web.asgi:application
+    command: daphne -b 127.0.0.1 -p 8000 web.asgi:application
     ports:
       - "127.0.0.1:8000:8000"
-    env_file:
-      - "./web/.env"
     volumes:
       - static_volume:/usr/src/app/static
     environment:
       DEBUG: 1
       DATABASE_HOST: db
       REDIS_HOST: redis
+      SECRET_KEY: 1
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.idmyteam.rule=Host(`localhost`)"
@@ -26,8 +25,6 @@ services:
   init-web:
     build:
       context: "./web/"
-    env_file:
-      - "./web/.env"
     environment:
       DATABASE_HOST: db
       REDIS_HOST: redis
@@ -98,6 +95,24 @@ services:
       - jaeger
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  test-web:
+    container_name: test-web
+    build:
+      context: "."
+      dockerfile: "Dockerfile.test"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - "DEBUG=1"
+      - "DATABASE_HOST=db"
+      - "REDIS_HOST=redis"
+      - "SECRET_KEY=123"
+      - "DJANGO_SETTINGS_MODULE=web.settings"
+    volumes:
+      - ".:/usr/src/app"
+    command: ["pytest", "/usr/src/app/web/", "--cov=./", "--cov-report=xml"]
 
 volumes:
   static_volume:

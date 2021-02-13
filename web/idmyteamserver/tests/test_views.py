@@ -138,8 +138,9 @@ class TestAuthViews:
             follow=False,
         )
 
+        team = Team.objects.get(username=team)
         # verify that the team has been confirmed
-        assert Team.objects.get(username=team).is_confirmed
+        assert team.is_confirmed
 
     def test_invalid_confirm_email_key(self, monkeypatch):
         client = Client()

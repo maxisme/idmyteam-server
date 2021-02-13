@@ -1,0 +1,16 @@
+FROM python:3.8-slim
+
+RUN apt-get update && apt-get install gcc python-numpy ffmpeg libsm6 libxext6 -y
+
+COPY web/test_requirements.txt .
+RUN pip install --no-cache-dir -r test_requirements.txt
+
+COPY web/worker/requirements.txt worker_requirements.txt
+RUN pip install --no-cache-dir -r worker_requirements.txt
+
+COPY web/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+COPY . .

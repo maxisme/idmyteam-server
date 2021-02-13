@@ -3,55 +3,21 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      SECRET_KEY: a8r(%ir&!=7rc0ycu(=fwks1qc$#lsr34_5p7v+dbif7kh%1pn
-      DJANGO_SETTINGS_MODULE: web.settings
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_DATABASE: idmyteam
-          POSTGRES_USER: idmyteam
-          POSTGRES_PASSWORD: idmyteam
-        ports:
-          - 5432:5432
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9]
-
     steps:
       - uses: actions/checkout@v1
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install requirements for web
-        run: |
-          pip install --upgrade pip
-          cd web
-          pip install -r requirements.txt
-          pip install -r worker/requirements.txt
-          pip install -r test_requirements.txt
-
+      - uses: actions/setup-python@v2
       - uses: pre-commit/action@v2.0.0
 
       - name: Test web
         run: |
-          cd web
-          pytest --cov=./ --cov-report=xml
+          docker-compose up test-web
 
       - name: Upload web coverage to Codecov
         if: github.ref == 'refs/heads/master'
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./web/coverage.xml
+          file: ./coverage.xml
 
   publish-pypi:
     name: Publish PyPi
@@ -85,44 +51,56 @@ jobs:
           verbose: true
           packages_dir: web/idmyteam/dist
 
-  publish:
-    name: Publish Docker image
+  build:
+    runs-on: ubuntu-latest
     needs: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set Docker Tags
+        id: prep
+        run: |
+          TAGS="${{ github.repository }}:sha-${GITHUB_SHA::7},${{ github.repository }}:latest"
+          echo ::set-output name=tags::${TAGS}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: web/
+          push: true
+          tags: ${{ steps.prep.outputs.tags }}
+          platforms: linux/amd64
+          build-args: |
+            COMMIT_HASH=${{ github.sha }}
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
+      - uses: azure/setup-helm@v1
       - uses: actions/checkout@master
         with:
           fetch-depth: '0'
-
-      - name: Publish to Docker Registry
-        uses: docker/build-push-action@v1
-        with:
-          path: "web/"
-          repository: ${{ github.repository }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          tag_with_ref: true
-          tag_with_sha: true
-          build_args: COMMIT_HASH=${{ github.sha }}
-
-      - name: Update Swarm idmyteam_migrations
-        if: github.ref == 'refs/heads/master'
+      - name: Upgrade helm
         run: |
-          export sha="${{ github.sha }}"
-          curl -f -X POST ${{ secrets.SWARM_HOOK }} \
-          -H 'Content-Type: application/x-www-form-urlencoded' \
-          -d 'service=idmyteam_migrations' \
-          -d "image=${{ github.repository }}" \
-          -d "tag=sha-${sha:0:7}" \
-          -d "token=${{ secrets.HOOK_TOKEN }}"
+          # pull infra charts
+          helm repo add maxisme https://${{ secrets.GH_PA_TOKEN }}@raw.githubusercontent.com/maxisme/infra/master/k8s/charts/
+          helm repo update
 
-      - name: Update Swarm idmyteam_web
-        if: github.ref == 'refs/heads/master' && always()
-        run: |
-          export sha="${{ github.sha }}"
-          curl -f -X POST ${{ secrets.SWARM_HOOK }} \
-          -H 'Content-Type: application/x-www-form-urlencoded' \
-          -d 'service=idmyteam_web' \
-          -d "image=${{ github.repository }}" \
-          -d "tag=sha-${sha:0:7}" \
-          -d "token=${{ secrets.HOOK_TOKEN }}"
+          # create kube config
+          mkdir ~/.kube
+          echo "${{ secrets.B64_KUBE_CONFIG }}" | base64 --decode > ~/.kube/config
+
+          # deploy helms
+          helm upgrade idmyteam maxisme/web -f helm-values.yml --set="image.tag=sha-${GITHUB_SHA::7}" --atomic --timeout 120s
+
+          # clean up
+          rm ~/.kube/config
