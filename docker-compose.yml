@@ -4,7 +4,7 @@ services:
   web:
     build:
       context: "./web/"
-    command: daphne -b 0.0.0.0 -p 8000 web.asgi:application
+    command: daphne -b 127.0.0.1 -p 8000 web.asgi:application
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -13,6 +13,7 @@ services:
       DEBUG: 1
       DATABASE_HOST: db
       REDIS_HOST: redis
+      SECRET_KEY: 1
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.idmyteam.rule=Host(`localhost`)"
