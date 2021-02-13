@@ -18,3 +18,5 @@ djangoStatic:
   ingressPath: "/static/"
 
 healthPath: "/"
+
+nodeSelector: {"kubernetes.io/arch": "amd64"}
