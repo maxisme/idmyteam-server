@@ -51,8 +51,7 @@ $ python3 manage.py makemigrations
 # k8 deployment
 ```
 kubectl create secret generic idmyteam --from-env-file web/.env
-helm upgrade idmyteam maxisme/staticweb --install -f 'helm/django-values.yml'
-    
+helm upgrade idmyteam maxisme/staticweb --install -f 'helm/django-values.yml' 
 ```
  
 ___
