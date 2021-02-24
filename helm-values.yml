@@ -5,9 +5,9 @@ image:
   repository: "maxisme/idmyteam-server"
   tag: "latest"
   command: "daphne"
-  args: ["-b0.0.0.0", "-p8000", "web.asgi:application"]
+  args: [ "-b0.0.0.0", "-p8000", "web.asgi:application" ]
 
-envSecretRef: "idmyteam" # kubectl create secret generic *thisval* --from-env-file .env
+envSecretRef: "idmyteam"
 
 service:
   port: 8000
@@ -18,5 +18,4 @@ djangoStatic:
   ingressPath: "/static/"
 
 healthPath: "/"
-
-nodeSelector: {"kubernetes.io/arch": "amd64"}
+nodeSelector: { "kubernetes.io/arch": "amd64" }
