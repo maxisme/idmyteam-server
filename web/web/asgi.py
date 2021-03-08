@@ -20,7 +20,6 @@ from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.trace.propagation.b3_format import B3Format
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
-DOCKER_NETWORK_TRAEFIK_SUBNET = "10.0.1."
 
 os.environ.setdefault("OPENTELEMETRY_PYTHON_DJANGO_INSTRUMENT", "True")
 jaeger_collector_host_name = os.environ.get("JAEGER_COLLECTOR_HOST_NAME", False)
@@ -32,8 +31,6 @@ if jaeger_collector_host_name:
     labels = {"hostname": hostname}
     for i, ip in enumerate(ips):
         labels[f"hostname-ip-{i + 1}"] = ip
-        if DOCKER_NETWORK_TRAEFIK_SUBNET in ip:
-            labels["traefik-server-ip"] = ip
     labels["commit-hash"] = os.getenv("COMMIT_HASH")
 
     trace.set_tracer_provider(TracerProvider(resource=Resource(labels)))
